@@ -31,21 +31,21 @@ export function ScoreBreakdown({
       weight: 30,
       fill: Math.min(100, (protocolFees / maxProtocolFees) * 100),
       value: `$${protocolFees.toFixed(2)}`,
-      color: "bg-purple-500",
+      gradient: "linear-gradient(90deg, #9945FF, #B06CFF)",
     },
     {
       name: "Network Fees",
       weight: 10,
       fill: Math.min(100, (networkFees / maxNetworkFees) * 100),
       value: `${networkFees.toFixed(4)} SOL`,
-      color: "bg-purple-400",
+      gradient: "linear-gradient(90deg, #7B3FE4, #9945FF)",
     },
     {
       name: "Holdings",
       weight: 10,
       fill: Math.min(100, (holdings / maxHoldings) * 100),
       value: `$${holdings.toFixed(2)}`,
-      color: "bg-purple-300",
+      gradient: "linear-gradient(90deg, #6B30D4, #8A3DEF)",
     },
   ];
 
@@ -55,14 +55,14 @@ export function ScoreBreakdown({
       weight: 30,
       fill: Math.min(100, (protocolCount / maxProtocols) * 100),
       value: `${protocolCount} protocols`,
-      color: "bg-green-500",
+      gradient: "linear-gradient(90deg, #14F195, #3DFFA8)",
     },
     {
       name: "Consistency",
       weight: 20,
       fill: Math.min(100, (monthsActive / maxMonths) * 100),
       value: `${monthsActive} months`,
-      color: "bg-green-400",
+      gradient: "linear-gradient(90deg, #0BC47A, #14F195)",
     },
   ];
 
@@ -71,12 +71,12 @@ export function ScoreBreakdown({
       {/* Category Headers */}
       <div className="flex justify-between text-sm">
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-purple-500" />
+          <div className="w-3 h-3 rounded-full bg-[#9945FF] pulse-subtle" />
           <span className="text-zinc-400">Value (50%)</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-zinc-400">Activity (50%)</span>
-          <div className="w-3 h-3 rounded-full bg-green-500" />
+          <div className="w-3 h-3 rounded-full bg-[#14F195] pulse-subtle" />
         </div>
       </div>
 
@@ -95,8 +95,8 @@ export function ScoreBreakdown({
             </div>
             <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
               <div
-                className={`h-full ${component.color} rounded-full transition-all duration-1000 ease-out`}
-                style={{ width: `${component.fill}%` }}
+                className="h-full rounded-full transition-all duration-1000 ease-out"
+                style={{ width: `${component.fill}%`, background: component.gradient }}
               />
             </div>
           </div>
@@ -121,8 +121,8 @@ export function ScoreBreakdown({
             </div>
             <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
               <div
-                className={`h-full ${component.color} rounded-full transition-all duration-1000 ease-out`}
-                style={{ width: `${component.fill}%` }}
+                className="h-full rounded-full transition-all duration-1000 ease-out"
+                style={{ width: `${component.fill}%`, background: component.gradient }}
               />
             </div>
           </div>

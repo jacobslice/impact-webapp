@@ -115,7 +115,7 @@ export default function Home() {
   const percentile = scoreData ? estimatePercentile(scoreData.score) : 0;
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen text-white">
       <main className="container mx-auto px-4 py-12 max-w-2xl">
         {/* Header with Logo */}
         <div className="text-center mb-12">
@@ -128,7 +128,7 @@ export default function Home() {
               className="opacity-80 hover:opacity-100 transition-opacity"
             />
           </div>
-          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-green-400 bg-clip-text text-transparent">
+          <h1 className="text-5xl font-bold mb-4 tracking-tight bg-gradient-to-r from-[#9945FF] via-[#14F195] to-[#9945FF] bg-clip-text text-transparent drop-shadow-[0_0_32px_rgba(153,69,255,0.3)]">
             Solana Score
           </h1>
           <p className="text-zinc-400">
@@ -138,18 +138,18 @@ export default function Home() {
 
         {/* Search Form */}
         <form onSubmit={handleSubmit} className="mb-6">
-          <div className="flex gap-3">
+          <div className="flex gap-3 rounded-xl">
             <Input
               type="text"
               placeholder="Enter Solana address..."
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              className="flex-1 h-12 bg-zinc-900 border-zinc-700 text-white placeholder:text-zinc-500 text-base"
+              className="flex-1 h-12 backdrop-blur-sm bg-zinc-900/60 border-zinc-700/50 text-white placeholder:text-zinc-500 text-base focus:ring-[#9945FF]/50 focus:border-[#9945FF]/50"
             />
             <Button
               type="submit"
               disabled={loading || !address.trim()}
-              className="h-12 bg-gradient-to-r from-purple-500 to-green-500 hover:from-purple-600 hover:to-green-600 text-white px-8 font-medium"
+              className="h-12 bg-gradient-to-r from-[#9945FF] to-[#14F195] hover:from-[#8035E5] hover:to-[#10D480] text-white px-8 font-medium transition-all"
             >
               {loading ? (
                 <span className="flex items-center gap-2">
@@ -190,7 +190,7 @@ export default function Home() {
                     setAddress(lookup.address);
                     fetchScore(lookup.address);
                   }}
-                  className="flex items-center gap-2 px-3 py-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded-lg text-sm transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 bg-zinc-900/40 backdrop-blur-sm hover:bg-zinc-800/60 border border-zinc-700/50 rounded-lg text-sm transition-all hover:scale-[1.02]"
                 >
                   <span className="text-zinc-400 font-mono">
                     {truncateAddress(lookup.address, 6)}
@@ -205,7 +205,7 @@ export default function Home() {
 
         {/* Leaderboard - Show when no score is loaded */}
         {!scoreData && !loading && !error && !notFound && (
-          <Card className="bg-zinc-900/80 border-zinc-800 mb-8">
+          <Card className="glass relative overflow-hidden border-zinc-800/50 mb-8 accent-bar-solana">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <svg className="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
@@ -229,7 +229,7 @@ export default function Home() {
                     {LEADERBOARD_DATA.slice(0, 10).map((entry, index) => (
                       <tr
                         key={entry.wallet}
-                        className="border-b border-zinc-800/50 hover:bg-zinc-800/30 cursor-pointer transition-colors"
+                        className="border-b border-zinc-800/50 hover:bg-white/5 cursor-pointer transition-colors"
                         onClick={() => {
                           setAddress(entry.wallet);
                           fetchScore(entry.wallet);
@@ -237,9 +237,9 @@ export default function Home() {
                       >
                         <td className="py-3 px-2">
                           <span className={`font-bold ${
-                            index === 0 ? "text-yellow-500" :
-                            index === 1 ? "text-zinc-300" :
-                            index === 2 ? "text-orange-400" :
+                            index === 0 ? "text-yellow-400 drop-shadow-[0_0_6px_rgba(250,204,21,0.4)]" :
+                            index === 1 ? "text-zinc-300 drop-shadow-[0_0_6px_rgba(212,212,216,0.3)]" :
+                            index === 2 ? "text-orange-400 drop-shadow-[0_0_6px_rgba(251,146,60,0.3)]" :
                             "text-zinc-500"
                           }`}>
                             {index + 1}
@@ -295,12 +295,12 @@ export default function Home() {
         {scoreData && tier && (
           <div className="space-y-6 animate-in fade-in duration-500">
             {/* Score Ring with Tier Badge */}
-            <Card className="bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-700 overflow-hidden">
+            <Card className="glass gradient-border overflow-hidden border-transparent fade-in-up fade-in-up-1">
               <CardContent className="p-8">
                 <div className="flex flex-col items-center">
                   {/* Tier Badge */}
                   <div
-                    className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full border mb-6 ${tier.bgColor} ${tier.borderColor}`}
+                    className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full border mb-6 backdrop-blur-sm ${tier.bgColor} ${tier.borderColor} drop-shadow-[0_0_10px_rgba(153,69,255,0.15)]`}
                   >
                     <span className="text-lg">{tier.icon}</span>
                     <span className={`font-semibold ${tier.color}`}>
@@ -309,7 +309,7 @@ export default function Home() {
                   </div>
 
                   {/* Score Ring */}
-                  <div className="relative w-52 h-52 mb-4">
+                  <div className="relative w-52 h-52 mb-4 glow-ring">
                     <svg
                       className="w-full h-full transform -rotate-90"
                       viewBox="0 0 100 100"
@@ -330,8 +330,10 @@ export default function Home() {
                         stroke="url(#scoreGradient)"
                         strokeWidth="6"
                         strokeLinecap="round"
-                        strokeDasharray={`${(scoreData.score / 100) * 264} 264`}
-                        className="transition-all duration-1000 ease-out"
+                        strokeDasharray="264 264"
+                        strokeDashoffset={264 - (scoreData.score / 100) * 264}
+                        className="score-ring-animate"
+                        style={{ "--ring-offset": `${264 - (scoreData.score / 100) * 264}` } as React.CSSProperties}
                       />
                       <defs>
                         <linearGradient
@@ -341,9 +343,8 @@ export default function Home() {
                           x2="100%"
                           y2="100%"
                         >
-                          <stop offset="0%" stopColor="#a855f7" />
-                          <stop offset="50%" stopColor="#ec4899" />
-                          <stop offset="100%" stopColor="#22c55e" />
+                          <stop offset="0%" stopColor="#9945FF" />
+                          <stop offset="100%" stopColor="#14F195" />
                         </linearGradient>
                       </defs>
                     </svg>
@@ -412,7 +413,7 @@ export default function Home() {
             </Card>
 
             {/* Score Breakdown Toggle */}
-            <Card className="bg-zinc-900/80 border-zinc-800">
+            <Card className="glass border-zinc-800/50 fade-in-up fade-in-up-2">
               <CardHeader
                 className="cursor-pointer"
                 onClick={() => setShowBreakdown(!showBreakdown)}
@@ -465,55 +466,55 @@ export default function Home() {
             </Card>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 gap-4">
-              <Card className="bg-zinc-900/80 border-zinc-800 hover:border-zinc-700 transition-colors">
-                <CardHeader className="pb-1 pt-4 px-4">
+            <div className="grid grid-cols-2 gap-4 fade-in-up fade-in-up-3">
+              <Card className="glass relative overflow-hidden border-zinc-800/50 hover:border-zinc-700/50 transition-all accent-bar-purple">
+                <CardHeader className="pb-1 pt-5 px-4">
                   <CardTitle className="text-xs text-zinc-500 uppercase tracking-wider">
                     Protocol Fees
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pb-4 px-4">
-                  <p className="text-2xl font-bold text-white">
+                  <p className="text-3xl font-bold text-white">
                     ${scoreData.protocol_fees_paid.toFixed(2)}
                   </p>
                 </CardContent>
               </Card>
 
-              <Card className="bg-zinc-900/80 border-zinc-800 hover:border-zinc-700 transition-colors">
-                <CardHeader className="pb-1 pt-4 px-4">
+              <Card className="glass relative overflow-hidden border-zinc-800/50 hover:border-zinc-700/50 transition-all accent-bar-purple">
+                <CardHeader className="pb-1 pt-5 px-4">
                   <CardTitle className="text-xs text-zinc-500 uppercase tracking-wider">
                     Network Fees
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pb-4 px-4">
-                  <p className="text-2xl font-bold text-white">
+                  <p className="text-3xl font-bold text-white">
                     {scoreData.network_fees_paid.toFixed(4)}{" "}
                     <span className="text-lg text-zinc-400">SOL</span>
                   </p>
                 </CardContent>
               </Card>
 
-              <Card className="bg-zinc-900/80 border-zinc-800 hover:border-zinc-700 transition-colors">
-                <CardHeader className="pb-1 pt-4 px-4">
+              <Card className="glass relative overflow-hidden border-zinc-800/50 hover:border-zinc-700/50 transition-all accent-bar-green">
+                <CardHeader className="pb-1 pt-5 px-4">
                   <CardTitle className="text-xs text-zinc-500 uppercase tracking-wider">
                     Holdings
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pb-4 px-4">
-                  <p className="text-2xl font-bold text-white">
+                  <p className="text-3xl font-bold text-white">
                     ${scoreData.current_holdings.toFixed(2)}
                   </p>
                 </CardContent>
               </Card>
 
-              <Card className="bg-zinc-900/80 border-zinc-800 hover:border-zinc-700 transition-colors">
-                <CardHeader className="pb-1 pt-4 px-4">
+              <Card className="glass relative overflow-hidden border-zinc-800/50 hover:border-zinc-700/50 transition-all accent-bar-green">
+                <CardHeader className="pb-1 pt-5 px-4">
                   <CardTitle className="text-xs text-zinc-500 uppercase tracking-wider">
                     Months Active
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pb-4 px-4">
-                  <p className="text-2xl font-bold text-white">
+                  <p className="text-3xl font-bold text-white">
                     {scoreData.months_active}
                   </p>
                 </CardContent>
@@ -521,7 +522,7 @@ export default function Home() {
             </div>
 
             {/* Protocols Used */}
-            <Card className="bg-zinc-900/80 border-zinc-800">
+            <Card className="glass border-zinc-800/50 fade-in-up fade-in-up-4">
               <CardHeader className="pb-3">
                 <CardTitle className="text-white flex items-center gap-2">
                   Protocols Used
@@ -541,18 +542,18 @@ export default function Home() {
                       <Tooltip key={index}>
                         <TooltipTrigger asChild>
                           <div
-                            className={`w-12 h-12 rounded-full border-2 flex items-center justify-center cursor-pointer transition-all hover:scale-110 hover:shadow-lg ${sectorColor}`}
+                            className={`w-14 h-14 rounded-full border-2 flex items-center justify-center cursor-pointer transition-all hover:scale-110 hover:shadow-[0_0_12px_rgba(153,69,255,0.25)] ${sectorColor}`}
                           >
                             {protocol.logo ? (
                               <Image
                                 src={protocol.logo}
                                 alt={protocol.displayName}
-                                width={28}
-                                height={28}
+                                width={32}
+                                height={32}
                                 className="rounded-full"
                               />
                             ) : (
-                              <span className="text-lg font-bold">
+                              <span className="text-xl font-bold">
                                 {protocol.displayName.charAt(0).toUpperCase()}
                               </span>
                             )}
@@ -580,7 +581,7 @@ export default function Home() {
 
             {/* Jupiter Activity */}
             {(scoreData.jup_staker || scoreData.jup_perps_user) && (
-              <Card className="bg-zinc-900/80 border-zinc-800">
+              <Card className="glass border-zinc-800/50 fade-in-up fade-in-up-5">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-white flex items-center gap-2">
                     <Image
@@ -595,9 +596,9 @@ export default function Home() {
                 <CardContent>
                   <div className="flex flex-wrap gap-3">
                     {scoreData.jup_staker && (
-                      <span className="flex items-center gap-2 px-4 py-2 bg-purple-900/30 border border-purple-700/50 rounded-lg text-sm text-purple-300">
+                      <span className="flex items-center gap-2 px-4 py-2 bg-purple-900/30 backdrop-blur-sm border border-purple-700/50 rounded-lg text-sm text-purple-300">
                         <svg
-                          className="w-4 h-4"
+                          className="w-4 h-4 pulse-subtle"
                           fill="currentColor"
                           viewBox="0 0 20 20"
                         >
@@ -607,9 +608,9 @@ export default function Home() {
                       </span>
                     )}
                     {scoreData.jup_perps_user && (
-                      <span className="flex items-center gap-2 px-4 py-2 bg-green-900/30 border border-green-700/50 rounded-lg text-sm text-green-300">
+                      <span className="flex items-center gap-2 px-4 py-2 bg-green-900/30 backdrop-blur-sm border border-green-700/50 rounded-lg text-sm text-green-300">
                         <svg
-                          className="w-4 h-4"
+                          className="w-4 h-4 pulse-subtle"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -646,8 +647,9 @@ export default function Home() {
         )}
 
         {/* Footer */}
-        <footer className="mt-16 pt-8 border-t border-zinc-800 text-center">
-          <div className="flex items-center justify-center gap-2 text-zinc-500 text-sm">
+        <footer className="mt-16 pt-8 text-center">
+          <div className="h-px mb-8 bg-gradient-to-r from-transparent via-[#9945FF]/20 to-transparent" />
+          <div className="flex items-center justify-center gap-2 text-zinc-500 text-xs opacity-30">
             <span>Powered by</span>
             <Image
               src="/images/slice-logo.png"
