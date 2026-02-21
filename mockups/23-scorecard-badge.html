@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solana Score Badge — @0xGug</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #08080c;
+    font-family: 'Inter', -apple-system, sans-serif;
+    padding: 40px 20px;
+    gap: 24px;
+  }
+
+  /* ── Card Shell ── */
+  .card {
+    position: relative;
+    width: 500px;
+    border-radius: 20px;
+    overflow: hidden;
+    background: linear-gradient(170deg, #12101f 0%, #0d0d18 40%, #0f0c1a 100%);
+    border: 1px solid rgba(139, 92, 246, 0.15);
+    box-shadow:
+      0 0 60px rgba(139, 92, 246, 0.1),
+      0 30px 60px rgba(0, 0, 0, 0.5);
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 350px;
+    height: 200px;
+    background: radial-gradient(ellipse, rgba(139, 92, 246, 0.15) 0%, rgba(99, 102, 241, 0.06) 40%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .card-inner {
+    position: relative;
+    z-index: 1;
+    padding: 18px 20px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* ── Glass Panel ── */
+  .glass {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+  }
+
+  /* ── Row 1: PFP + Identity + Score ── */
+  .row-identity {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .pfp-ring {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    padding: 2.5px;
+    background: conic-gradient(
+      from 0deg,
+      #8b5cf6, #6366f1, #a78bfa, #c084fc, #7c3aed, #8b5cf6
+    );
+    flex-shrink: 0;
+  }
+
+  .pfp-ring img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    border: 2px solid #0d0d18;
+  }
+
+  .identity {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .identity-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .identity-name h2 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+  }
+
+  .x-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: rgba(29, 155, 240, 0.12);
+    border: 1px solid rgba(29, 155, 240, 0.25);
+    border-radius: 6px;
+    padding: 2px 6px;
+    font-size: 9px;
+    font-weight: 600;
+    color: #1d9bf0;
+    letter-spacing: 0.02em;
+    flex-shrink: 0;
+  }
+
+  .x-badge svg {
+    width: 10px;
+    height: 10px;
+  }
+
+  .identity-handle {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: 400;
+    margin-top: 1px;
+  }
+
+  .score-block {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  .score-number {
+    font-size: 40px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #c084fc 0%, #8b5cf6 50%, #6366f1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+
+  .score-label {
+    font-size: 9px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.35);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    writing-mode: vertical-lr;
+    transform: rotate(180deg);
+  }
+
+  /* ── Row 2: Tier + Rank + Percentile ── */
+  .row-tier {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .tier-badge {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(139, 92, 246, 0.08));
+    border: 1px solid rgba(168, 85, 247, 0.2);
+  }
+
+  .tier-badge .diamond {
+    font-size: 13px;
+  }
+
+  .tier-badge span {
+    font-size: 12px;
+    font-weight: 700;
+    color: #c084fc;
+    letter-spacing: 0.03em;
+  }
+
+  .rank-badge, .pct-badge {
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .rank-badge {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .pct-badge {
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    color: #4ade80;
+  }
+
+  .brand-tag {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .brand-tag .brand-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 5px;
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .brand-tag .brand-dot svg {
+    width: 9px;
+    height: 9px;
+  }
+
+  .brand-tag span {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.35);
+    letter-spacing: 0.02em;
+  }
+
+  /* ── Row 3: Segmented Score Bar ── */
+  .row-breakdown {
+    padding: 10px 12px;
+  }
+
+  .breakdown-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+
+  .breakdown-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+  }
+
+  .breakdown-label .bl-name {
+    font-size: 9px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.35);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .breakdown-label .bl-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    margin-top: 1px;
+  }
+
+  .seg-bar {
+    display: flex;
+    height: 6px;
+    border-radius: 3px;
+    overflow: hidden;
+    gap: 2px;
+  }
+
+  .seg-bar .seg {
+    flex: 1;
+    border-radius: 3px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .seg-bar .seg-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s ease;
+  }
+
+  .seg-bar .seg:nth-child(1) { background: rgba(168, 85, 247, 0.15); }
+  .seg-bar .seg:nth-child(1) .seg-fill { background: linear-gradient(90deg, #a855f7, #8b5cf6); }
+
+  .seg-bar .seg:nth-child(2) { background: rgba(99, 102, 241, 0.15); }
+  .seg-bar .seg:nth-child(2) .seg-fill { background: linear-gradient(90deg, #6366f1, #818cf8); }
+
+  .seg-bar .seg:nth-child(3) { background: rgba(59, 130, 246, 0.15); }
+  .seg-bar .seg:nth-child(3) .seg-fill { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+
+  .seg-bar .seg:nth-child(4) { background: rgba(34, 211, 238, 0.15); }
+  .seg-bar .seg:nth-child(4) .seg-fill { background: linear-gradient(90deg, #22d3ee, #67e8f9); }
+
+  /* ── Row 4: Stats mini boxes ── */
+  .row-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+
+  .stat-box {
+    padding: 8px 6px;
+    border-radius: 10px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  .stat-box .stat-val {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+  }
+
+  .stat-box .stat-key {
+    font-size: 8px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 2px;
+  }
+
+  /* ── Row 5: Protocol logos ── */
+  .row-protocols {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 6px 0 2px;
+  }
+
+  .proto-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.2s;
+  }
+
+  .proto-icon:hover {
+    border-color: rgba(139, 92, 246, 0.3);
+  }
+
+  .proto-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 4px;
+  }
+
+  /* ── Footer ── */
+  .row-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 4px;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  .footer-url {
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.25);
+    letter-spacing: 0.02em;
+  }
+
+  .share-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    border-radius: 8px;
+    background: rgba(29, 155, 240, 0.1);
+    border: 1px solid rgba(29, 155, 240, 0.2);
+    color: #1d9bf0;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+
+  .share-btn:hover {
+    background: rgba(29, 155, 240, 0.18);
+    border-color: rgba(29, 155, 240, 0.35);
+  }
+
+  .share-btn svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  /* ── Page Label ── */
+  .page-label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.2);
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-inner">
+
+    <!-- Row 1: PFP + Identity + Score -->
+    <div class="row-identity">
+      <div class="pfp-ring">
+        <img src="0xgug-pfp.jpg" alt="0xGug">
+      </div>
+      <div class="identity">
+        <div class="identity-name">
+          <h2>0xGug</h2>
+          <div class="x-badge">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            Connected
+          </div>
+        </div>
+        <div class="identity-handle">@0xGug</div>
+      </div>
+      <div class="score-block">
+        <span class="score-label">Score</span>
+        <span class="score-number">87</span>
+      </div>
+    </div>
+
+    <!-- Row 2: Tier + Rank + Percentile + Brand -->
+    <div class="row-tier">
+      <div class="tier-badge">
+        <span class="diamond">&#x1F48E;</span>
+        <span>Diamond</span>
+      </div>
+      <div class="rank-badge">#1,247</div>
+      <div class="pct-badge">Top 3%</div>
+      <div class="brand-tag">
+        <div class="brand-dot">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <span>Solana Score</span>
+      </div>
+    </div>
+
+    <!-- Row 3: Score Breakdown Bar -->
+    <div class="row-breakdown glass">
+      <div class="breakdown-labels">
+        <div class="breakdown-label">
+          <span class="bl-name">Transactions</span>
+          <span class="bl-value">92</span>
+        </div>
+        <div class="breakdown-label">
+          <span class="bl-name">DeFi</span>
+          <span class="bl-value">88</span>
+        </div>
+        <div class="breakdown-label">
+          <span class="bl-name">Holdings</span>
+          <span class="bl-value">85</span>
+        </div>
+        <div class="breakdown-label">
+          <span class="bl-name">Tenure</span>
+          <span class="bl-value">79</span>
+        </div>
+      </div>
+      <div class="seg-bar">
+        <div class="seg"><div class="seg-fill" style="width:92%"></div></div>
+        <div class="seg"><div class="seg-fill" style="width:88%"></div></div>
+        <div class="seg"><div class="seg-fill" style="width:85%"></div></div>
+        <div class="seg"><div class="seg-fill" style="width:79%"></div></div>
+      </div>
+    </div>
+
+    <!-- Row 4: Stats -->
+    <div class="row-stats">
+      <div class="stat-box">
+        <div class="stat-val">$12,450</div>
+        <div class="stat-key">Protocol Fees</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">2.3 SOL</div>
+        <div class="stat-key">Network Fees</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">$45,200</div>
+        <div class="stat-key">Holdings</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">18 Mo</div>
+        <div class="stat-key">Active</div>
+      </div>
+    </div>
+
+    <!-- Row 5: Protocol Logos -->
+    <div class="row-protocols">
+      <div class="proto-icon"><img src="../public/images/protocols/jupiter.svg" alt="Jupiter"></div>
+      <div class="proto-icon"><img src="../public/images/protocols/raydium.jpg" alt="Raydium"></div>
+      <div class="proto-icon"><img src="../public/images/protocols/meteora.jpg" alt="Meteora"></div>
+      <div class="proto-icon"><img src="../public/images/protocols/drift.png" alt="Drift"></div>
+      <div class="proto-icon"><img src="../public/images/protocols/orca.jpg" alt="Orca"></div>
+      <div class="proto-icon"><img src="../public/images/protocols/phantom.jpg" alt="Phantom"></div>
+      <div class="proto-icon"><img src="../public/images/protocols/pumpfun.png" alt="Pump.fun"></div>
+      <div class="proto-icon"><img src="../public/images/protocols/axiom.png" alt="Axiom"></div>
+    </div>
+
+    <!-- Footer -->
+    <div class="row-footer">
+      <span class="footer-url">solana-score.xyz</span>
+      <a href="#" class="share-btn">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        Share on X
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<div class="page-label">Mockup 23 — Compact Badge</div>
+
+</body>
+</html>

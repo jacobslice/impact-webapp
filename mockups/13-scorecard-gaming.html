@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solana Score - Diamond Rank Card</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #07060b;
+    background-image:
+      radial-gradient(ellipse 600px 400px at 50% 40%, rgba(14, 165, 233, 0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 400px 300px at 30% 60%, rgba(139, 92, 246, 0.04) 0%, transparent 70%);
+    font-family: 'Exo 2', 'Rajdhani', sans-serif;
+    overflow: hidden;
+  }
+
+  /* ── Card Shell ── */
+  .scorecard {
+    position: relative;
+    width: 600px;
+    height: 750px;
+    background: linear-gradient(170deg, #0d0f18 0%, #0a0c14 40%, #0e1020 100%);
+    border-radius: 20px;
+    border: 1px solid rgba(56, 189, 248, 0.12);
+    overflow: hidden;
+    box-shadow:
+      0 0 60px rgba(14, 165, 233, 0.15),
+      0 0 120px rgba(14, 165, 233, 0.05),
+      0 30px 60px rgba(0, 0, 0, 0.6);
+  }
+
+  /* ── Dramatic Radial Glow Behind Emblem ── */
+  .scorecard::before {
+    content: '';
+    position: absolute;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 500px;
+    height: 400px;
+    background: radial-gradient(
+      ellipse 260px 220px at 50% 50%,
+      rgba(14, 165, 233, 0.35) 0%,
+      rgba(56, 189, 248, 0.18) 25%,
+      rgba(99, 102, 241, 0.08) 50%,
+      transparent 75%
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Edge Scanline / Texture ── */
+  .scorecard::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(255, 255, 255, 0.007) 2px,
+      rgba(255, 255, 255, 0.007) 4px
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .card-inner {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 32px 22px;
+  }
+
+  /* ── Top Banner ── */
+  .top-bar {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+
+  .logo-text {
+    font-family: 'Exo 2', sans-serif;
+    font-weight: 900;
+    font-size: 22px;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: #e0f2fe;
+    text-shadow:
+      0 0 20px rgba(14, 165, 233, 0.6),
+      0 0 40px rgba(14, 165, 233, 0.3);
+    position: relative;
+  }
+
+  .logo-text .slice {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: rgba(148, 163, 184, 0.6);
+    display: block;
+    text-align: center;
+    margin-top: -2px;
+    text-shadow: none;
+    font-weight: 500;
+  }
+
+  /* ── Sparkle Particles ── */
+  .sparkles {
+    position: absolute;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 400px;
+    height: 350px;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .sparkle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: #38bdf8;
+    border-radius: 50%;
+    box-shadow: 0 0 6px 2px rgba(56, 189, 248, 0.6);
+    animation: sparkle-float 3s ease-in-out infinite;
+  }
+
+  .sparkle:nth-child(1) { top: 10%; left: 15%; animation-delay: 0s; animation-duration: 2.8s; }
+  .sparkle:nth-child(2) { top: 25%; left: 85%; animation-delay: 0.5s; animation-duration: 3.2s; width: 2px; height: 2px; }
+  .sparkle:nth-child(3) { top: 55%; left: 10%; animation-delay: 1s; animation-duration: 2.5s; }
+  .sparkle:nth-child(4) { top: 40%; left: 90%; animation-delay: 1.5s; animation-duration: 3.5s; width: 2px; height: 2px; }
+  .sparkle:nth-child(5) { top: 70%; left: 20%; animation-delay: 0.3s; animation-duration: 3s; background: #818cf8; box-shadow: 0 0 6px 2px rgba(129, 140, 248, 0.6); }
+  .sparkle:nth-child(6) { top: 15%; left: 70%; animation-delay: 0.8s; animation-duration: 2.6s; width: 4px; height: 4px; }
+  .sparkle:nth-child(7) { top: 60%; left: 80%; animation-delay: 1.2s; animation-duration: 3.1s; background: #818cf8; box-shadow: 0 0 6px 2px rgba(129, 140, 248, 0.6); }
+  .sparkle:nth-child(8) { top: 5%; left: 50%; animation-delay: 2s; animation-duration: 2.9s; width: 2px; height: 2px; }
+  .sparkle:nth-child(9) { top: 75%; left: 55%; animation-delay: 0.7s; animation-duration: 3.4s; }
+  .sparkle:nth-child(10) { top: 35%; left: 30%; animation-delay: 1.8s; animation-duration: 2.7s; width: 2px; height: 2px; background: #67e8f9; box-shadow: 0 0 6px 2px rgba(103, 232, 249, 0.5); }
+  .sparkle:nth-child(11) { top: 20%; left: 40%; animation-delay: 0.2s; animation-duration: 3.3s; }
+  .sparkle:nth-child(12) { top: 65%; left: 65%; animation-delay: 1.4s; animation-duration: 2.4s; width: 3px; height: 3px; background: #67e8f9; box-shadow: 0 0 6px 2px rgba(103, 232, 249, 0.5); }
+
+  @keyframes sparkle-float {
+    0%, 100% { opacity: 0; transform: translateY(0) scale(1); }
+    25% { opacity: 1; }
+    50% { opacity: 0.8; transform: translateY(-12px) scale(1.3); }
+    75% { opacity: 0.4; }
+  }
+
+  /* ── Emblem Container ── */
+  .emblem-section {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  /* ── Diamond Emblem (Hexagonal Shield) ── */
+  .emblem-wrap {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Outer glow ring */
+  .emblem-wrap::before {
+    content: '';
+    position: absolute;
+    inset: -18px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(14, 165, 233, 0.12) 40%, transparent 70%);
+    animation: emblem-pulse 3s ease-in-out infinite;
+  }
+
+  @keyframes emblem-pulse {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.06); }
+  }
+
+  .emblem-svg {
+    width: 200px;
+    height: 200px;
+    filter: drop-shadow(0 0 30px rgba(14, 165, 233, 0.4)) drop-shadow(0 0 60px rgba(14, 165, 233, 0.15));
+  }
+
+  /* Score inside emblem */
+  .emblem-score {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .emblem-score .number {
+    font-family: 'Exo 2', sans-serif;
+    font-weight: 900;
+    font-size: 56px;
+    color: #ffffff;
+    line-height: 1;
+    text-shadow:
+      0 0 20px rgba(14, 165, 233, 0.8),
+      0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+
+  .emblem-score .label {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: rgba(186, 230, 253, 0.7);
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  /* ── Tier Label ── */
+  .tier-label {
+    font-family: 'Exo 2', sans-serif;
+    font-weight: 800;
+    font-size: 32px;
+    letter-spacing: 12px;
+    text-transform: uppercase;
+    color: #38bdf8;
+    text-shadow:
+      0 0 30px rgba(56, 189, 248, 0.5),
+      0 0 60px rgba(56, 189, 248, 0.2);
+    margin-top: -4px;
+    margin-bottom: 4px;
+  }
+
+  /* ── Rank + Badge Row ── */
+  .rank-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .rank-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    color: rgba(203, 213, 225, 0.8);
+    letter-spacing: 2px;
+  }
+
+  .top-badge {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.25), rgba(99, 102, 241, 0.2));
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 20px;
+    padding: 3px 14px;
+    font-family: 'Exo 2', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    color: #67e8f9;
+    letter-spacing: 1px;
+    text-shadow: 0 0 10px rgba(103, 232, 249, 0.4);
+  }
+
+  /* ── Player Tag ── */
+  .player-tag {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 500;
+    font-size: 13px;
+    color: rgba(148, 163, 184, 0.5);
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+  }
+
+  /* ── Glass Panels ── */
+  .glass-panel {
+    width: 100%;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(56, 189, 248, 0.08);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+  }
+
+  /* ── Stats Grid ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 0;
+  }
+
+  .stat-item {
+    text-align: center;
+    position: relative;
+  }
+
+  .stat-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 15%;
+    height: 70%;
+    width: 1px;
+    background: rgba(56, 189, 248, 0.1);
+  }
+
+  .stat-value {
+    font-family: 'Exo 2', sans-serif;
+    font-weight: 700;
+    font-size: 17px;
+    color: #e2e8f0;
+    line-height: 1.2;
+  }
+
+  .stat-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 500;
+    font-size: 10px;
+    color: rgba(148, 163, 184, 0.55);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-top: 3px;
+  }
+
+  /* ── Score Breakdown Bars ── */
+  .breakdown-header {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: rgba(148, 163, 184, 0.45);
+    margin-bottom: 10px;
+  }
+
+  .breakdown-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 24px;
+  }
+
+  .bar-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .bar-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .bar-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    color: rgba(203, 213, 225, 0.75);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .bar-value {
+    font-family: 'Exo 2', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: #38bdf8;
+  }
+
+  .bar-track {
+    width: 100%;
+    height: 5px;
+    background: rgba(30, 41, 59, 0.7);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, #0ea5e9, #38bdf8);
+    box-shadow: 0 0 8px rgba(14, 165, 233, 0.4);
+    transition: width 1s ease;
+  }
+
+  .bar-fill.high {
+    background: linear-gradient(90deg, #06b6d4, #22d3ee);
+    box-shadow: 0 0 8px rgba(34, 211, 238, 0.4);
+  }
+
+  .bar-fill.mid {
+    background: linear-gradient(90deg, #6366f1, #818cf8);
+    box-shadow: 0 0 8px rgba(99, 102, 241, 0.4);
+  }
+
+  /* ── Protocols ── */
+  .protocols-section {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .protocols-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: rgba(148, 163, 184, 0.4);
+    margin-bottom: 8px;
+  }
+
+  .protocols-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .protocol-badge {
+    width: 52px;
+    height: 30px;
+    background: rgba(15, 23, 42, 0.5);
+    border: 1px solid rgba(56, 189, 248, 0.08);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 8px;
+    color: rgba(148, 163, 184, 0.65);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    backdrop-filter: blur(8px);
+    transition: border-color 0.3s, color 0.3s;
+  }
+
+  .protocol-badge:hover {
+    border-color: rgba(56, 189, 248, 0.25);
+    color: rgba(186, 230, 253, 0.85);
+  }
+
+  .protocol-badge .icon {
+    width: 14px;
+    height: 14px;
+    margin-right: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .protocol-badge .icon svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  /* ── Footer ── */
+  .card-footer {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 4px;
+  }
+
+  .footer-left {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 500;
+    font-size: 11px;
+    color: rgba(100, 116, 139, 0.5);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .footer-right {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 11px;
+    color: rgba(100, 116, 139, 0.45);
+    letter-spacing: 1px;
+  }
+
+  /* ── Corner Accents ── */
+  .corner {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    z-index: 3;
+  }
+
+  .corner--tl { top: 8px; left: 8px; border-top: 1px solid rgba(56, 189, 248, 0.2); border-left: 1px solid rgba(56, 189, 248, 0.2); }
+  .corner--tr { top: 8px; right: 8px; border-top: 1px solid rgba(56, 189, 248, 0.2); border-right: 1px solid rgba(56, 189, 248, 0.2); }
+  .corner--bl { bottom: 8px; left: 8px; border-bottom: 1px solid rgba(56, 189, 248, 0.2); border-left: 1px solid rgba(56, 189, 248, 0.2); }
+  .corner--br { bottom: 8px; right: 8px; border-bottom: 1px solid rgba(56, 189, 248, 0.2); border-right: 1px solid rgba(56, 189, 248, 0.2); }
+
+  /* ── Decorative top line ── */
+  .top-accent {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 160px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.4), transparent);
+    z-index: 3;
+  }
+
+  /* ── Inner border glow line ── */
+  .inner-border {
+    position: absolute;
+    inset: 3px;
+    border-radius: 18px;
+    border: 1px solid rgba(56, 189, 248, 0.04);
+    pointer-events: none;
+    z-index: 3;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="scorecard">
+  <!-- Corner accents -->
+  <div class="corner corner--tl"></div>
+  <div class="corner corner--tr"></div>
+  <div class="corner corner--bl"></div>
+  <div class="corner corner--br"></div>
+  <div class="top-accent"></div>
+  <div class="inner-border"></div>
+
+  <!-- Sparkle particles -->
+  <div class="sparkles">
+    <div class="sparkle"></div>
+    <div class="sparkle"></div>
+    <div class="sparkle"></div>
+    <div class="sparkle"></div>
+    <div class="sparkle"></div>
+    <div class="sparkle"></div>
+    <div class="sparkle"></div>
+    <div class="sparkle"></div>
+    <div class="sparkle"></div>
+    <div class="sparkle"></div>
+    <div class="sparkle"></div>
+    <div class="sparkle"></div>
+  </div>
+
+  <div class="card-inner">
+
+    <!-- Top Banner -->
+    <div class="top-bar">
+      <div class="logo-text">
+        SOLANA SCORE
+        <span class="slice">by Slice Analytics</span>
+      </div>
+    </div>
+
+    <!-- Emblem Section -->
+    <div class="emblem-section">
+      <div class="emblem-wrap">
+        <!-- Hexagonal Shield Emblem SVG -->
+        <svg class="emblem-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <!-- Main Diamond gradient -->
+            <linearGradient id="diamondGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#0ea5e9"/>
+              <stop offset="35%" stop-color="#38bdf8"/>
+              <stop offset="65%" stop-color="#06b6d4"/>
+              <stop offset="100%" stop-color="#6366f1"/>
+            </linearGradient>
+
+            <!-- Inner gradient -->
+            <linearGradient id="innerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#0c4a6e" stop-opacity="0.9"/>
+              <stop offset="50%" stop-color="#0e1a3a" stop-opacity="0.95"/>
+              <stop offset="100%" stop-color="#1e1b4b" stop-opacity="0.9"/>
+            </linearGradient>
+
+            <!-- Highlight gradient -->
+            <linearGradient id="highlightGrad" x1="50%" y1="0%" x2="50%" y2="100%">
+              <stop offset="0%" stop-color="#67e8f9" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="#67e8f9" stop-opacity="0"/>
+            </linearGradient>
+
+            <!-- Glow filter -->
+            <filter id="emblemGlow" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+            </filter>
+
+            <!-- Outer glow filter -->
+            <filter id="outerGlow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="6" result="blur"/>
+              <feFlood flood-color="#38bdf8" flood-opacity="0.3"/>
+              <feComposite in2="blur" operator="in"/>
+              <feComposite in="SourceGraphic"/>
+            </filter>
+          </defs>
+
+          <!-- Outer hexagonal shield -->
+          <polygon
+            points="100,8 178,38 190,110 160,175 100,195 40,175 10,110 22,38"
+            fill="none"
+            stroke="url(#diamondGrad)"
+            stroke-width="2.5"
+            filter="url(#outerGlow)"
+            opacity="0.9"
+          />
+
+          <!-- Mid shield shape -->
+          <polygon
+            points="100,18 170,44 181,110 154,168 100,186 46,168 19,110 30,44"
+            fill="url(#innerGrad)"
+            stroke="url(#diamondGrad)"
+            stroke-width="1.2"
+            opacity="0.95"
+          />
+
+          <!-- Inner hexagonal detail -->
+          <polygon
+            points="100,40 150,58 158,105 140,148 100,162 60,148 42,105 50,58"
+            fill="none"
+            stroke="url(#diamondGrad)"
+            stroke-width="0.6"
+            opacity="0.3"
+          />
+
+          <!-- Top highlight -->
+          <polygon
+            points="100,18 170,44 165,50 100,26 35,50 30,44"
+            fill="url(#highlightGrad)"
+            opacity="0.4"
+          />
+
+          <!-- Side accent lines -->
+          <line x1="22" y1="38" x2="42" y2="105" stroke="#38bdf8" stroke-width="0.4" opacity="0.2"/>
+          <line x1="178" y1="38" x2="158" y2="105" stroke="#38bdf8" stroke-width="0.4" opacity="0.2"/>
+
+          <!-- Diamond gem detail at top -->
+          <polygon
+            points="100,12 108,22 100,28 92,22"
+            fill="#67e8f9"
+            opacity="0.5"
+          />
+
+          <!-- Bottom chevron accent -->
+          <polyline
+            points="70,175 100,190 130,175"
+            fill="none"
+            stroke="#38bdf8"
+            stroke-width="0.8"
+            opacity="0.25"
+          />
+
+          <!-- Decorative inner corner brackets -->
+          <!-- Top-left -->
+          <polyline points="58,55 50,58 48,68" fill="none" stroke="#67e8f9" stroke-width="0.6" opacity="0.35"/>
+          <!-- Top-right -->
+          <polyline points="142,55 150,58 152,68" fill="none" stroke="#67e8f9" stroke-width="0.6" opacity="0.35"/>
+          <!-- Bottom-left -->
+          <polyline points="48,140 42,105" fill="none" stroke="#67e8f9" stroke-width="0.4" opacity="0.2"/>
+          <!-- Bottom-right -->
+          <polyline points="152,140 158,105" fill="none" stroke="#67e8f9" stroke-width="0.4" opacity="0.2"/>
+
+          <!-- Small diamond accents on sides -->
+          <polygon points="26,74 30,70 34,74 30,78" fill="#38bdf8" opacity="0.2"/>
+          <polygon points="166,74 170,70 174,74 170,78" fill="#38bdf8" opacity="0.2"/>
+        </svg>
+
+        <!-- Score overlay -->
+        <div class="emblem-score">
+          <div class="number">87</div>
+          <div class="label">SCORE</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tier Label -->
+    <div class="tier-label">DIAMOND</div>
+
+    <!-- Rank Row -->
+    <div class="rank-row">
+      <span class="rank-text">RANK #1,247 / 142,000</span>
+      <span class="top-badge">TOP 3%</span>
+    </div>
+
+    <!-- Player Tag -->
+    <div class="player-tag">7xKX...AsU</div>
+
+    <!-- Stats Grid -->
+    <div class="glass-panel">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value">$12,450</div>
+          <div class="stat-label">Protocol Fees</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">2.3 SOL</div>
+          <div class="stat-label">Network Fees</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">$45,200</div>
+          <div class="stat-label">Holdings</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">18</div>
+          <div class="stat-label">Months Active</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Score Breakdown -->
+    <div class="glass-panel">
+      <div class="breakdown-header">Score Breakdown</div>
+      <div class="breakdown-grid">
+        <div class="bar-item">
+          <div class="bar-top">
+            <span class="bar-label">Transactions</span>
+            <span class="bar-value">92</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill high" style="width: 92%"></div>
+          </div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-top">
+            <span class="bar-label">DeFi</span>
+            <span class="bar-value">88</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width: 88%"></div>
+          </div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-top">
+            <span class="bar-label">Holdings</span>
+            <span class="bar-value">85</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill mid" style="width: 85%"></div>
+          </div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-top">
+            <span class="bar-label">Tenure</span>
+            <span class="bar-value">79</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill mid" style="width: 79%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Protocols -->
+    <div class="protocols-section">
+      <div class="protocols-label">Protocols Used</div>
+      <div class="protocols-row">
+        <div class="protocol-badge">
+          <span class="icon"><svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="4" fill="none" stroke="#67e8f9" stroke-width="0.8" opacity="0.6"/><circle cx="6" cy="6" r="1.5" fill="#67e8f9" opacity="0.5"/></svg></span>
+          JUP
+        </div>
+        <div class="protocol-badge">
+          <span class="icon"><svg viewBox="0 0 12 12"><rect x="2" y="2" width="8" height="8" rx="1.5" fill="none" stroke="#818cf8" stroke-width="0.8" opacity="0.6"/></svg></span>
+          RAY
+        </div>
+        <div class="protocol-badge">
+          <span class="icon"><svg viewBox="0 0 12 12"><polygon points="6,1 11,9 1,9" fill="none" stroke="#67e8f9" stroke-width="0.8" opacity="0.6"/></svg></span>
+          MNDE
+        </div>
+        <div class="protocol-badge">
+          <span class="icon"><svg viewBox="0 0 12 12"><polygon points="6,1 9,4 9,8 6,11 3,8 3,4" fill="none" stroke="#818cf8" stroke-width="0.8" opacity="0.6"/></svg></span>
+          TNSR
+        </div>
+        <div class="protocol-badge">
+          <span class="icon"><svg viewBox="0 0 12 12"><path d="M2,6 Q6,1 10,6 Q6,11 2,6Z" fill="none" stroke="#e879f9" stroke-width="0.8" opacity="0.6"/></svg></span>
+          ME
+        </div>
+        <div class="protocol-badge">
+          <span class="icon"><svg viewBox="0 0 12 12"><line x1="3" y1="3" x2="9" y2="9" stroke="#67e8f9" stroke-width="0.8" opacity="0.6"/><line x1="9" y1="3" x2="3" y2="9" stroke="#67e8f9" stroke-width="0.8" opacity="0.6"/></svg></span>
+          DRIFT
+        </div>
+        <div class="protocol-badge">
+          <span class="icon"><svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="4" fill="none" stroke="#38bdf8" stroke-width="0.8" opacity="0.6"/><path d="M3,6 Q6,2 9,6" fill="none" stroke="#38bdf8" stroke-width="0.6" opacity="0.5"/></svg></span>
+          ORCA
+        </div>
+        <div class="protocol-badge">
+          <span class="icon"><svg viewBox="0 0 12 12"><rect x="3" y="3" width="6" height="6" fill="none" stroke="#818cf8" stroke-width="0.8" opacity="0.6" transform="rotate(45 6 6)"/></svg></span>
+          KMNO
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="card-footer">
+      <div class="footer-left">Season 1 &mdash; Feb 2026</div>
+      <div class="footer-right">solana-score.xyz</div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

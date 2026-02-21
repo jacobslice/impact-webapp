@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solana Score - @0xGug - Concentric Rings</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #060710;
+    font-family: 'Inter', -apple-system, sans-serif;
+    padding: 40px 20px;
+  }
+
+  /* ── Card ── */
+  .card {
+    position: relative;
+    width: 480px;
+    border-radius: 24px;
+    overflow: hidden;
+    background: linear-gradient(170deg, #0e0d1a 0%, #0a0b14 45%, #0d0c18 100%);
+    border: 1px solid rgba(139, 92, 246, 0.12);
+    box-shadow:
+      0 0 100px rgba(139, 92, 246, 0.08),
+      0 40px 80px rgba(0, 0, 0, 0.7);
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 420px;
+    height: 320px;
+    background: radial-gradient(ellipse, rgba(139, 92, 246, 0.14) 0%, rgba(99, 102, 241, 0.06) 40%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .card-inner {
+    position: relative;
+    z-index: 1;
+    padding: 26px 28px 22px;
+  }
+
+  /* ── Glass helper ── */
+  .glass {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.055);
+    border-radius: 14px;
+  }
+
+  /* ── Header ── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 22px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+
+  .brand-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #9945FF, #14F195);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .brand-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .brand-text {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .brand-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  .brand-sub {
+    font-size: 9px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 0.04em;
+  }
+
+  .x-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  .x-badge svg {
+    width: 13px;
+    height: 13px;
+    fill: #fff;
+  }
+
+  .x-badge span {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.7);
+  }
+
+  .x-check {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #1D9BF0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .x-check svg {
+    width: 8px;
+    height: 8px;
+    fill: #fff;
+  }
+
+  /* ── Profile ── */
+  .profile {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 6px;
+  }
+
+  .pfp-wrapper {
+    position: relative;
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+  }
+
+  .pfp-ring {
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: conic-gradient(
+      #9945FF, #14F195, #00D1FF, #9945FF
+    );
+    animation: pfpSpin 4s linear infinite;
+  }
+
+  @keyframes pfpSpin {
+    to { transform: rotate(360deg); }
+  }
+
+  .pfp-ring-inner {
+    position: absolute;
+    inset: 2px;
+    border-radius: 50%;
+    background: #0a0b14;
+  }
+
+  .pfp-img {
+    position: relative;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    z-index: 1;
+  }
+
+  .profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .profile-name {
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.02em;
+  }
+
+  .profile-handle {
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    font-weight: 500;
+  }
+
+  .profile-rank {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 2px;
+  }
+
+  .rank-text {
+    font-size: 10.5px;
+    color: rgba(255,255,255,0.45);
+    font-weight: 500;
+  }
+
+  .rank-pct {
+    font-size: 10px;
+    font-weight: 700;
+    color: #14F195;
+    background: rgba(20, 241, 149, 0.1);
+    padding: 2px 7px;
+    border-radius: 6px;
+  }
+
+  /* ── Tier badge ── */
+  .tier-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-top: -38px;
+    margin-bottom: 20px;
+  }
+
+  .tier-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px 5px 8px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(185, 142, 254, 0.12), rgba(139, 92, 246, 0.06));
+    border: 1px solid rgba(185, 142, 254, 0.15);
+  }
+
+  .tier-diamond {
+    font-size: 16px;
+    line-height: 1;
+  }
+
+  .tier-label {
+    font-size: 11px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #B98EFE, #E0C3FC);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* ── Concentric Rings Visualization ── */
+  .rings-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 22px;
+    padding: 20px 0;
+  }
+
+  .rings-container {
+    position: relative;
+    width: 240px;
+    height: 240px;
+    flex-shrink: 0;
+  }
+
+  .rings-svg {
+    width: 240px;
+    height: 240px;
+    transform: rotate(-90deg);
+    animation: ringsBreath 6s ease-in-out infinite;
+  }
+
+  @keyframes ringsBreath {
+    0%, 100% { filter: drop-shadow(0 0 6px rgba(153, 69, 255, 0.2)); }
+    50% { filter: drop-shadow(0 0 18px rgba(153, 69, 255, 0.35)); }
+  }
+
+  .ring-track {
+    fill: none;
+    opacity: 0.08;
+  }
+
+  .ring-bar {
+    fill: none;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .ring-bar-outer {
+    stroke: #9945FF;
+    filter: drop-shadow(0 0 4px rgba(153, 69, 255, 0.5));
+    animation: ringPulse1 3s ease-in-out infinite;
+  }
+
+  .ring-bar-2 {
+    stroke: #00D1FF;
+    filter: drop-shadow(0 0 4px rgba(0, 209, 255, 0.4));
+    animation: ringPulse2 3s ease-in-out infinite 0.5s;
+  }
+
+  .ring-bar-3 {
+    stroke: #14F195;
+    filter: drop-shadow(0 0 4px rgba(20, 241, 149, 0.4));
+    animation: ringPulse3 3s ease-in-out infinite 1s;
+  }
+
+  .ring-bar-inner {
+    stroke: #FFB800;
+    filter: drop-shadow(0 0 4px rgba(255, 184, 0, 0.4));
+    animation: ringPulse4 3s ease-in-out infinite 1.5s;
+  }
+
+  @keyframes ringPulse1 {
+    0%, 100% { opacity: 0.9; }
+    50% { opacity: 1; }
+  }
+  @keyframes ringPulse2 {
+    0%, 100% { opacity: 0.85; }
+    50% { opacity: 1; }
+  }
+  @keyframes ringPulse3 {
+    0%, 100% { opacity: 0.85; }
+    50% { opacity: 1; }
+  }
+  @keyframes ringPulse4 {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 1; }
+  }
+
+  /* Center score overlay */
+  .rings-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .rings-score {
+    font-size: 46px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    text-shadow: 0 0 30px rgba(153, 69, 255, 0.4);
+  }
+
+  .rings-score-label {
+    font-size: 9.5px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
+
+  /* Ring Labels */
+  .ring-labels {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 130px;
+  }
+
+  .ring-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+  }
+
+  .ring-label-line {
+    width: 20px;
+    height: 2px;
+    border-radius: 1px;
+    flex-shrink: 0;
+  }
+
+  .ring-label-line.purple { background: #9945FF; box-shadow: 0 0 6px rgba(153, 69, 255, 0.4); }
+  .ring-label-line.blue { background: #00D1FF; box-shadow: 0 0 6px rgba(0, 209, 255, 0.4); }
+  .ring-label-line.green { background: #14F195; box-shadow: 0 0 6px rgba(20, 241, 149, 0.4); }
+  .ring-label-line.amber { background: #FFB800; box-shadow: 0 0 6px rgba(255, 184, 0, 0.4); }
+
+  .ring-label-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .ring-label-name {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 0.02em;
+  }
+
+  .ring-label-score {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+
+  .ring-label-score.purple { color: #B98EFE; }
+  .ring-label-score.blue { color: #00D1FF; }
+  .ring-label-score.green { color: #14F195; }
+  .ring-label-score.amber { color: #FFB800; }
+
+  /* ── Stats ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+
+  .stat-card {
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.045);
+    backdrop-filter: blur(10px);
+  }
+
+  .stat-value {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.02em;
+    margin-bottom: 2px;
+  }
+
+  .stat-label {
+    font-size: 9.5px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  /* ── Protocols ── */
+  .protocols-section {
+    margin-bottom: 18px;
+  }
+
+  .protocols-title {
+    font-size: 9.5px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .protocols-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .protocol-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.06);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+
+  .protocol-icon:hover {
+    transform: scale(1.1);
+    border-color: rgba(153, 69, 255, 0.3);
+  }
+
+  .protocol-icon img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+  }
+
+  /* ── Divider ── */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+    margin: 16px 0;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-left {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .footer-url {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.5);
+  }
+
+  .footer-date {
+    font-size: 9.5px;
+    color: rgba(255,255,255,0.25);
+    font-weight: 500;
+  }
+
+  .share-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 16px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(153, 69, 255, 0.18), rgba(20, 241, 149, 0.08));
+    border: 1px solid rgba(153, 69, 255, 0.2);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .share-btn:hover {
+    background: linear-gradient(135deg, rgba(153, 69, 255, 0.28), rgba(20, 241, 149, 0.14));
+    border-color: rgba(153, 69, 255, 0.35);
+    transform: translateY(-1px);
+  }
+
+  .share-btn svg {
+    width: 13px;
+    height: 13px;
+    fill: #fff;
+  }
+
+  .share-btn span {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.8);
+  }
+
+  /* ── Page Label ── */
+  .page-label {
+    margin-top: 28px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.2);
+    font-weight: 500;
+    letter-spacing: 0.03em;
+  }
+
+  /* ── Ambient background decoration ── */
+  .card::after {
+    content: '';
+    position: absolute;
+    bottom: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px;
+    height: 200px;
+    background: radial-gradient(ellipse, rgba(20, 241, 149, 0.06) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-inner">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <div class="brand-name">Solana Score</div>
+          <div class="brand-sub">by Slice Analytics</div>
+        </div>
+      </div>
+      <div class="x-badge">
+        <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        <span>Connected</span>
+        <div class="x-check">
+          <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile Row -->
+    <div class="profile">
+      <div class="pfp-wrapper">
+        <div class="pfp-ring">
+          <div class="pfp-ring-inner"></div>
+        </div>
+        <img class="pfp-img" src="0xgug-pfp.jpg" alt="0xGug">
+      </div>
+      <div class="profile-info">
+        <div class="profile-name">0xGug</div>
+        <div class="profile-handle">@0xGug</div>
+        <div class="profile-rank">
+          <span class="rank-text">#1,247 of 142,000</span>
+          <span class="rank-pct">Top 3%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tier Badge -->
+    <div class="tier-row">
+      <div class="tier-badge">
+        <span class="tier-diamond">&#x1F48E;</span>
+        <span class="tier-label">Diamond</span>
+      </div>
+    </div>
+
+    <!-- Concentric Rings Visualization -->
+    <div class="rings-section">
+      <div class="rings-container">
+        <svg class="rings-svg" viewBox="0 0 240 240">
+          <!-- Ring tracks (background) -->
+          <!-- Outer ring: r=108, circumference=2*pi*108 = 678.58 -->
+          <circle class="ring-track" cx="120" cy="120" r="108" stroke="#9945FF" stroke-width="12"/>
+          <!-- Ring 2: r=88, circumference=2*pi*88 = 552.92 -->
+          <circle class="ring-track" cx="120" cy="120" r="88" stroke="#00D1FF" stroke-width="14"/>
+          <!-- Ring 3: r=68, circumference=2*pi*68 = 427.26 -->
+          <circle class="ring-track" cx="120" cy="120" r="68" stroke="#14F195" stroke-width="14"/>
+          <!-- Inner ring: r=48, circumference=2*pi*48 = 301.59 -->
+          <circle class="ring-track" cx="120" cy="120" r="48" stroke="#FFB800" stroke-width="14"/>
+
+          <!-- Ring arcs (filled proportionally) -->
+          <!-- Outer: Transactions 92/100, circumference=678.58, dashoffset = 678.58 * (1 - 0.92) = 54.29 -->
+          <circle class="ring-bar ring-bar-outer" cx="120" cy="120" r="108" stroke-width="12"
+            stroke-dasharray="678.58" stroke-dashoffset="54.29"/>
+
+          <!-- Ring 2: DeFi 88/100, circumference=552.92, dashoffset = 552.92 * (1 - 0.88) = 66.35 -->
+          <circle class="ring-bar ring-bar-2" cx="120" cy="120" r="88" stroke-width="14"
+            stroke-dasharray="552.92" stroke-dashoffset="66.35"/>
+
+          <!-- Ring 3: Holdings 85/100, circumference=427.26, dashoffset = 427.26 * (1 - 0.85) = 64.09 -->
+          <circle class="ring-bar ring-bar-3" cx="120" cy="120" r="68" stroke-width="14"
+            stroke-dasharray="427.26" stroke-dashoffset="64.09"/>
+
+          <!-- Inner: Tenure 79/100, circumference=301.59, dashoffset = 301.59 * (1 - 0.79) = 63.33 -->
+          <circle class="ring-bar ring-bar-inner" cx="120" cy="120" r="48" stroke-width="14"
+            stroke-dasharray="301.59" stroke-dashoffset="63.33"/>
+        </svg>
+
+        <!-- Center Score -->
+        <div class="rings-center">
+          <div class="rings-score">87</div>
+          <div class="rings-score-label">Solana Score</div>
+        </div>
+      </div>
+
+      <!-- Ring Labels -->
+      <div class="ring-labels">
+        <div class="ring-label">
+          <div class="ring-label-line purple"></div>
+          <div class="ring-label-info">
+            <div class="ring-label-name">Transactions</div>
+            <div class="ring-label-score purple">92</div>
+          </div>
+        </div>
+        <div class="ring-label">
+          <div class="ring-label-line blue"></div>
+          <div class="ring-label-info">
+            <div class="ring-label-name">DeFi</div>
+            <div class="ring-label-score blue">88</div>
+          </div>
+        </div>
+        <div class="ring-label">
+          <div class="ring-label-line green"></div>
+          <div class="ring-label-info">
+            <div class="ring-label-name">Holdings</div>
+            <div class="ring-label-score green">85</div>
+          </div>
+        </div>
+        <div class="ring-label">
+          <div class="ring-label-line amber"></div>
+          <div class="ring-label-info">
+            <div class="ring-label-name">Tenure</div>
+            <div class="ring-label-score amber">79</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">$12,450</div>
+        <div class="stat-label">Protocol Fees</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">2.3 SOL</div>
+        <div class="stat-label">Network Fees</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">$45,200</div>
+        <div class="stat-label">Holdings</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">18 Mo</div>
+        <div class="stat-label">Active</div>
+      </div>
+    </div>
+
+    <!-- Protocols -->
+    <div class="protocols-section">
+      <div class="protocols-title">Top Protocols</div>
+      <div class="protocols-row">
+        <div class="protocol-icon" title="Jupiter">
+          <img src="../public/images/protocols/jupiter.svg" alt="Jupiter">
+        </div>
+        <div class="protocol-icon" title="Raydium">
+          <img src="../public/images/protocols/raydium.jpg" alt="Raydium">
+        </div>
+        <div class="protocol-icon" title="Meteora">
+          <img src="../public/images/protocols/meteora.jpg" alt="Meteora">
+        </div>
+        <div class="protocol-icon" title="Drift">
+          <img src="../public/images/protocols/drift.png" alt="Drift">
+        </div>
+        <div class="protocol-icon" title="Orca">
+          <img src="../public/images/protocols/orca.jpg" alt="Orca">
+        </div>
+        <div class="protocol-icon" title="Phantom">
+          <img src="../public/images/protocols/phantom.jpg" alt="Phantom">
+        </div>
+        <div class="protocol-icon" title="Pump.fun">
+          <img src="../public/images/protocols/pumpfun.png" alt="Pump.fun">
+        </div>
+        <div class="protocol-icon" title="Axiom">
+          <img src="../public/images/protocols/axiom.png" alt="Axiom">
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div class="footer-left">
+        <div class="footer-url">solana-score.xyz</div>
+        <div class="footer-date">Feb 2026</div>
+      </div>
+      <div class="share-btn">
+        <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        <span>Share on X</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="page-label">Mockup 24 &mdash; Concentric Rings</div>
+
+</body>
+</html>

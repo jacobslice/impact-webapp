@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solana Score by Slice Analytics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* ── Reset ── */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* ── Root palette ── */
+  :root {
+    --purple-deep:  #1a0533;
+    --purple-mid:   #4b1d8e;
+    --teal-dark:    #0d4f4f;
+    --teal-bright:  #00e5b0;
+    --green-aurora:  #39ff8e;
+    --pink-hint:    #ff5faa;
+    --card-bg:      rgba(12, 8, 24, 0.55);
+    --card-border:  rgba(255, 255, 255, 0.07);
+    --text-primary: #f0eef6;
+    --text-muted:   rgba(224, 218, 240, 0.55);
+    --radius:       20px;
+    --blur:         24px;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    background: var(--purple-deep);
+  }
+
+  /* ── Animated aurora mesh background ── */
+  .aurora-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .aurora-bg::before,
+  .aurora-bg::after {
+    content: '';
+    position: absolute;
+    inset: -50%;
+    width: 200%;
+    height: 200%;
+    animation: auroraDrift 18s ease-in-out infinite alternate;
+  }
+
+  .aurora-bg::before {
+    background:
+      radial-gradient(ellipse 60% 50% at 20% 30%, rgba(75, 29, 142, 0.9) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 60% at 75% 20%, rgba(0, 229, 176, 0.45) 0%, transparent 65%),
+      radial-gradient(ellipse 55% 45% at 50% 70%, rgba(57, 255, 142, 0.3) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 55% at 85% 75%, rgba(255, 95, 170, 0.35) 0%, transparent 65%),
+      radial-gradient(ellipse 70% 50% at 10% 80%, rgba(13, 79, 79, 0.8) 0%, transparent 60%);
+    animation-delay: 0s;
+  }
+
+  .aurora-bg::after {
+    background:
+      radial-gradient(ellipse 45% 55% at 65% 55%, rgba(75, 29, 142, 0.7) 0%, transparent 65%),
+      radial-gradient(ellipse 55% 40% at 30% 75%, rgba(0, 229, 176, 0.4) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 80% 40%, rgba(57, 255, 142, 0.25) 0%, transparent 55%),
+      radial-gradient(ellipse 60% 45% at 15% 25%, rgba(255, 95, 170, 0.3) 0%, transparent 60%);
+    animation-delay: -9s;
+    animation-direction: alternate-reverse;
+  }
+
+  @keyframes auroraDrift {
+    0%   { transform: translate(0, 0)   rotate(0deg)   scale(1); }
+    33%  { transform: translate(3%, -2%) rotate(3deg)   scale(1.03); }
+    66%  { transform: translate(-2%, 3%) rotate(-2deg)  scale(0.98); }
+    100% { transform: translate(1%, -1%) rotate(1deg)   scale(1.01); }
+  }
+
+  /* extra floating orbs for depth */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.45;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .orb--1 {
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(0,229,176,0.5), transparent 70%);
+    top: -10%; left: 55%;
+    animation: orbFloat1 22s ease-in-out infinite alternate;
+  }
+  .orb--2 {
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(255,95,170,0.4), transparent 70%);
+    bottom: -5%; left: 10%;
+    animation: orbFloat2 26s ease-in-out infinite alternate;
+  }
+  .orb--3 {
+    width: 450px; height: 450px;
+    background: radial-gradient(circle, rgba(57,255,142,0.3), transparent 70%);
+    top: 40%; right: -5%;
+    animation: orbFloat3 20s ease-in-out infinite alternate;
+  }
+
+  @keyframes orbFloat1 {
+    0%   { transform: translate(0, 0); }
+    100% { transform: translate(-80px, 60px); }
+  }
+  @keyframes orbFloat2 {
+    0%   { transform: translate(0, 0); }
+    100% { transform: translate(60px, -40px); }
+  }
+  @keyframes orbFloat3 {
+    0%   { transform: translate(0, 0); }
+    100% { transform: translate(-50px, -70px); }
+  }
+
+  /* ── Layout ── */
+  .page-wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* ── Glass card mixin ── */
+  .glass {
+    background: var(--card-bg);
+    backdrop-filter: blur(var(--blur));
+    -webkit-backdrop-filter: blur(var(--blur));
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+  }
+
+  /* ── Header ── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 40px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .brand-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, var(--teal-bright), var(--green-aurora), var(--pink-hint));
+    box-shadow: 0 0 24px rgba(0, 229, 176, 0.3);
+    position: relative;
+    overflow: hidden;
+  }
+  .brand-icon::after {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    border-radius: 12px;
+    background: rgba(12, 8, 24, 0.6);
+  }
+  .brand-icon svg {
+    position: relative;
+    z-index: 1;
+  }
+
+  .brand h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #fff 30%, var(--teal-bright));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .brand span {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    -webkit-text-fill-color: var(--text-muted);
+    margin-top: 1px;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .btn-ghost {
+    padding: 10px 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.04);
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+  .btn-ghost:hover {
+    border-color: rgba(0, 229, 176, 0.3);
+    color: var(--text-primary);
+    background: rgba(0, 229, 176, 0.06);
+  }
+
+  .btn-primary {
+    padding: 10px 22px;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(135deg, var(--teal-bright), var(--green-aurora));
+    color: #0a0a1a;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+    box-shadow: 0 0 20px rgba(0, 229, 176, 0.25);
+  }
+  .btn-primary:hover {
+    box-shadow: 0 0 32px rgba(0, 229, 176, 0.45);
+    transform: translateY(-1px);
+  }
+
+  /* ── Search ── */
+  .search-wrapper {
+    position: relative;
+    margin-bottom: 44px;
+  }
+
+  .search-glow {
+    position: absolute;
+    inset: -2px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, var(--teal-bright), var(--purple-mid), var(--pink-hint), var(--green-aurora));
+    background-size: 300% 300%;
+    opacity: 0;
+    transition: opacity 0.4s;
+    animation: glowShift 6s ease-in-out infinite;
+    z-index: 0;
+    filter: blur(1px);
+  }
+
+  .search-wrapper:focus-within .search-glow {
+    opacity: 1;
+  }
+
+  @keyframes glowShift {
+    0%, 100% { background-position: 0% 50%; }
+    50%      { background-position: 100% 50%; }
+  }
+
+  .search-inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 6px 6px 22px;
+    border-radius: 20px;
+    background: rgba(12, 8, 24, 0.85);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: border-color 0.3s;
+  }
+  .search-wrapper:focus-within .search-inner {
+    border-color: transparent;
+  }
+
+  .search-inner svg {
+    flex-shrink: 0;
+    opacity: 0.4;
+  }
+
+  .search-inner input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    font-family: inherit;
+    font-size: 15px;
+    color: var(--text-primary);
+    letter-spacing: -0.2px;
+  }
+  .search-inner input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .search-btn {
+    padding: 12px 28px;
+    border-radius: 14px;
+    border: none;
+    background: linear-gradient(135deg, var(--teal-bright), var(--green-aurora));
+    color: #0a0a1a;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+  .search-btn:hover {
+    box-shadow: 0 0 24px rgba(0, 229, 176, 0.4);
+  }
+
+  /* ── Score Section ── */
+  .score-section {
+    display: flex;
+    gap: 28px;
+    margin-bottom: 32px;
+    align-items: stretch;
+  }
+
+  .score-card {
+    flex: 0 0 320px;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  /* Conic-gradient score ring */
+  .score-ring-wrapper {
+    position: relative;
+    width: 190px;
+    height: 190px;
+    margin-bottom: 24px;
+  }
+
+  .score-ring-bg {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: conic-gradient(
+      from 220deg,
+      var(--purple-mid) 0%,
+      var(--teal-bright) 22%,
+      var(--green-aurora) 45%,
+      var(--pink-hint) 65%,
+      var(--teal-bright) 87%,
+      rgba(75, 29, 142, 0.3) 87%,
+      rgba(30, 15, 60, 0.15) 100%
+    );
+    mask: radial-gradient(
+      farthest-side,
+      transparent calc(100% - 12px),
+      #000 calc(100% - 12px) calc(100% - 1px),
+      transparent calc(100%)
+    );
+    -webkit-mask: radial-gradient(
+      farthest-side,
+      transparent calc(100% - 12px),
+      #000 calc(100% - 12px) calc(100% - 1px),
+      transparent calc(100%)
+    );
+    animation: ringPulse 4s ease-in-out infinite alternate;
+  }
+
+  @keyframes ringPulse {
+    0%   { filter: brightness(1)   drop-shadow(0 0 8px rgba(0,229,176,0.3)); }
+    100% { filter: brightness(1.1) drop-shadow(0 0 18px rgba(0,229,176,0.5)); }
+  }
+
+  .score-ring-track {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: conic-gradient(
+      from 220deg,
+      rgba(255,255,255,0.03) 0%,
+      rgba(255,255,255,0.03) 100%
+    );
+    mask: radial-gradient(
+      farthest-side,
+      transparent calc(100% - 12px),
+      #000 calc(100% - 12px) calc(100% - 1px),
+      transparent calc(100%)
+    );
+    -webkit-mask: radial-gradient(
+      farthest-side,
+      transparent calc(100% - 12px),
+      #000 calc(100% - 12px) calc(100% - 1px),
+      transparent calc(100%)
+    );
+  }
+
+  .score-value {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .score-value .number {
+    font-size: 54px;
+    font-weight: 800;
+    letter-spacing: -2px;
+    line-height: 1;
+    background: linear-gradient(135deg, #fff, var(--teal-bright));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .score-value .out-of {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .tier-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    border-radius: 100px;
+    background: linear-gradient(135deg, rgba(0,229,176,0.12), rgba(57,255,142,0.08));
+    border: 1px solid rgba(0,229,176,0.2);
+    margin-bottom: 10px;
+  }
+  .tier-badge .diamond {
+    font-size: 16px;
+    filter: drop-shadow(0 0 4px rgba(0,229,176,0.6));
+  }
+  .tier-badge .label {
+    font-size: 14px;
+    font-weight: 600;
+    background: linear-gradient(135deg, var(--teal-bright), var(--green-aurora));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .percentile {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .percentile strong {
+    color: var(--teal-bright);
+  }
+
+  /* ── Score Details Panel ── */
+  .score-details {
+    flex: 1;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .score-details h3 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    letter-spacing: -0.3px;
+  }
+
+  .breakdown-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .breakdown-label {
+    width: 130px;
+    font-size: 13px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  .breakdown-bar-track {
+    flex: 1;
+    height: 8px;
+    border-radius: 100px;
+    background: rgba(255,255,255,0.06);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .breakdown-bar-fill {
+    height: 100%;
+    border-radius: 100px;
+    transition: width 1s ease;
+    position: relative;
+  }
+
+  .breakdown-bar-fill.aurora-1 {
+    background: linear-gradient(90deg, var(--purple-mid), var(--teal-bright));
+    box-shadow: 0 0 10px rgba(0,229,176,0.3);
+  }
+  .breakdown-bar-fill.aurora-2 {
+    background: linear-gradient(90deg, var(--teal-dark), var(--green-aurora));
+    box-shadow: 0 0 10px rgba(57,255,142,0.3);
+  }
+  .breakdown-bar-fill.aurora-3 {
+    background: linear-gradient(90deg, var(--purple-mid), var(--pink-hint));
+    box-shadow: 0 0 10px rgba(255,95,170,0.3);
+  }
+  .breakdown-bar-fill.aurora-4 {
+    background: linear-gradient(90deg, var(--teal-bright), var(--green-aurora));
+    box-shadow: 0 0 10px rgba(0,229,176,0.3);
+  }
+  .breakdown-bar-fill.aurora-5 {
+    background: linear-gradient(90deg, var(--pink-hint), var(--teal-bright));
+    box-shadow: 0 0 10px rgba(255,95,170,0.3);
+  }
+
+  .breakdown-score {
+    width: 38px;
+    text-align: right;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    flex-shrink: 0;
+  }
+
+  /* ── Stats Grid ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    padding: 24px 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0,229,176,0.3), transparent);
+  }
+
+  .stat-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 10px;
+  }
+
+  .stat-value {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, #fff 40%, var(--teal-bright));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .stat-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+
+  .stat-sub .up {
+    color: var(--teal-bright);
+  }
+
+  /* ── Protocols ── */
+  .protocols-section {
+    margin-bottom: 32px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .section-header h2 {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+
+  .section-header .count {
+    font-size: 12px;
+    color: var(--text-muted);
+    padding: 4px 12px;
+    border-radius: 100px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .protocols-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+
+  .protocol-card {
+    padding: 22px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: all 0.3s;
+    cursor: default;
+  }
+  .protocol-card:hover {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(0,229,176,0.15);
+    transform: translateY(-2px);
+  }
+
+  .protocol-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    font-size: 18px;
+    font-weight: 700;
+    flex-shrink: 0;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .protocol-icon::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+  }
+
+  .protocol-info {
+    min-width: 0;
+  }
+  .protocol-name {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 2px;
+    letter-spacing: -0.2px;
+  }
+  .protocol-txns {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  /* Protocol brand colors */
+  .proto-jupiter   { background: linear-gradient(135deg, #24ae8f, #17c68b); }
+  .proto-raydium   { background: linear-gradient(135deg, #5f5eff, #8b7fff); }
+  .proto-marinade  { background: linear-gradient(135deg, #4a9b8e, #3ac5a9); }
+  .proto-tensor    { background: linear-gradient(135deg, #e44d6f, #ff6b8a); }
+  .proto-magiceden { background: linear-gradient(135deg, #e42575, #ff3d8d); }
+  .proto-drift     { background: linear-gradient(135deg, #c47ff5, #9b5de5); }
+  .proto-orca      { background: linear-gradient(135deg, #ffb84d, #ffd280); }
+  .proto-kamino    { background: linear-gradient(135deg, #3b82f6, #60a5fa); }
+
+  /* ── Wallet tag at top ── */
+  .wallet-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    margin-bottom: 28px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .wallet-tag .addr {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    color: var(--text-primary);
+    opacity: 0.7;
+  }
+  .wallet-tag .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--teal-bright);
+    box-shadow: 0 0 8px var(--teal-bright);
+  }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center;
+    padding: 32px 0 0;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    margin-top: 16px;
+  }
+  .footer p {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .footer a {
+    color: var(--teal-bright);
+    text-decoration: none;
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Aurora Background ── -->
+<div class="aurora-bg"></div>
+<div class="orb orb--1"></div>
+<div class="orb orb--2"></div>
+<div class="orb orb--3"></div>
+
+<!-- ── Page Content ── -->
+<div class="page-wrapper">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+      </div>
+      <div>
+        <h1>Solana Score</h1>
+        <span>by Slice Analytics</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-ghost">Docs</button>
+      <button class="btn-ghost">API</button>
+      <button class="btn-primary">Connect Wallet</button>
+    </div>
+  </header>
+
+  <!-- Search -->
+  <div class="search-wrapper">
+    <div class="search-glow"></div>
+    <div class="search-inner">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" value="8Kag...wvHM" placeholder="Search any Solana wallet address..." />
+      <button class="search-btn">Lookup Score</button>
+    </div>
+  </div>
+
+  <!-- Wallet Tag -->
+  <div class="wallet-tag">
+    <span class="dot"></span>
+    <span class="addr">8KagR2yUiPemBCKTxAb2mBZ3guSjfwvHM</span>
+    <span style="opacity:0.4;">|</span>
+    <span>Last active 2h ago</span>
+  </div>
+
+  <!-- Score + Breakdown -->
+  <div class="score-section">
+    <div class="score-card glass">
+      <div class="score-ring-wrapper">
+        <div class="score-ring-track"></div>
+        <div class="score-ring-bg"></div>
+        <div class="score-value">
+          <span class="number">87</span>
+          <span class="out-of">out of 100</span>
+        </div>
+      </div>
+      <div class="tier-badge">
+        <span class="diamond">&#x1F48E;</span>
+        <span class="label">Diamond Tier</span>
+      </div>
+      <p class="percentile">Top <strong>4%</strong> of scored wallets</p>
+    </div>
+
+    <div class="score-details glass">
+      <h3>Score Breakdown</h3>
+
+      <div class="breakdown-item">
+        <span class="breakdown-label">DeFi Activity</span>
+        <div class="breakdown-bar-track">
+          <div class="breakdown-bar-fill aurora-1" style="width: 92%;"></div>
+        </div>
+        <span class="breakdown-score">92</span>
+      </div>
+
+      <div class="breakdown-item">
+        <span class="breakdown-label">Network Usage</span>
+        <div class="breakdown-bar-track">
+          <div class="breakdown-bar-fill aurora-2" style="width: 88%;"></div>
+        </div>
+        <span class="breakdown-score">88</span>
+      </div>
+
+      <div class="breakdown-item">
+        <span class="breakdown-label">NFT Engagement</span>
+        <div class="breakdown-bar-track">
+          <div class="breakdown-bar-fill aurora-3" style="width: 74%;"></div>
+        </div>
+        <span class="breakdown-score">74</span>
+      </div>
+
+      <div class="breakdown-item">
+        <span class="breakdown-label">Staking & Yield</span>
+        <div class="breakdown-bar-track">
+          <div class="breakdown-bar-fill aurora-4" style="width: 95%;"></div>
+        </div>
+        <span class="breakdown-score">95</span>
+      </div>
+
+      <div class="breakdown-item">
+        <span class="breakdown-label">Wallet Maturity</span>
+        <div class="breakdown-bar-track">
+          <div class="breakdown-bar-fill aurora-5" style="width: 82%;"></div>
+        </div>
+        <span class="breakdown-score">82</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <div class="stat-card glass">
+      <div class="stat-label">Protocol Fees</div>
+      <div class="stat-value">$12,450</div>
+      <div class="stat-sub"><span class="up">+18%</span> vs last quarter</div>
+    </div>
+    <div class="stat-card glass">
+      <div class="stat-label">Network Fees</div>
+      <div class="stat-value">2.3 SOL</div>
+      <div class="stat-sub">~1,840 transactions</div>
+    </div>
+    <div class="stat-card glass">
+      <div class="stat-label">Holdings</div>
+      <div class="stat-value">$45,200</div>
+      <div class="stat-sub"><span class="up">+32%</span> 30d change</div>
+    </div>
+    <div class="stat-card glass">
+      <div class="stat-label">Months Active</div>
+      <div class="stat-value">18</div>
+      <div class="stat-sub">Since Aug 2024</div>
+    </div>
+  </div>
+
+  <!-- Protocols -->
+  <div class="protocols-section">
+    <div class="section-header">
+      <h2>Protocols Used</h2>
+      <span class="count">8 protocols</span>
+    </div>
+    <div class="protocols-grid">
+      <div class="protocol-card glass">
+        <div class="protocol-icon proto-jupiter">J</div>
+        <div class="protocol-info">
+          <div class="protocol-name">Jupiter</div>
+          <div class="protocol-txns">342 swaps</div>
+        </div>
+      </div>
+      <div class="protocol-card glass">
+        <div class="protocol-icon proto-raydium">R</div>
+        <div class="protocol-info">
+          <div class="protocol-name">Raydium</div>
+          <div class="protocol-txns">187 txns</div>
+        </div>
+      </div>
+      <div class="protocol-card glass">
+        <div class="protocol-icon proto-marinade">M</div>
+        <div class="protocol-info">
+          <div class="protocol-name">Marinade</div>
+          <div class="protocol-txns">24 stakes</div>
+        </div>
+      </div>
+      <div class="protocol-card glass">
+        <div class="protocol-icon proto-tensor">T</div>
+        <div class="protocol-info">
+          <div class="protocol-name">Tensor</div>
+          <div class="protocol-txns">96 trades</div>
+        </div>
+      </div>
+      <div class="protocol-card glass">
+        <div class="protocol-icon proto-magiceden">M</div>
+        <div class="protocol-info">
+          <div class="protocol-name">Magic Eden</div>
+          <div class="protocol-txns">58 trades</div>
+        </div>
+      </div>
+      <div class="protocol-card glass">
+        <div class="protocol-icon proto-drift">D</div>
+        <div class="protocol-info">
+          <div class="protocol-name">Drift</div>
+          <div class="protocol-txns">213 perps</div>
+        </div>
+      </div>
+      <div class="protocol-card glass">
+        <div class="protocol-icon proto-orca">O</div>
+        <div class="protocol-info">
+          <div class="protocol-name">Orca</div>
+          <div class="protocol-txns">74 swaps</div>
+        </div>
+      </div>
+      <div class="protocol-card glass">
+        <div class="protocol-icon proto-kamino">K</div>
+        <div class="protocol-info">
+          <div class="protocol-name">Kamino</div>
+          <div class="protocol-txns">31 vaults</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p>Solana Score by <a href="#">Slice Analytics</a> &mdash; On-chain reputation, quantified.</p>
+  </div>
+
+</div>
+</body>
+</html>

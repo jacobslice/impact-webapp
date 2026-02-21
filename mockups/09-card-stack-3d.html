@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solana Score by Slice Analytics - 3D Card Stack</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  :root {
+    --blue: #3B82F6;
+    --blue-light: #60A5FA;
+    --blue-dark: #2563EB;
+    --blue-glow: rgba(59, 130, 246, 0.35);
+    --silver: #C0C8D8;
+    --silver-light: #E2E8F0;
+    --white: #F8FAFC;
+    --card-bg: rgba(15, 23, 42, 0.75);
+    --card-border: rgba(148, 163, 184, 0.12);
+    --glass-highlight: rgba(255, 255, 255, 0.06);
+  }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(145deg, #0B1120 0%, #060A14 40%, #0A0F1E 70%, #030508 100%);
+    color: var(--white);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Ambient background effects */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -30%;
+    left: -10%;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(ellipse, rgba(59, 130, 246, 0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -20%;
+    right: -10%;
+    width: 50%;
+    height: 50%;
+    background: radial-gradient(ellipse, rgba(59, 130, 246, 0.04) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .scene {
+    perspective: 1200px;
+    perspective-origin: 50% 40%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 48px 32px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ====== HEADER ====== */
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+    transform: translateZ(20px);
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 8px;
+  }
+
+  .brand-icon {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+      0 4px 12px rgba(59, 130, 246, 0.3),
+      0 1px 3px rgba(0,0,0,0.4);
+  }
+
+  .brand-icon svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .brand h1 {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #fff 30%, var(--silver) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: none;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
+  }
+
+  .brand-sub {
+    font-size: 14px;
+    color: var(--silver);
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    opacity: 0.7;
+  }
+
+  /* ====== SEARCH ====== */
+  .search-wrapper {
+    max-width: 560px;
+    margin: 0 auto 52px;
+    transform: translateZ(30px) rotateX(1deg);
+    transform-style: preserve-3d;
+  }
+
+  .search-bar {
+    position: relative;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    padding: 6px 6px 6px 20px;
+    box-shadow:
+      0 2px 4px rgba(0,0,0,0.3),
+      0 8px 24px rgba(0,0,0,0.25),
+      0 20px 48px rgba(0,0,0,0.2),
+      inset 0 1px 0 rgba(255,255,255,0.04);
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .search-bar:hover {
+    border-color: rgba(59, 130, 246, 0.3);
+    box-shadow:
+      0 2px 4px rgba(0,0,0,0.3),
+      0 8px 24px rgba(0,0,0,0.25),
+      0 20px 48px rgba(0,0,0,0.2),
+      0 0 0 1px rgba(59, 130, 246, 0.15),
+      inset 0 1px 0 rgba(255,255,255,0.06);
+    transform: translateZ(35px) rotateX(1deg);
+  }
+
+  /* Glass reflection on search */
+  .search-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    border-radius: 16px 16px 0 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 100%);
+    pointer-events: none;
+  }
+
+  .search-icon {
+    flex-shrink: 0;
+    color: var(--silver);
+    opacity: 0.5;
+    margin-right: 12px;
+  }
+
+  .search-input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--white);
+    font-family: 'Outfit', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    letter-spacing: 0.2px;
+  }
+
+  .search-input::placeholder {
+    color: rgba(148, 163, 184, 0.45);
+  }
+
+  .search-btn {
+    flex-shrink: 0;
+    background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+    border: none;
+    border-radius: 11px;
+    color: #fff;
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 12px 24px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  }
+
+  .search-btn:hover {
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.45);
+    transform: translateY(-1px);
+  }
+
+  /* ====== CARD BASE ====== */
+  .card {
+    position: relative;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 28px;
+    transform-style: preserve-3d;
+    transition: all 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* Glass reflection overlay */
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 45%;
+    border-radius: 20px 20px 0 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 40%, transparent 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Subtle edge highlight */
+  .card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    border: 1px solid transparent;
+    background: linear-gradient(160deg, rgba(255,255,255,0.08), transparent 40%) border-box;
+    -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ====== LAYOUT GRID ====== */
+  .grid {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    grid-template-rows: auto auto;
+    gap: 24px;
+    transform-style: preserve-3d;
+  }
+
+  /* ====== Z-DEPTH LAYERS ====== */
+  /* Foreground - Score card */
+  .depth-front {
+    transform: translateZ(60px) rotateX(1.5deg) rotateY(-1deg);
+    box-shadow:
+      0 2px 4px rgba(0,0,0,0.2),
+      0 8px 16px rgba(0,0,0,0.2),
+      0 16px 32px rgba(0,0,0,0.15),
+      0 32px 64px rgba(0,0,0,0.1);
+  }
+  .depth-front:hover {
+    transform: translateZ(80px) rotateX(0.5deg) rotateY(-0.5deg);
+    box-shadow:
+      0 4px 8px rgba(0,0,0,0.25),
+      0 12px 24px rgba(0,0,0,0.2),
+      0 24px 48px rgba(0,0,0,0.15),
+      0 48px 80px rgba(0,0,0,0.1),
+      0 0 40px rgba(59, 130, 246, 0.08);
+  }
+
+  /* Mid-depth - Stats cards */
+  .depth-mid {
+    transform: translateZ(30px) rotateX(1deg) rotateY(0.5deg);
+    box-shadow:
+      0 2px 4px rgba(0,0,0,0.2),
+      0 6px 12px rgba(0,0,0,0.15),
+      0 12px 28px rgba(0,0,0,0.1),
+      0 20px 44px rgba(0,0,0,0.08);
+  }
+  .depth-mid:hover {
+    transform: translateZ(55px) rotateX(0.5deg) rotateY(0.2deg);
+    box-shadow:
+      0 4px 8px rgba(0,0,0,0.25),
+      0 10px 20px rgba(0,0,0,0.18),
+      0 20px 40px rgba(0,0,0,0.12),
+      0 36px 64px rgba(0,0,0,0.08),
+      0 0 30px rgba(59, 130, 246, 0.06);
+  }
+
+  /* Background layer */
+  .depth-back {
+    transform: translateZ(10px) rotateX(1.5deg) rotateY(1deg);
+    box-shadow:
+      0 1px 3px rgba(0,0,0,0.15),
+      0 4px 8px rgba(0,0,0,0.12),
+      0 8px 20px rgba(0,0,0,0.08),
+      0 14px 32px rgba(0,0,0,0.06);
+  }
+  .depth-back:hover {
+    transform: translateZ(40px) rotateX(0.8deg) rotateY(0.5deg);
+    box-shadow:
+      0 3px 6px rgba(0,0,0,0.2),
+      0 8px 16px rgba(0,0,0,0.15),
+      0 16px 36px rgba(0,0,0,0.1),
+      0 28px 56px rgba(0,0,0,0.07),
+      0 0 24px rgba(59, 130, 246, 0.05);
+  }
+
+  /* ====== SCORE CARD ====== */
+  .score-card {
+    grid-row: 1 / 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 36px 28px 32px;
+    background: linear-gradient(165deg, rgba(15, 23, 42, 0.85) 0%, rgba(10, 16, 32, 0.9) 100%);
+    border-color: rgba(59, 130, 246, 0.12);
+  }
+
+  .score-ring-container {
+    position: relative;
+    width: 220px;
+    height: 220px;
+    margin-bottom: 24px;
+  }
+
+  .score-ring-bg {
+    fill: none;
+    stroke: rgba(59, 130, 246, 0.1);
+    stroke-width: 10;
+  }
+
+  .score-ring-fill {
+    fill: none;
+    stroke: url(#scoreGradient);
+    stroke-width: 10;
+    stroke-linecap: round;
+    stroke-dasharray: 534;
+    stroke-dashoffset: 69.4;
+    transform: rotate(-90deg);
+    transform-origin: center;
+    filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.4));
+    transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .score-ring-glow {
+    fill: none;
+    stroke: rgba(59, 130, 246, 0.15);
+    stroke-width: 18;
+    stroke-linecap: round;
+    stroke-dasharray: 534;
+    stroke-dashoffset: 69.4;
+    transform: rotate(-90deg);
+    transform-origin: center;
+    filter: blur(6px);
+  }
+
+  .score-value {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+
+  .score-number {
+    font-size: 64px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -2px;
+    background: linear-gradient(135deg, #fff 0%, var(--blue-light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .score-max {
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--silver);
+    opacity: 0.5;
+    margin-top: 2px;
+  }
+
+  .tier-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0.05));
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 100px;
+    padding: 8px 20px;
+    margin-bottom: 16px;
+  }
+
+  .tier-diamond {
+    width: 18px;
+    height: 18px;
+    fill: var(--blue-light);
+    filter: drop-shadow(0 0 4px rgba(96, 165, 250, 0.5));
+  }
+
+  .tier-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--blue-light);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .percentile {
+    font-size: 14px;
+    color: var(--silver);
+    opacity: 0.6;
+    font-weight: 400;
+  }
+
+  .percentile strong {
+    color: var(--white);
+    opacity: 1;
+    font-weight: 600;
+  }
+
+  .score-card-footer {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(148, 163, 184, 0.08);
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .mini-stat {
+    text-align: center;
+  }
+
+  .mini-stat-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--white);
+  }
+
+  .mini-stat-label {
+    font-size: 11px;
+    color: var(--silver);
+    opacity: 0.5;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-top: 2px;
+  }
+
+  /* ====== STATS CARDS GRID ====== */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    transform-style: preserve-3d;
+  }
+
+  .stat-card {
+    padding: 22px 24px;
+  }
+
+  .stat-card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+  }
+
+  .stat-card-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .stat-card-icon.blue {
+    background: rgba(59, 130, 246, 0.12);
+    color: var(--blue-light);
+  }
+  .stat-card-icon.green {
+    background: rgba(34, 197, 94, 0.12);
+    color: #4ade80;
+  }
+  .stat-card-icon.purple {
+    background: rgba(168, 85, 247, 0.12);
+    color: #c084fc;
+  }
+  .stat-card-icon.amber {
+    background: rgba(251, 191, 36, 0.12);
+    color: #fbbf24;
+  }
+
+  .stat-card-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.1;
+  }
+
+  .stat-card-label {
+    font-size: 13px;
+    color: var(--silver);
+    opacity: 0.55;
+    margin-top: 4px;
+    font-weight: 400;
+  }
+
+  /* ====== PROTOCOLS CARD ====== */
+  .protocols-card {
+    padding: 26px 28px;
+  }
+
+  .card-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--silver-light);
+    margin-bottom: 20px;
+    letter-spacing: 0.3px;
+  }
+
+  .protocols-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .protocol-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 76px;
+    cursor: default;
+    transition: transform 0.3s ease;
+  }
+
+  .protocol-item:hover {
+    transform: translateY(-3px) translateZ(10px);
+  }
+
+  .protocol-circle {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    position: relative;
+    box-shadow:
+      0 2px 8px rgba(0,0,0,0.3),
+      0 4px 16px rgba(0,0,0,0.15);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .protocol-item:hover .protocol-circle {
+    box-shadow:
+      0 4px 12px rgba(0,0,0,0.35),
+      0 8px 24px rgba(0,0,0,0.2);
+  }
+
+  .protocol-circle::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 6px;
+    right: 6px;
+    height: 40%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 100%);
+    border-radius: 50%;
+  }
+
+  .protocol-name {
+    font-size: 11px;
+    color: var(--silver);
+    opacity: 0.65;
+    font-weight: 500;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  /* Protocol colors */
+  .proto-jupiter  { background: linear-gradient(135deg, #C3F73A, #7CC51E); color: #1a2e05; }
+  .proto-raydium  { background: linear-gradient(135deg, #7B61FF, #5B3FD6); }
+  .proto-marinade { background: linear-gradient(135deg, #E14B4B, #B83131); }
+  .proto-tensor   { background: linear-gradient(135deg, #FF6B35, #D4501A); }
+  .proto-magiceden{ background: linear-gradient(135deg, #E42575, #B81D5E); }
+  .proto-drift    { background: linear-gradient(135deg, #5CE1E6, #3BA8AD); color: #0a2e2f; }
+  .proto-orca     { background: linear-gradient(135deg, #FFD700, #D4A900); color: #3d3200; }
+  .proto-kamino   { background: linear-gradient(135deg, #4ADE80, #22C55E); color: #0a2e14; }
+
+  /* ====== BREAKDOWN CARD ====== */
+  .breakdown-card {
+    padding: 26px 28px;
+  }
+
+  .breakdown-items {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .breakdown-item {
+    position: relative;
+  }
+
+  .breakdown-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+
+  .breakdown-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--silver-light);
+  }
+
+  .breakdown-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--white);
+  }
+
+  .breakdown-track {
+    width: 100%;
+    height: 7px;
+    background: rgba(59, 130, 246, 0.08);
+    border-radius: 100px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .breakdown-fill {
+    height: 100%;
+    border-radius: 100px;
+    position: relative;
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Layered bar effect */
+  .breakdown-fill::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 100px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 60%);
+  }
+
+  .breakdown-fill::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 24px;
+    border-radius: 100px;
+    background: rgba(255,255,255,0.15);
+    filter: blur(4px);
+  }
+
+  .fill-blue   { background: linear-gradient(90deg, var(--blue-dark), var(--blue-light)); }
+  .fill-green  { background: linear-gradient(90deg, #16a34a, #4ade80); }
+  .fill-purple { background: linear-gradient(90deg, #7c3aed, #c084fc); }
+  .fill-amber  { background: linear-gradient(90deg, #d97706, #fbbf24); }
+  .fill-cyan   { background: linear-gradient(90deg, #0891b2, #22d3ee); }
+
+  /* ====== BOTTOM ROW ====== */
+  .bottom-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 24px;
+    transform-style: preserve-3d;
+  }
+
+  /* ====== FOOTER ====== */
+  .footer {
+    text-align: center;
+    margin-top: 56px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(148, 163, 184, 0.06);
+  }
+
+  .footer-text {
+    font-size: 13px;
+    color: var(--silver);
+    opacity: 0.35;
+    font-weight: 400;
+  }
+
+  .footer-text a {
+    color: var(--blue-light);
+    text-decoration: none;
+    opacity: 1;
+  }
+
+  /* ====== SUBTLE ANIMATIONS ====== */
+  @keyframes floatIn {
+    from {
+      opacity: 0;
+      transform: translateZ(-40px) translateY(20px) rotateX(4deg);
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .score-card    { animation: floatIn 0.7s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both; }
+  .stats-grid .stat-card:nth-child(1) { animation: floatIn 0.6s ease 0.2s both; }
+  .stats-grid .stat-card:nth-child(2) { animation: floatIn 0.6s ease 0.28s both; }
+  .stats-grid .stat-card:nth-child(3) { animation: floatIn 0.6s ease 0.36s both; }
+  .stats-grid .stat-card:nth-child(4) { animation: floatIn 0.6s ease 0.44s both; }
+  .protocols-card { animation: floatIn 0.6s ease 0.5s both; }
+  .breakdown-card { animation: floatIn 0.6s ease 0.6s both; }
+
+  /* ====== SCORE RING PULSE ====== */
+  @keyframes ringPulse {
+    0%, 100% { filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.4)); }
+    50%      { filter: drop-shadow(0 0 14px rgba(59, 130, 246, 0.55)); }
+  }
+
+  .score-ring-fill {
+    animation: ringPulse 3s ease-in-out infinite;
+  }
+</style>
+</head>
+<body>
+
+<div class="scene">
+
+  <!-- ====== HEADER ====== -->
+  <div class="header">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+      </div>
+      <h1>Solana Score</h1>
+    </div>
+    <div class="brand-sub">by Slice Analytics</div>
+  </div>
+
+  <!-- ====== SEARCH ====== -->
+  <div class="search-wrapper">
+    <div class="search-bar">
+      <div class="search-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+        </svg>
+      </div>
+      <input type="text" class="search-input" placeholder="Enter Solana wallet address..." value="7xKX...q4Wz">
+      <button class="search-btn">Analyze</button>
+    </div>
+  </div>
+
+  <!-- ====== MAIN GRID ====== -->
+  <div class="grid">
+
+    <!-- Score Card (Foreground) -->
+    <div class="card score-card depth-front">
+
+      <svg class="score-ring-container" viewBox="0 0 220 220" width="220" height="220">
+        <defs>
+          <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#2563EB"/>
+            <stop offset="50%" stop-color="#3B82F6"/>
+            <stop offset="100%" stop-color="#60A5FA"/>
+          </linearGradient>
+        </defs>
+        <!-- Glow ring (behind) -->
+        <circle class="score-ring-glow" cx="110" cy="110" r="85"/>
+        <!-- Background track -->
+        <circle class="score-ring-bg" cx="110" cy="110" r="85"/>
+        <!-- Filled arc: 87% of circumference -->
+        <circle class="score-ring-fill" cx="110" cy="110" r="85"/>
+      </svg>
+
+      <div class="score-value">
+        <div class="score-number">87</div>
+        <div class="score-max">/ 100</div>
+      </div>
+
+      <div class="tier-badge">
+        <svg class="tier-diamond" viewBox="0 0 24 24">
+          <path d="M6 3h12l4 6-10 12L2 9z" fill="currentColor"/>
+          <path d="M2 9h20M12 21L8 9m4 12l4-12M6 3l2 6m8-6l-2 6" stroke="rgba(0,0,0,0.15)" stroke-width="0.5" fill="none"/>
+        </svg>
+        <span class="tier-label">Diamond</span>
+      </div>
+
+      <div class="percentile">Top <strong>4%</strong> of all wallets</div>
+
+      <div class="score-card-footer">
+        <div class="mini-stat">
+          <div class="mini-stat-value">1,247</div>
+          <div class="mini-stat-label">Transactions</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-value">34</div>
+          <div class="mini-stat-label">Protocols</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-value">A+</div>
+          <div class="mini-stat-label">Grade</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Grid (Mid-depth) -->
+    <div class="stats-grid">
+      <div class="card stat-card depth-mid">
+        <div class="stat-card-icon blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
+          </svg>
+        </div>
+        <div class="stat-card-value">$12,450</div>
+        <div class="stat-card-label">Protocol Fees Paid</div>
+      </div>
+
+      <div class="card stat-card depth-mid">
+        <div class="stat-card-icon green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+          </svg>
+        </div>
+        <div class="stat-card-value">2.3 SOL</div>
+        <div class="stat-card-label">Network Fees</div>
+      </div>
+
+      <div class="card stat-card depth-mid">
+        <div class="stat-card-icon purple">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 00-8 0v2"/>
+          </svg>
+        </div>
+        <div class="stat-card-value">$45,200</div>
+        <div class="stat-card-label">Holdings Value</div>
+      </div>
+
+      <div class="card stat-card depth-mid">
+        <div class="stat-card-icon amber">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+          </svg>
+        </div>
+        <div class="stat-card-value">18</div>
+        <div class="stat-card-label">Months Active</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ====== BOTTOM ROW ====== -->
+  <div class="bottom-row">
+
+    <!-- Protocols Card (Background layer) -->
+    <div class="card protocols-card depth-back">
+      <div class="card-title">Protocols Used</div>
+      <div class="protocols-row">
+        <div class="protocol-item">
+          <div class="protocol-circle proto-jupiter">J</div>
+          <div class="protocol-name">Jupiter</div>
+        </div>
+        <div class="protocol-item">
+          <div class="protocol-circle proto-raydium">R</div>
+          <div class="protocol-name">Raydium</div>
+        </div>
+        <div class="protocol-item">
+          <div class="protocol-circle proto-marinade">M</div>
+          <div class="protocol-name">Marinade</div>
+        </div>
+        <div class="protocol-item">
+          <div class="protocol-circle proto-tensor">T</div>
+          <div class="protocol-name">Tensor</div>
+        </div>
+        <div class="protocol-item">
+          <div class="protocol-circle proto-magiceden">ME</div>
+          <div class="protocol-name">Magic Eden</div>
+        </div>
+        <div class="protocol-item">
+          <div class="protocol-circle proto-drift">D</div>
+          <div class="protocol-name">Drift</div>
+        </div>
+        <div class="protocol-item">
+          <div class="protocol-circle proto-orca">O</div>
+          <div class="protocol-name">Orca</div>
+        </div>
+        <div class="protocol-item">
+          <div class="protocol-circle proto-kamino">K</div>
+          <div class="protocol-name">Kamino</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Breakdown Card (Background layer) -->
+    <div class="card breakdown-card depth-back">
+      <div class="card-title">Score Breakdown</div>
+      <div class="breakdown-items">
+        <div class="breakdown-item">
+          <div class="breakdown-header">
+            <span class="breakdown-label">Transaction History</span>
+            <span class="breakdown-value">92 / 100</span>
+          </div>
+          <div class="breakdown-track">
+            <div class="breakdown-fill fill-blue" style="width: 92%;"></div>
+          </div>
+        </div>
+        <div class="breakdown-item">
+          <div class="breakdown-header">
+            <span class="breakdown-label">DeFi Activity</span>
+            <span class="breakdown-value">88 / 100</span>
+          </div>
+          <div class="breakdown-track">
+            <div class="breakdown-fill fill-green" style="width: 88%;"></div>
+          </div>
+        </div>
+        <div class="breakdown-item">
+          <div class="breakdown-header">
+            <span class="breakdown-label">Portfolio Value</span>
+            <span class="breakdown-value">85 / 100</span>
+          </div>
+          <div class="breakdown-track">
+            <div class="breakdown-fill fill-purple" style="width: 85%;"></div>
+          </div>
+        </div>
+        <div class="breakdown-item">
+          <div class="breakdown-header">
+            <span class="breakdown-label">Network Contribution</span>
+            <span class="breakdown-value">79 / 100</span>
+          </div>
+          <div class="breakdown-track">
+            <div class="breakdown-fill fill-amber" style="width: 79%;"></div>
+          </div>
+        </div>
+        <div class="breakdown-item">
+          <div class="breakdown-header">
+            <span class="breakdown-label">Account Age</span>
+            <span class="breakdown-value">83 / 100</span>
+          </div>
+          <div class="breakdown-track">
+            <div class="breakdown-fill fill-cyan" style="width: 83%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ====== FOOTER ====== -->
+  <div class="footer">
+    <div class="footer-text">Powered by <a href="#">Slice Analytics</a> &middot; Data sourced from Solana Mainnet</div>
+  </div>
+
+</div>
+
+</body>
+</html>

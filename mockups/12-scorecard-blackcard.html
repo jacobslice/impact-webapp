@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solana Score — Black Card</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+
+  :root {
+    --gold-1: #d4a843;
+    --gold-2: #f5d778;
+    --gold-3: #c9952a;
+    --gold-4: #a67c1a;
+    --silver-1: #e8e8e8;
+    --silver-2: #c0c0c0;
+    --silver-3: #8a8a8a;
+    --card-bg: #0e0e0e;
+    --card-bg-2: #141414;
+    --card-surface: rgba(255,255,255,0.04);
+    --card-border: rgba(255,255,255,0.06);
+    --text-dim: rgba(255,255,255,0.35);
+    --text-mid: rgba(255,255,255,0.55);
+    --text-bright: rgba(255,255,255,0.85);
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #050505;
+    background-image:
+      radial-gradient(ellipse 80% 60% at 50% 40%, rgba(180,150,80,0.04) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 50% at 30% 70%, rgba(100,80,40,0.03) 0%, transparent 60%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    overflow: hidden;
+  }
+
+  /* ── METALLIC GRADIENT MIXINS ── */
+  .gold-text {
+    background: linear-gradient(135deg, var(--gold-4) 0%, var(--gold-1) 25%, var(--gold-2) 50%, var(--gold-1) 75%, var(--gold-3) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .silver-text {
+    background: linear-gradient(135deg, var(--silver-3) 0%, var(--silver-1) 40%, #ffffff 55%, var(--silver-2) 75%, var(--silver-3) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── THE CARD ── */
+  .card-wrapper {
+    position: relative;
+    width: 600px;
+    height: 380px;
+    perspective: 1200px;
+  }
+
+  /* Dramatic ambient glow behind card */
+  .card-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: -40px;
+    background: radial-gradient(ellipse at 50% 50%, rgba(200,165,60,0.10) 0%, rgba(200,165,60,0.03) 40%, transparent 70%);
+    filter: blur(30px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .card {
+    position: relative;
+    width: 600px;
+    height: 380px;
+    border-radius: 16px;
+    overflow: hidden;
+    z-index: 1;
+
+    /* Multi-layered black card background */
+    background:
+      /* Fine noise texture via repeating SVG-simulated dots */
+      repeating-conic-gradient(rgba(255,255,255,0.008) 0% 25%, transparent 0% 50%) 0 0 / 3px 3px,
+      /* Subtle diagonal brushed metal lines */
+      repeating-linear-gradient(
+        135deg,
+        transparent 0px,
+        transparent 2px,
+        rgba(255,255,255,0.012) 2px,
+        rgba(255,255,255,0.012) 3px
+      ),
+      /* Deep gradient base */
+      linear-gradient(160deg, #151515 0%, #0c0c0c 40%, #0a0a0a 60%, #111111 100%);
+
+    /* Card border: subtle metallic rim */
+    border: 1px solid rgba(180,160,100,0.12);
+
+    /* Premium shadow stack */
+    box-shadow:
+      0 2px 4px rgba(0,0,0,0.4),
+      0 8px 16px rgba(0,0,0,0.4),
+      0 24px 48px rgba(0,0,0,0.5),
+      0 48px 80px rgba(0,0,0,0.4),
+      /* Gold rim light on top edge */
+      inset 0 1px 0 rgba(200,175,80,0.10),
+      inset 0 -1px 0 rgba(0,0,0,0.3);
+
+    /* Slight 3D tilt for that physical card feel */
+    transform: rotateX(2deg) rotateY(-1deg);
+    transform-style: preserve-3d;
+    transition: transform 0.4s ease;
+  }
+
+  .card:hover {
+    transform: rotateX(0deg) rotateY(0deg) translateY(-4px);
+    box-shadow:
+      0 4px 8px rgba(0,0,0,0.4),
+      0 12px 24px rgba(0,0,0,0.4),
+      0 32px 64px rgba(0,0,0,0.5),
+      0 56px 96px rgba(0,0,0,0.4),
+      inset 0 1px 0 rgba(200,175,80,0.12),
+      inset 0 -1px 0 rgba(0,0,0,0.3);
+  }
+
+  /* Holographic sheen overlay */
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      115deg,
+      transparent 0%,
+      transparent 30%,
+      rgba(255,255,255,0.015) 40%,
+      rgba(255,255,255,0.04) 50%,
+      rgba(255,255,255,0.015) 60%,
+      transparent 70%,
+      transparent 100%
+    );
+    pointer-events: none;
+    z-index: 50;
+  }
+
+  /* Edge light stripe (top-left to center) */
+  .card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 5%, rgba(200,175,80,0.2) 20%, rgba(200,175,80,0.08) 50%, transparent 80%);
+    z-index: 51;
+  }
+
+  .card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 28px 32px 22px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    z-index: 10;
+  }
+
+  /* ── TOP ROW: Branding + Tier Badge ── */
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .brand {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .brand-name {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, var(--gold-4) 0%, var(--gold-2) 40%, var(--gold-1) 70%, var(--gold-3) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .brand-sub {
+    font-size: 8px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    font-weight: 400;
+  }
+
+  /* Diamond tier badge */
+  .tier-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 14px 5px 10px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(200,170,60,0.08) 0%, rgba(200,170,60,0.03) 100%);
+    border: 1px solid rgba(200,170,60,0.15);
+  }
+
+  .diamond-icon {
+    width: 18px;
+    height: 18px;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .diamond-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .tier-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, var(--gold-3) 0%, var(--gold-2) 50%, var(--gold-1) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── CENTER ROW: Score + Rank ── */
+  .card-center {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-top: -4px;
+  }
+
+  .score-block {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+  }
+
+  .score-number {
+    font-size: 72px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -3px;
+    background: linear-gradient(
+      160deg,
+      var(--gold-4) 0%,
+      var(--gold-1) 20%,
+      var(--gold-2) 35%,
+      #ffffff 50%,
+      var(--silver-1) 60%,
+      var(--silver-2) 80%,
+      var(--silver-3) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 2px 8px rgba(200,170,60,0.15));
+  }
+
+  .score-denominator {
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--text-dim);
+    letter-spacing: -0.5px;
+    margin-left: 2px;
+    margin-bottom: 8px;
+  }
+
+  .rank-block {
+    text-align: right;
+    margin-bottom: 6px;
+  }
+
+  .rank-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--silver-2) 0%, var(--silver-1) 40%, #ffffff 60%, var(--silver-2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .rank-percentile {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--gold-1);
+    margin-top: 2px;
+    letter-spacing: 0.5px;
+  }
+
+  .percentile-bar-track {
+    width: 120px;
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.06);
+    margin-top: 6px;
+    margin-left: auto;
+    overflow: hidden;
+  }
+
+  .percentile-bar-fill {
+    width: 97%;
+    height: 100%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--gold-4), var(--gold-2), var(--gold-1));
+  }
+
+  /* ── WALLET ADDRESS ── */
+  .wallet-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 2px;
+  }
+
+  .wallet-address {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.18);
+    text-shadow:
+      0 1px 0 rgba(255,255,255,0.04),
+      0 -1px 0 rgba(0,0,0,0.6);
+    /* Embossed / debossed feel */
+  }
+
+  .wallet-chip {
+    width: 32px;
+    height: 24px;
+    border-radius: 4px;
+    background: linear-gradient(145deg, rgba(200,175,80,0.15) 0%, rgba(200,175,80,0.05) 100%);
+    border: 1px solid rgba(200,175,80,0.12);
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .wallet-chip::before {
+    content: '';
+    position: absolute;
+    top: 4px; bottom: 4px;
+    left: 6px; right: 6px;
+    border: 1px solid rgba(200,175,80,0.15);
+    border-radius: 2px;
+  }
+
+  .wallet-chip::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 4px;
+    right: 4px;
+    height: 1px;
+    background: rgba(200,175,80,0.12);
+  }
+
+  /* ── STATS ROW ── */
+  .stats-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 8px 14px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.04);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .stat-item {
+    flex: 1;
+    text-align: center;
+    position: relative;
+  }
+
+  .stat-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 2px;
+    bottom: 2px;
+    width: 1px;
+    background: rgba(255,255,255,0.06);
+  }
+
+  .stat-value {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-bright);
+    letter-spacing: -0.2px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .stat-label {
+    font-size: 7.5px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  /* ── PROTOCOLS ROW ── */
+  .protocols-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .protocols-left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .protocol-circle {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0;
+    border: 1px solid rgba(255,255,255,0.06);
+    position: relative;
+  }
+
+  /* Protocol brand colors */
+  .proto-jup { background: linear-gradient(135deg, #1a3a2a, #2d6b4a); }
+  .proto-ray { background: linear-gradient(135deg, #2a1a4a, #5b3daa); }
+  .proto-mar { background: linear-gradient(135deg, #1a2a3a, #3474a7); }
+  .proto-ten { background: linear-gradient(135deg, #2a1a2a, #8b3a8b); }
+  .proto-me  { background: linear-gradient(135deg, #3a1a2a, #c73a6a); }
+  .proto-dri { background: linear-gradient(135deg, #2a2a1a, #b5892a); }
+  .proto-orc { background: linear-gradient(135deg, #1a1a3a, #4a4ab5); }
+  .proto-kam { background: linear-gradient(135deg, #1a3a3a, #2aafaf); }
+
+  .bottom-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .bottom-brand {
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, var(--gold-4) 0%, var(--gold-1) 30%, var(--gold-2) 50%, var(--gold-1) 70%, var(--gold-3) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .bottom-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .bottom-meta span {
+    font-size: 7.5px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .bottom-meta .url {
+    color: rgba(200,170,60,0.4);
+  }
+
+  /* ── AMBIENT BACKGROUND EFFECTS ── */
+  .bg-orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(100px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .bg-orb-1 {
+    width: 400px;
+    height: 400px;
+    top: -100px;
+    right: -100px;
+    background: rgba(180,150,60,0.03);
+  }
+
+  .bg-orb-2 {
+    width: 300px;
+    height: 300px;
+    bottom: -80px;
+    left: -60px;
+    background: rgba(100,80,40,0.02);
+  }
+
+  /* ── SUBTLE SCANLINE / TEXTURE ON PAGE ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 2px,
+      rgba(255,255,255,0.003) 2px,
+      rgba(255,255,255,0.003) 4px
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px) {
+    .card-wrapper {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 600 / 380;
+    }
+    .card {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 600 / 380;
+      transform: none;
+    }
+    .card:hover {
+      transform: none;
+    }
+    .card-inner {
+      padding: 5% 5.5% 4%;
+    }
+    .score-number { font-size: 12vw; }
+    .score-denominator { font-size: 3.5vw; }
+    .rank-number { font-size: 4vw; }
+    .wallet-address { font-size: 2.2vw; }
+    .stat-value { font-size: 2vw; }
+    .stat-label { font-size: 1.2vw; }
+    .protocol-circle { width: 4.3vw; height: 4.3vw; font-size: 1.3vw; }
+    .brand-name { font-size: 1.8vw; }
+    .bottom-brand { font-size: 1.7vw; }
+    .bottom-meta span { font-size: 1.2vw; }
+    .tier-label { font-size: 1.6vw; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-orb bg-orb-1"></div>
+<div class="bg-orb bg-orb-2"></div>
+
+<div class="card-wrapper">
+  <div class="card">
+    <div class="card-inner">
+
+      <!-- TOP ROW -->
+      <div class="card-top">
+        <div class="brand">
+          <div class="brand-name">Slice Analytics</div>
+          <div class="brand-sub">On-Chain Intelligence</div>
+        </div>
+        <div class="tier-badge">
+          <div class="diamond-icon">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="diamondGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:#a67c1a"/>
+                  <stop offset="30%" style="stop-color:#d4a843"/>
+                  <stop offset="50%" style="stop-color:#f5d778"/>
+                  <stop offset="70%" style="stop-color:#d4a843"/>
+                  <stop offset="100%" style="stop-color:#c9952a"/>
+                </linearGradient>
+              </defs>
+              <!-- Geometric diamond shape -->
+              <polygon points="12,2 22,10 12,22 2,10" fill="url(#diamondGrad)" opacity="0.9"/>
+              <polygon points="12,2 17,10 12,22 7,10" fill="url(#diamondGrad)" opacity="0.6"/>
+              <line x1="2" y1="10" x2="22" y2="10" stroke="rgba(255,255,255,0.25)" stroke-width="0.5"/>
+              <line x1="12" y1="2" x2="7" y2="10" stroke="rgba(255,255,255,0.15)" stroke-width="0.4"/>
+              <line x1="12" y1="2" x2="17" y2="10" stroke="rgba(255,255,255,0.15)" stroke-width="0.4"/>
+            </svg>
+          </div>
+          <span class="tier-label">Diamond</span>
+        </div>
+      </div>
+
+      <!-- CENTER ROW: Score + Rank -->
+      <div class="card-center">
+        <div class="score-block">
+          <span class="score-number">87</span>
+          <span class="score-denominator">/100</span>
+        </div>
+        <div class="rank-block">
+          <div class="rank-number">#1,247</div>
+          <div class="rank-percentile">Top 3%</div>
+          <div class="percentile-bar-track">
+            <div class="percentile-bar-fill"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WALLET ADDRESS -->
+      <div class="wallet-row">
+        <div class="wallet-chip"></div>
+        <div class="wallet-address">7xKXtg2CW87d97TXJSDpbD5jBkheTqA7ECNAhJosgAsU</div>
+      </div>
+
+      <!-- STATS ROW -->
+      <div class="stats-row">
+        <div class="stat-item">
+          <div class="stat-value">$12,450</div>
+          <div class="stat-label">Protocol Fees</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">2.3 SOL</div>
+          <div class="stat-label">Network Fees</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">$45,200</div>
+          <div class="stat-label">Holdings</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">18mo</div>
+          <div class="stat-label">Active</div>
+        </div>
+      </div>
+
+      <!-- PROTOCOLS + BOTTOM LINE -->
+      <div class="protocols-row">
+        <div class="protocols-left">
+          <div class="protocol-circle proto-jup" title="Jupiter">JU</div>
+          <div class="protocol-circle proto-ray" title="Raydium">RA</div>
+          <div class="protocol-circle proto-mar" title="Marinade">MN</div>
+          <div class="protocol-circle proto-ten" title="Tensor">TS</div>
+          <div class="protocol-circle proto-me" title="Magic Eden">ME</div>
+          <div class="protocol-circle proto-dri" title="Drift">DR</div>
+          <div class="protocol-circle proto-orc" title="Orca">OR</div>
+          <div class="protocol-circle proto-kam" title="Kamino">KA</div>
+        </div>
+        <div class="bottom-meta">
+          <span>Member Since Oct 2024</span>
+          <span class="url">solana-score.xyz</span>
+        </div>
+      </div>
+
+      <!-- BOTTOM BRAND LINE -->
+      <div class="bottom-line" style="margin-top: 2px;">
+        <div class="bottom-brand">Solana Score</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solana Score — Split Panel — @0xGug</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #060609;
+    font-family: 'Inter', -apple-system, sans-serif;
+    padding: 40px 20px;
+    gap: 24px;
+  }
+
+  /* ── Card Shell ── */
+  .card {
+    position: relative;
+    width: 600px;
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow:
+      0 0 120px rgba(153, 69, 255, 0.08),
+      0 60px 100px rgba(0, 0, 0, 0.7);
+  }
+
+  /* Noise overlay */
+  .card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 128px 128px;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  /* ══════════════════════════════════════════
+     LEFT PANEL — Score Hero
+     ══════════════════════════════════════════ */
+  .panel-left {
+    width: 45%;
+    background: #0a0a14;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 24px 24px;
+    overflow: hidden;
+    z-index: 1;
+  }
+
+  /* Solana gradient accent bar at top */
+  .panel-left::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #9945FF, #14F195, #00D1FF);
+    z-index: 2;
+  }
+
+  /* Ambient glow behind score */
+  .panel-left::after {
+    content: '';
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(153, 69, 255, 0.12) 0%, rgba(20, 241, 149, 0.04) 50%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Brand in left panel */
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .brand-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    background: linear-gradient(135deg, #9945FF, #14F195);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 11px;
+    color: #fff;
+  }
+
+  .brand-text {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .brand-name {
+    font-size: 13px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.3px;
+    line-height: 1.1;
+  }
+
+  .brand-sub {
+    font-size: 8px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.25);
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+  }
+
+  /* PFP */
+  .pfp-wrap {
+    position: relative;
+    margin-bottom: 16px;
+    z-index: 1;
+  }
+
+  .pfp {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    border: 2.5px solid rgba(153, 69, 255, 0.3);
+  }
+
+  .pfp-ring {
+    position: absolute;
+    inset: -5px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    background: conic-gradient(from 0deg, #9945FF, #14F195, #00D1FF, #9945FF) border-box;
+    -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
+    mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: ringRotate 6s linear infinite;
+  }
+
+  @keyframes ringRotate {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Name + Handle */
+  .identity {
+    text-align: center;
+    margin-bottom: 6px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .display-name {
+    font-size: 18px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+  }
+
+  .handle {
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.35);
+  }
+
+  /* X Connected badge */
+  .verified-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 16px;
+    background: rgba(29, 155, 240, 0.08);
+    border: 1px solid rgba(29, 155, 240, 0.18);
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .verified-badge svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .verified-badge span {
+    font-size: 9px;
+    font-weight: 600;
+    color: rgba(29, 155, 240, 0.85);
+    letter-spacing: 0.3px;
+  }
+
+  /* MASSIVE Score */
+  .score-hero {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  .score-number {
+    font-size: 128px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -8px;
+    background: linear-gradient(180deg, #ffffff 20%, rgba(255,255,255,0.5) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 4px 30px rgba(153, 69, 255, 0.2));
+  }
+
+  .score-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.25);
+    margin-top: -4px;
+  }
+
+  /* Tier Badge */
+  .tier-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(0, 209, 255, 0.1), rgba(0, 209, 255, 0.03));
+    border: 1px solid rgba(0, 209, 255, 0.18);
+    margin-bottom: 14px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .tier-badge .diamond {
+    font-size: 13px;
+    line-height: 1;
+  }
+
+  .tier-badge span {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: #67e8f9;
+  }
+
+  /* Rank + Percentile */
+  .rank-section {
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 16px;
+  }
+
+  .rank-text {
+    font-size: 13px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 4px;
+  }
+
+  .rank-text .dim {
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 11px;
+  }
+
+  .percentile-badge {
+    display: inline-flex;
+    padding: 3px 12px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(20, 241, 149, 0.1), rgba(20, 241, 149, 0.03));
+    border: 1px solid rgba(20, 241, 149, 0.18);
+    font-size: 11px;
+    font-weight: 700;
+    color: #14F195;
+  }
+
+  /* Gradient accent line at bottom of left panel */
+  .accent-line {
+    width: 60%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #9945FF, #14F195, #00D1FF, transparent);
+    border-radius: 1px;
+    margin-top: auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Divider ── */
+  .panel-divider {
+    width: 1px;
+    background: linear-gradient(180deg, rgba(153, 69, 255, 0.3) 0%, rgba(255,255,255,0.04) 30%, rgba(255,255,255,0.04) 70%, rgba(20, 241, 149, 0.2) 100%);
+    z-index: 2;
+  }
+
+  /* ══════════════════════════════════════════
+     RIGHT PANEL — Details
+     ══════════════════════════════════════════ */
+  .panel-right {
+    width: 55%;
+    background: #12121e;
+    display: flex;
+    flex-direction: column;
+    padding: 28px 24px 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Section titles */
+  .section-title {
+    font-size: 9px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.25);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  /* ── Score Breakdown Bars ── */
+  .breakdown {
+    margin-bottom: 22px;
+  }
+
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .bar-row:last-child {
+    margin-bottom: 0;
+  }
+
+  .bar-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.5);
+    width: 80px;
+    flex-shrink: 0;
+  }
+
+  .bar-track {
+    flex: 1;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s ease;
+  }
+
+  .bar-fill.c1 {
+    width: 92%;
+    background: linear-gradient(90deg, #a78bfa, #8b5cf6);
+    box-shadow: 0 0 12px rgba(139, 92, 246, 0.3);
+  }
+
+  .bar-fill.c2 {
+    width: 88%;
+    background: linear-gradient(90deg, #60a5fa, #3b82f6);
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.3);
+  }
+
+  .bar-fill.c3 {
+    width: 85%;
+    background: linear-gradient(90deg, #34d399, #10b981);
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+  }
+
+  .bar-fill.c4 {
+    width: 79%;
+    background: linear-gradient(90deg, #fbbf24, #f59e0b);
+    box-shadow: 0 0 12px rgba(245, 158, 11, 0.3);
+  }
+
+  .bar-score {
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.75);
+    width: 24px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* ── Stats Grid ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 22px;
+  }
+
+  .stat-card {
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  .stat-value {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 2px;
+    letter-spacing: -0.3px;
+  }
+
+  .stat-label {
+    font-size: 8px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* ── Protocols ── */
+  .protocols-section {
+    margin-bottom: 22px;
+  }
+
+  .protocols-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .protocols-count {
+    font-size: 9px;
+    font-weight: 600;
+    color: rgba(153, 69, 255, 0.5);
+  }
+
+  .protocol-logos {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .protocol-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .protocol-img-wrap {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1.5px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.03);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .protocol-img-wrap:hover {
+    border-color: rgba(153, 69, 255, 0.3);
+    transform: scale(1.1);
+  }
+
+  .protocol-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+
+  .protocol-name {
+    font-size: 7px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.25);
+    letter-spacing: 0.2px;
+  }
+
+  /* ── Footer / CTA ── */
+  .panel-footer {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  .footer-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .footer-url {
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.2);
+  }
+
+  .footer-date {
+    font-size: 9px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.12);
+  }
+
+  .share-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(29, 155, 240, 0.15), rgba(29, 155, 240, 0.05));
+    border: 1px solid rgba(29, 155, 240, 0.22);
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(29, 155, 240, 0.9);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+
+  .share-btn:hover {
+    background: linear-gradient(135deg, rgba(29, 155, 240, 0.25), rgba(29, 155, 240, 0.1));
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(29, 155, 240, 0.15);
+  }
+
+  .share-btn svg {
+    width: 12px;
+    height: 12px;
+    fill: currentColor;
+  }
+
+  /* ── Page Label ── */
+  .page-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.15);
+    letter-spacing: 0.5px;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- LEFT PANEL -->
+  <div class="panel-left">
+
+    <!-- Brand -->
+    <div class="brand">
+      <div class="brand-icon">S</div>
+      <div class="brand-text">
+        <div class="brand-name">Solana Score</div>
+        <div class="brand-sub">by Slice Analytics</div>
+      </div>
+    </div>
+
+    <!-- PFP -->
+    <div class="pfp-wrap">
+      <div class="pfp-ring"></div>
+      <img class="pfp" src="0xgug-pfp.jpg" alt="0xGug">
+    </div>
+
+    <!-- Identity -->
+    <div class="identity">
+      <div class="display-name">0xGug</div>
+      <div class="handle">@0xGug</div>
+    </div>
+
+    <!-- X Connected -->
+    <div class="verified-badge">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M8.52 3.59a3.12 3.12 0 0 1 4.3-.48l.18.15.18-.15a3.12 3.12 0 0 1 4.3.48l.1.13a3.12 3.12 0 0 1 .48 4.3l-.15.18.15.18a3.12 3.12 0 0 1-.48 4.3l-.13.1a3.12 3.12 0 0 1-4.3.48l-.18-.15-.18.15a3.12 3.12 0 0 1-4.3-.48l-.1-.13a3.12 3.12 0 0 1-.48-4.3l.15-.18-.15-.18a3.12 3.12 0 0 1 .48-4.3l.13-.1Z" fill="#1d9bf0"/><path d="m10.5 14-3-3 1.5-1.5L10.5 11l4.5-4.5L16.5 8l-6 6Z" fill="#fff"/></svg>
+      <span>X Connected</span>
+    </div>
+
+    <!-- SCORE HERO -->
+    <div class="score-hero">
+      <div class="score-number">87</div>
+      <div class="score-label">Solana Score</div>
+    </div>
+
+    <!-- Tier -->
+    <div class="tier-badge">
+      <span class="diamond">&#128142;</span>
+      <span>Diamond</span>
+    </div>
+
+    <!-- Rank -->
+    <div class="rank-section">
+      <div class="rank-text">#1,247 <span class="dim">of 142,000</span></div>
+      <div class="percentile-badge">Top 3%</div>
+    </div>
+
+    <!-- Accent Line -->
+    <div class="accent-line"></div>
+
+  </div>
+
+  <!-- DIVIDER -->
+  <div class="panel-divider"></div>
+
+  <!-- RIGHT PANEL -->
+  <div class="panel-right">
+
+    <!-- Score Breakdown -->
+    <div class="breakdown">
+      <div class="section-title">Score Breakdown</div>
+      <div class="bar-row">
+        <span class="bar-label">Transactions</span>
+        <div class="bar-track"><div class="bar-fill c1"></div></div>
+        <span class="bar-score">92</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">DeFi</span>
+        <div class="bar-track"><div class="bar-fill c2"></div></div>
+        <span class="bar-score">88</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">Holdings</span>
+        <div class="bar-track"><div class="bar-fill c3"></div></div>
+        <span class="bar-score">85</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">Tenure</span>
+        <div class="bar-track"><div class="bar-fill c4"></div></div>
+        <span class="bar-score">79</span>
+      </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="section-title">Wallet Stats</div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">$12,450</div>
+        <div class="stat-label">Protocol Fees</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">2.3 SOL</div>
+        <div class="stat-label">Network Fees</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">$45,200</div>
+        <div class="stat-label">Holdings</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">18 Mo</div>
+        <div class="stat-label">Active</div>
+      </div>
+    </div>
+
+    <!-- Protocols -->
+    <div class="protocols-section">
+      <div class="protocols-header">
+        <span class="section-title" style="margin-bottom:0;">Protocols Used</span>
+        <span class="protocols-count">8 protocols</span>
+      </div>
+      <div class="protocol-logos">
+        <div class="protocol-item">
+          <div class="protocol-img-wrap">
+            <img src="../public/images/protocols/jupiter.svg" alt="Jupiter">
+          </div>
+          <span class="protocol-name">Jupiter</span>
+        </div>
+        <div class="protocol-item">
+          <div class="protocol-img-wrap">
+            <img src="../public/images/protocols/raydium.jpg" alt="Raydium">
+          </div>
+          <span class="protocol-name">Raydium</span>
+        </div>
+        <div class="protocol-item">
+          <div class="protocol-img-wrap">
+            <img src="../public/images/protocols/meteora.jpg" alt="Meteora">
+          </div>
+          <span class="protocol-name">Meteora</span>
+        </div>
+        <div class="protocol-item">
+          <div class="protocol-img-wrap">
+            <img src="../public/images/protocols/drift.png" alt="Drift">
+          </div>
+          <span class="protocol-name">Drift</span>
+        </div>
+        <div class="protocol-item">
+          <div class="protocol-img-wrap">
+            <img src="../public/images/protocols/orca.jpg" alt="Orca">
+          </div>
+          <span class="protocol-name">Orca</span>
+        </div>
+        <div class="protocol-item">
+          <div class="protocol-img-wrap">
+            <img src="../public/images/protocols/phantom.jpg" alt="Phantom">
+          </div>
+          <span class="protocol-name">Phantom</span>
+        </div>
+        <div class="protocol-item">
+          <div class="protocol-img-wrap">
+            <img src="../public/images/protocols/pumpfun.png" alt="Pump.fun">
+          </div>
+          <span class="protocol-name">Pump.fun</span>
+        </div>
+        <div class="protocol-item">
+          <div class="protocol-img-wrap">
+            <img src="../public/images/protocols/axiom.png" alt="Axiom">
+          </div>
+          <span class="protocol-name">Axiom</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="panel-footer">
+      <div class="footer-meta">
+        <span class="footer-url">solana-score.xyz</span>
+        <span class="footer-date">Feb 2026</span>
+      </div>
+      <a class="share-btn" href="#">
+        <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        Share on X
+      </a>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="page-label">Mockup 21 — Split Panel</div>
+
+</body>
+</html>

@@ -17,48 +17,49 @@ export const PROTOCOLS: Record<string, Protocol> = {
     name: "raydium cpmm",
     displayName: "Raydium CPMM",
     sector: "Dex",
-    logo: "/images/protocols/raydium.svg",
+    logo: "/images/protocols/raydium.jpg",
   },
   "raydium amm": {
     name: "raydium amm",
     displayName: "Raydium AMM",
     sector: "Dex",
-    logo: "/images/protocols/raydium.svg",
+    logo: "/images/protocols/raydium.jpg",
   },
   "raydium clmm": {
     name: "raydium clmm",
     displayName: "Raydium CLMM",
     sector: "Dex",
-    logo: "/images/protocols/raydium.svg",
+    logo: "/images/protocols/raydium.jpg",
   },
   "raydium": {
     name: "raydium",
     displayName: "Raydium",
     sector: "Dex",
-    logo: "/images/protocols/raydium.svg",
+    logo: "/images/protocols/raydium.jpg",
   },
   "orca": {
     name: "orca",
     displayName: "Orca",
     sector: "Dex",
-    logo: "/images/protocols/orca.png",
+    logo: "/images/protocols/orca.jpg",
   },
   "meteora damm v2": {
     name: "meteora damm v2",
     displayName: "Meteora DAMM v2",
     sector: "Dex",
-    logo: "/images/protocols/meteora.png",
+    logo: "/images/protocols/meteora.jpg",
   },
   "meteora": {
     name: "meteora",
     displayName: "Meteora",
     sector: "Dex",
-    logo: "/images/protocols/meteora.png",
+    logo: "/images/protocols/meteora.jpg",
   },
   "byreal clmm": {
     name: "byreal clmm",
     displayName: "ByReal CLMM",
     sector: "Dex",
+    logo: "/images/protocols/byreal.jpg",
   },
 
   // Launchpad
@@ -66,11 +67,13 @@ export const PROTOCOLS: Record<string, Protocol> = {
     name: "moonshot create",
     displayName: "Moonshot Create",
     sector: "Launchpad",
+    logo: "/images/protocols/moonshot.jpg",
   },
   "launchlab": {
     name: "launchlab",
     displayName: "LaunchLab",
     sector: "Launchpad",
+    logo: "/images/protocols/launchlab.jpg",
   },
   "pump.fun": {
     name: "pump.fun",
@@ -82,16 +85,19 @@ export const PROTOCOLS: Record<string, Protocol> = {
     name: "lets bonk",
     displayName: "Lets Bonk",
     sector: "Launchpad",
+    logo: "/images/protocols/letsbonk.jpg",
   },
   "bags": {
     name: "bags",
     displayName: "Bags",
     sector: "Launchpad",
+    logo: "/images/protocols/bags.jpg",
   },
   "believe": {
     name: "believe",
     displayName: "Believe",
     sector: "Launchpad",
+    logo: "/images/protocols/believe.jpg",
   },
 
   // DEX Aggregator
@@ -131,13 +137,13 @@ export const PROTOCOLS: Record<string, Protocol> = {
     name: "drift perps",
     displayName: "Drift Perps",
     sector: "Perps",
-    logo: "/images/protocols/drift.svg",
+    logo: "/images/protocols/drift.png",
   },
   "drift": {
     name: "drift",
     displayName: "Drift",
     sector: "Perps",
-    logo: "/images/protocols/drift.svg",
+    logo: "/images/protocols/drift.png",
   },
 
   // Trading Apps
@@ -151,6 +157,7 @@ export const PROTOCOLS: Record<string, Protocol> = {
     name: "moonshot.money",
     displayName: "Moonshot.money",
     sector: "Trading App",
+    logo: "/images/protocols/moonshot.jpg",
   },
   "photon": {
     name: "photon",
@@ -164,7 +171,7 @@ export const PROTOCOLS: Record<string, Protocol> = {
     name: "phantom",
     displayName: "Phantom",
     sector: "Wallet",
-    logo: "/images/protocols/phantom.svg",
+    logo: "/images/protocols/phantom.jpg",
   },
 
   // Other
@@ -184,11 +191,13 @@ export const PROTOCOLS: Record<string, Protocol> = {
     name: "dex tools",
     displayName: "Dex Tools",
     sector: "Other",
+    logo: "/images/protocols/dextools.png",
   },
   "dextools": {
     name: "dextools",
     displayName: "DexTools",
     sector: "Other",
+    logo: "/images/protocols/dextools.png",
   },
 };
 

@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solana Score by Slice Analytics - Bento Grid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  :root {
+    --bg: #0a0a0f;
+    --card-bg: #141419;
+    --card-border: rgba(255, 255, 255, 0.06);
+    --text-primary: #f0f0f5;
+    --text-secondary: #8a8a9a;
+    --text-muted: #55556a;
+    --purple: #a78bfa;
+    --purple-dim: rgba(167, 139, 250, 0.15);
+    --teal: #5eead4;
+    --teal-dim: rgba(94, 234, 212, 0.12);
+    --orange: #fb923c;
+    --orange-dim: rgba(251, 146, 60, 0.12);
+    --pink: #f472b6;
+    --pink-dim: rgba(244, 114, 182, 0.12);
+    --blue: #60a5fa;
+    --blue-dim: rgba(96, 165, 250, 0.12);
+    --green: #4ade80;
+    --green-dim: rgba(74, 222, 128, 0.12);
+    --radius: 18px;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  /* ── Header ──────────────────────────────── */
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .brand-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--purple), #7c3aed);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 16px;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+
+  .brand-name {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--text-primary) 40%, var(--purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .brand-tag {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+
+  /* ── Search ──────────────────────────────── */
+  .search-wrap {
+    max-width: 560px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 16px 56px 16px 20px;
+    border-radius: 14px;
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .search-input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .search-input:focus {
+    border-color: rgba(167, 139, 250, 0.4);
+    box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.08);
+  }
+
+  .search-btn {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, var(--purple), #7c3aed);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s;
+  }
+
+  .search-btn:hover {
+    opacity: 0.85;
+  }
+
+  .search-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* ── Wallet pill ─────────────────────────── */
+  .wallet-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 6px 14px 6px 10px;
+    border-radius: 999px;
+    background: rgba(167, 139, 250, 0.08);
+    border: 1px solid rgba(167, 139, 250, 0.15);
+    font-size: 13px;
+    color: var(--purple);
+    font-weight: 500;
+    font-family: 'Inter', monospace;
+  }
+
+  .wallet-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px rgba(74, 222, 128, 0.5);
+  }
+
+  /* ── Bento Grid ──────────────────────────── */
+  .bento {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: minmax(170px, auto);
+    gap: 16px;
+    margin-top: 8px;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  }
+
+  /* card glow overlays */
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--card-accent, transparent), transparent);
+    opacity: 0.6;
+  }
+
+  .card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius);
+    pointer-events: none;
+    opacity: 0.35;
+  }
+
+  .card-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+
+  /* ── Score Card (2x2) ────────────────────── */
+  .card--score {
+    grid-column: span 2;
+    grid-row: span 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    --card-accent: var(--purple);
+  }
+
+  .card--score::after {
+    background: radial-gradient(ellipse at 50% 0%, var(--purple-dim), transparent 70%);
+  }
+
+  .ring-wrap {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin-bottom: 20px;
+  }
+
+  .ring-svg {
+    width: 200px;
+    height: 200px;
+    transform: rotate(-90deg);
+  }
+
+  .ring-bg {
+    fill: none;
+    stroke: rgba(167, 139, 250, 0.1);
+    stroke-width: 10;
+  }
+
+  .ring-fill {
+    fill: none;
+    stroke: url(#scoreGrad);
+    stroke-width: 10;
+    stroke-linecap: round;
+    stroke-dasharray: 534;
+    stroke-dashoffset: 534;
+    animation: ringDraw 1.8s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
+  }
+
+  @keyframes ringDraw {
+    to { stroke-dashoffset: 69.4; }
+  }
+
+  .ring-score {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ring-number {
+    font-size: 56px;
+    font-weight: 800;
+    letter-spacing: -3px;
+    line-height: 1;
+    background: linear-gradient(180deg, #fff 30%, var(--purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: fadeUp 0.8s ease 0.6s both;
+  }
+
+  .ring-of {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-top: 2px;
+    animation: fadeUp 0.8s ease 0.75s both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .tier-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(167, 139, 250, 0.15), rgba(124, 58, 237, 0.1));
+    border: 1px solid rgba(167, 139, 250, 0.2);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--purple);
+    margin-bottom: 10px;
+    animation: fadeUp 0.8s ease 0.9s both;
+  }
+
+  .tier-icon {
+    font-size: 15px;
+    -webkit-text-fill-color: initial;
+  }
+
+  .percentile {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 400;
+    animation: fadeUp 0.8s ease 1s both;
+  }
+
+  .percentile span {
+    color: var(--teal);
+    font-weight: 600;
+  }
+
+  /* ── Breakdown Card ──────────────────────── */
+  .card--breakdown {
+    grid-column: span 2;
+    --card-accent: var(--teal);
+  }
+
+  .card--breakdown::after {
+    background: radial-gradient(ellipse at 50% 0%, var(--teal-dim), transparent 70%);
+  }
+
+  .breakdown-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-top: 4px;
+  }
+
+  .breakdown-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .breakdown-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .breakdown-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .breakdown-pct {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--teal);
+  }
+
+  .bar-track {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    animation: barGrow 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both;
+  }
+
+  .bar-fill--value {
+    width: 50%;
+    background: linear-gradient(90deg, var(--teal), #2dd4bf);
+  }
+
+  .bar-fill--activity {
+    width: 50%;
+    background: linear-gradient(90deg, var(--purple), #c084fc);
+  }
+
+  .breakdown-sub {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 2px;
+  }
+
+  .breakdown-chip {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 6px;
+    color: var(--text-secondary);
+  }
+
+  .breakdown-chip--teal {
+    background: rgba(94, 234, 212, 0.08);
+  }
+
+  .breakdown-chip--purple {
+    background: rgba(167, 139, 250, 0.08);
+  }
+
+  @keyframes barGrow {
+    from { width: 0; }
+  }
+
+  /* ── Small stat cards ────────────────────── */
+  .card--stat {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .stat-value {
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    margin-top: auto;
+  }
+
+  .stat-context {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    font-weight: 400;
+  }
+
+  .stat-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+
+  .stat-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* Card color themes */
+  .card--fees {
+    --card-accent: var(--orange);
+  }
+  .card--fees::after {
+    background: radial-gradient(ellipse at 50% 0%, var(--orange-dim), transparent 70%);
+  }
+  .card--fees .stat-value { color: var(--orange); }
+  .card--fees .stat-icon { background: var(--orange-dim); }
+  .card--fees .stat-icon svg { color: var(--orange); }
+
+  .card--network {
+    --card-accent: var(--blue);
+  }
+  .card--network::after {
+    background: radial-gradient(ellipse at 50% 0%, var(--blue-dim), transparent 70%);
+  }
+  .card--network .stat-value { color: var(--blue); }
+  .card--network .stat-icon { background: var(--blue-dim); }
+  .card--network .stat-icon svg { color: var(--blue); }
+
+  .card--holdings {
+    --card-accent: var(--green);
+  }
+  .card--holdings::after {
+    background: radial-gradient(ellipse at 50% 0%, var(--green-dim), transparent 70%);
+  }
+  .card--holdings .stat-value { color: var(--green); }
+  .card--holdings .stat-icon { background: var(--green-dim); }
+  .card--holdings .stat-icon svg { color: var(--green); }
+
+  .card--months {
+    --card-accent: var(--pink);
+  }
+  .card--months::after {
+    background: radial-gradient(ellipse at 50% 0%, var(--pink-dim), transparent 70%);
+  }
+  .card--months .stat-value { color: var(--pink); }
+  .card--months .stat-icon { background: var(--pink-dim); }
+  .card--months .stat-icon svg { color: var(--pink); }
+
+  /* ── Protocols Card (wide) ───────────────── */
+  .card--protocols {
+    grid-column: span 2;
+    --card-accent: var(--purple);
+  }
+
+  .card--protocols::after {
+    background: radial-gradient(ellipse at 50% 0%, var(--purple-dim), transparent 70%);
+  }
+
+  .protocols-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 4px;
+  }
+
+  .protocol-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--card-border);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .protocol-chip:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  .protocol-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .protocol-txns {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-left: 4px;
+    font-weight: 400;
+  }
+
+  /* dot colors per protocol */
+  .dot--jupiter  { background: linear-gradient(135deg, #22d3ee, #06b6d4); }
+  .dot--raydium  { background: linear-gradient(135deg, #c084fc, #a855f7); }
+  .dot--marinade { background: linear-gradient(135deg, #4ade80, #22c55e); }
+  .dot--tensor   { background: linear-gradient(135deg, #fb923c, #f97316); }
+  .dot--magic    { background: linear-gradient(135deg, #f472b6, #ec4899); }
+  .dot--drift    { background: linear-gradient(135deg, #60a5fa, #3b82f6); }
+  .dot--orca     { background: linear-gradient(135deg, #fbbf24, #f59e0b); }
+  .dot--kamino   { background: linear-gradient(135deg, #a78bfa, #8b5cf6); }
+
+  /* ── Footer ──────────────────────────────── */
+  .footer {
+    text-align: center;
+    margin-top: 48px;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 400;
+  }
+
+  .footer a {
+    color: var(--purple);
+    text-decoration: none;
+  }
+
+  /* ── Responsive hint ─────────────────────── */
+  @media (max-width: 860px) {
+    .bento {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .card--score {
+      grid-column: span 2;
+      grid-row: span 2;
+    }
+    .card--breakdown {
+      grid-column: span 2;
+    }
+    .card--protocols {
+      grid-column: span 2;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="brand">
+      <div class="brand-icon">S</div>
+      <div class="brand-name">Solana Score</div>
+    </div>
+    <div class="brand-tag">by Slice Analytics</div>
+
+    <div class="search-wrap">
+      <input
+        class="search-input"
+        type="text"
+        placeholder="Enter a Solana wallet address..."
+        value="8Kag...wRkb"
+      />
+      <button class="search-btn" aria-label="Search">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="wallet-pill">
+      <span class="wallet-dot"></span>
+      8Kag7pMjTAPtiB4oCsmQFcMuE4jfbuXvwRkb
+    </div>
+  </header>
+
+  <!-- Bento Grid -->
+  <div class="bento">
+
+    <!-- ===== SCORE (2x2) ===== -->
+    <div class="card card--score">
+      <div class="ring-wrap">
+        <svg class="ring-svg" viewBox="0 0 200 200">
+          <defs>
+            <linearGradient id="scoreGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#a78bfa"/>
+              <stop offset="100%" stop-color="#7c3aed"/>
+            </linearGradient>
+          </defs>
+          <circle class="ring-bg" cx="100" cy="100" r="85"/>
+          <circle class="ring-fill" cx="100" cy="100" r="85"/>
+        </svg>
+        <div class="ring-score">
+          <span class="ring-number">87</span>
+          <span class="ring-of">out of 100</span>
+        </div>
+      </div>
+      <div class="tier-badge">
+        <span class="tier-icon">&#x1F48E;</span> Diamond Tier
+      </div>
+      <p class="percentile">Top <span>4%</span> of all scored wallets</p>
+    </div>
+
+    <!-- ===== BREAKDOWN (2-col) ===== -->
+    <div class="card card--breakdown">
+      <div class="card-label">Score Breakdown</div>
+      <div class="breakdown-rows">
+        <div class="breakdown-row">
+          <div class="breakdown-label-row">
+            <span class="breakdown-name">Value Score</span>
+            <span class="breakdown-pct" style="color:var(--teal);">50%</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill bar-fill--value"></div>
+          </div>
+          <div class="breakdown-sub">
+            <span class="breakdown-chip breakdown-chip--teal">Holdings</span>
+            <span class="breakdown-chip breakdown-chip--teal">DeFi TVL</span>
+            <span class="breakdown-chip breakdown-chip--teal">NFTs</span>
+          </div>
+        </div>
+        <div class="breakdown-row">
+          <div class="breakdown-label-row">
+            <span class="breakdown-name">Activity Score</span>
+            <span class="breakdown-pct" style="color:var(--purple);">50%</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill bar-fill--activity"></div>
+          </div>
+          <div class="breakdown-sub">
+            <span class="breakdown-chip breakdown-chip--purple">Transactions</span>
+            <span class="breakdown-chip breakdown-chip--purple">Protocols</span>
+            <span class="breakdown-chip breakdown-chip--purple">History</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PROTOCOL FEES ===== -->
+    <div class="card card--stat card--fees">
+      <div>
+        <div class="stat-icon">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
+          </svg>
+        </div>
+        <div class="card-label">Protocol Fees</div>
+      </div>
+      <div>
+        <div class="stat-value">$12,450</div>
+        <div class="stat-context">Lifetime across all protocols</div>
+      </div>
+    </div>
+
+    <!-- ===== NETWORK FEES ===== -->
+    <div class="card card--stat card--network">
+      <div>
+        <div class="stat-icon">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+          </svg>
+        </div>
+        <div class="card-label">Network Fees</div>
+      </div>
+      <div>
+        <div class="stat-value">2.3 SOL</div>
+        <div class="stat-context">~$280 in transaction fees</div>
+      </div>
+    </div>
+
+    <!-- ===== HOLDINGS ===== -->
+    <div class="card card--stat card--holdings">
+      <div>
+        <div class="stat-icon">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="6" width="20" height="12" rx="2"/>
+            <path d="M2 10h20"/>
+          </svg>
+        </div>
+        <div class="card-label">Holdings</div>
+      </div>
+      <div>
+        <div class="stat-value">$45,200</div>
+        <div class="stat-context">Tokens, NFTs, and staked assets</div>
+      </div>
+    </div>
+
+    <!-- ===== MONTHS ACTIVE ===== -->
+    <div class="card card--stat card--months">
+      <div>
+        <div class="stat-icon">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2"/>
+            <path d="M16 2v4M8 2v4M3 10h18"/>
+          </svg>
+        </div>
+        <div class="card-label">Months Active</div>
+      </div>
+      <div>
+        <div class="stat-value">18</div>
+        <div class="stat-context">First seen Aug 2024</div>
+      </div>
+    </div>
+
+    <!-- ===== PROTOCOLS (wide) ===== -->
+    <div class="card card--protocols">
+      <div class="card-label">Protocols Used <span style="color:var(--text-muted);font-weight:400;letter-spacing:0;text-transform:none;">&mdash; 8 protocols, 1,247 transactions</span></div>
+      <div class="protocols-grid">
+        <div class="protocol-chip">
+          <span class="protocol-dot dot--jupiter"></span>
+          Jupiter
+          <span class="protocol-txns">412 txns</span>
+        </div>
+        <div class="protocol-chip">
+          <span class="protocol-dot dot--raydium"></span>
+          Raydium
+          <span class="protocol-txns">289 txns</span>
+        </div>
+        <div class="protocol-chip">
+          <span class="protocol-dot dot--marinade"></span>
+          Marinade
+          <span class="protocol-txns">156 txns</span>
+        </div>
+        <div class="protocol-chip">
+          <span class="protocol-dot dot--tensor"></span>
+          Tensor
+          <span class="protocol-txns">134 txns</span>
+        </div>
+        <div class="protocol-chip">
+          <span class="protocol-dot dot--magic"></span>
+          Magic Eden
+          <span class="protocol-txns">98 txns</span>
+        </div>
+        <div class="protocol-chip">
+          <span class="protocol-dot dot--drift"></span>
+          Drift
+          <span class="protocol-txns">78 txns</span>
+        </div>
+        <div class="protocol-chip">
+          <span class="protocol-dot dot--orca"></span>
+          Orca
+          <span class="protocol-txns">52 txns</span>
+        </div>
+        <div class="protocol-chip">
+          <span class="protocol-dot dot--kamino"></span>
+          Kamino
+          <span class="protocol-txns">28 txns</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Powered by (bottom wide) ===== -->
+
+  </div>
+
+  <div class="footer">
+    Powered by <a href="#">Slice Analytics</a> &middot; Data refreshed 2 minutes ago
+  </div>
+
+</div>
+
+</body>
+</html>

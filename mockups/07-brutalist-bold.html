@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solana Score | Slice Analytics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  :root {
+    --lime: #BFFF00;
+    --coral: #FF6B6B;
+    --white: #FFFFFF;
+    --black: #0A0A0A;
+    --dark-gray: #1A1A1A;
+    --mid-gray: #2A2A2A;
+    --shadow-offset: 6px;
+    --border-thick: 3px;
+    --border-xthick: 4px;
+  }
+
+  html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--black);
+    color: var(--white);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ===== NAVIGATION ===== */
+  .nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 48px;
+    border-bottom: var(--border-thick) solid var(--white);
+    position: relative;
+    z-index: 100;
+  }
+
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .nav-logo {
+    width: 40px;
+    height: 40px;
+    background: var(--lime);
+    border: var(--border-thick) solid var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .nav-logo::after {
+    content: '';
+    width: 40px;
+    height: 40px;
+    border: var(--border-thick) solid var(--lime);
+    position: absolute;
+    top: var(--shadow-offset);
+    left: var(--shadow-offset);
+    z-index: -1;
+  }
+
+  .nav-logo svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .nav-title {
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: -0.5px;
+    text-transform: uppercase;
+  }
+
+  .nav-title span {
+    color: var(--lime);
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+  }
+
+  .nav-links a {
+    color: var(--white);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    transition: color 0.15s;
+  }
+
+  .nav-links a:hover {
+    color: var(--lime);
+  }
+
+  .nav-connect {
+    background: var(--white);
+    color: var(--black);
+    border: var(--border-thick) solid var(--white);
+    padding: 10px 24px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.1s;
+  }
+
+  .nav-connect::after {
+    content: '';
+    position: absolute;
+    top: var(--shadow-offset);
+    left: var(--shadow-offset);
+    width: 100%;
+    height: 100%;
+    border: var(--border-thick) solid var(--coral);
+    z-index: -1;
+    transition: all 0.1s;
+  }
+
+  .nav-connect:hover {
+    transform: translate(2px, 2px);
+  }
+
+  .nav-connect:hover::after {
+    top: 2px;
+    left: 2px;
+  }
+
+  /* ===== MAIN LAYOUT ===== */
+  .main {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 48px 48px 80px;
+    position: relative;
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    margin-bottom: 48px;
+    position: relative;
+  }
+
+  .header-title {
+    font-size: 72px;
+    font-weight: 700;
+    letter-spacing: -3px;
+    text-transform: uppercase;
+    line-height: 0.9;
+    position: relative;
+    display: inline-block;
+  }
+
+  .header-title .shadow-text {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    color: transparent;
+    -webkit-text-stroke: 2px var(--coral);
+    z-index: -1;
+    user-select: none;
+  }
+
+  .header-subtitle {
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+    margin-top: 12px;
+  }
+
+  .header-subtitle span {
+    color: var(--lime);
+  }
+
+  /* ===== SEARCH BAR ===== */
+  .search-section {
+    margin-bottom: 56px;
+    position: relative;
+  }
+
+  .search-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--coral);
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .search-bar {
+    display: flex;
+    gap: 0;
+    position: relative;
+  }
+
+  .search-input {
+    flex: 1;
+    background: var(--dark-gray);
+    border: var(--border-xthick) solid var(--white);
+    border-right: none;
+    color: var(--white);
+    padding: 18px 24px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    outline: none;
+    caret-color: var(--lime);
+  }
+
+  .search-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+    letter-spacing: 0.5px;
+  }
+
+  .search-input:focus {
+    border-color: var(--lime);
+    background: #111;
+  }
+
+  .search-btn {
+    background: var(--lime);
+    color: var(--black);
+    border: var(--border-xthick) solid var(--white);
+    padding: 18px 36px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.1s;
+    white-space: nowrap;
+  }
+
+  .search-btn::after {
+    content: '';
+    position: absolute;
+    top: var(--shadow-offset);
+    left: var(--shadow-offset);
+    width: 100%;
+    height: 100%;
+    background: var(--coral);
+    z-index: -1;
+    transition: all 0.1s;
+  }
+
+  .search-btn:hover {
+    transform: translate(3px, 3px);
+  }
+
+  .search-btn:hover::after {
+    top: 2px;
+    left: 2px;
+  }
+
+  .search-wallet-display {
+    margin-top: 12px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.35);
+    font-weight: 500;
+    letter-spacing: 1px;
+  }
+
+  .search-wallet-display span {
+    color: var(--lime);
+    font-weight: 600;
+  }
+
+  /* ===== CONTENT GRID ===== */
+  .content-grid {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+
+  /* ===== SCORE SECTION (LEFT) ===== */
+  .score-section {
+    position: relative;
+  }
+
+  .score-card {
+    border: var(--border-xthick) solid var(--white);
+    background: var(--dark-gray);
+    padding: 40px 36px 36px;
+    position: relative;
+    overflow: visible;
+  }
+
+  .score-card::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: 100%;
+    height: 100%;
+    border: var(--border-xthick) solid var(--lime);
+    z-index: -1;
+  }
+
+  .score-top-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--coral);
+    margin-bottom: 4px;
+  }
+
+  .score-number-container {
+    position: relative;
+    line-height: 1;
+    margin: -10px -12px 0;
+  }
+
+  .score-number {
+    font-size: 320px;
+    font-weight: 700;
+    letter-spacing: -18px;
+    color: var(--white);
+    line-height: 0.82;
+    position: relative;
+    z-index: 2;
+  }
+
+  .score-number-outline {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    font-size: 320px;
+    font-weight: 700;
+    letter-spacing: -18px;
+    color: transparent;
+    -webkit-text-stroke: 3px var(--lime);
+    line-height: 0.82;
+    z-index: 1;
+    user-select: none;
+  }
+
+  .score-max {
+    font-size: 48px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.15);
+    letter-spacing: -2px;
+    margin-left: 4px;
+  }
+
+  .score-tier-badge {
+    position: absolute;
+    top: 80px;
+    right: -32px;
+    background: var(--coral);
+    color: var(--black);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    padding: 10px 28px;
+    border: var(--border-thick) solid var(--white);
+    transform: rotate(12deg);
+    z-index: 10;
+    white-space: nowrap;
+  }
+
+  .score-tier-badge::before {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    width: 100%;
+    height: 100%;
+    background: var(--black);
+    z-index: -1;
+  }
+
+  .score-bar-container {
+    margin-top: 20px;
+    position: relative;
+  }
+
+  .score-bar-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .score-bar-labels span {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+  }
+
+  .score-bar-track {
+    width: 100%;
+    height: 18px;
+    background: var(--mid-gray);
+    border: 2px solid var(--white);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .score-bar-fill {
+    height: 100%;
+    background: var(--lime);
+    width: 87%;
+    position: relative;
+  }
+
+  .score-bar-fill::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--white);
+  }
+
+  .score-tiers {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    padding: 0 2px;
+  }
+
+  .score-tier {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.25);
+  }
+
+  .score-tier.active {
+    color: var(--lime);
+  }
+
+  .score-percentile {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 2px solid var(--mid-gray);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+  }
+
+  .score-percentile span {
+    color: var(--lime);
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  /* ===== RIGHT COLUMN ===== */
+  .right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+  }
+
+  /* ===== STATS GRID ===== */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .stat-block {
+    background: var(--dark-gray);
+    border: var(--border-thick) solid var(--white);
+    padding: 22px 24px;
+    position: relative;
+    transition: transform 0.1s;
+  }
+
+  .stat-block::after {
+    content: '';
+    position: absolute;
+    top: var(--shadow-offset);
+    left: var(--shadow-offset);
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    transition: all 0.1s;
+  }
+
+  .stat-block:nth-child(1)::after { background: var(--lime); }
+  .stat-block:nth-child(2)::after { background: var(--coral); }
+  .stat-block:nth-child(3)::after { background: var(--coral); }
+  .stat-block:nth-child(4)::after { background: var(--lime); }
+
+  .stat-block:hover {
+    transform: translate(3px, 3px);
+  }
+
+  .stat-block:hover::after {
+    top: 2px;
+    left: 2px;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    color: var(--white);
+    line-height: 1;
+  }
+
+  .stat-block:nth-child(1) .stat-value { color: var(--lime); }
+  .stat-block:nth-child(2) .stat-value { color: var(--coral); }
+  .stat-block:nth-child(3) .stat-value { color: var(--coral); }
+  .stat-block:nth-child(4) .stat-value { color: var(--lime); }
+
+  .stat-unit {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+    margin-top: 4px;
+  }
+
+  /* ===== SCORE BREAKDOWN ===== */
+  .breakdown-section {
+    border: var(--border-thick) solid var(--white);
+    background: var(--dark-gray);
+    padding: 28px 28px 24px;
+    position: relative;
+  }
+
+  .breakdown-section::after {
+    content: '';
+    position: absolute;
+    top: var(--shadow-offset);
+    left: var(--shadow-offset);
+    width: 100%;
+    height: 100%;
+    border: var(--border-thick) solid var(--coral);
+    z-index: -1;
+  }
+
+  .breakdown-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--white);
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--mid-gray);
+  }
+
+  .breakdown-item {
+    margin-bottom: 18px;
+  }
+
+  .breakdown-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .breakdown-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+
+  .breakdown-item-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.7);
+  }
+
+  .breakdown-item-score {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: -0.5px;
+  }
+
+  .breakdown-item-score span {
+    font-size: 12px;
+    color: rgba(255,255,255,0.3);
+    font-weight: 600;
+  }
+
+  .breakdown-bar {
+    width: 100%;
+    height: 14px;
+    background: var(--mid-gray);
+    border: 2px solid rgba(255,255,255,0.2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .breakdown-bar-fill {
+    height: 100%;
+    position: relative;
+  }
+
+  .breakdown-bar-fill.lime { background: var(--lime); }
+  .breakdown-bar-fill.coral { background: var(--coral); }
+  .breakdown-bar-fill.white { background: var(--white); }
+
+  /* ===== PROTOCOLS SECTION ===== */
+  .protocols-section {
+    border: var(--border-thick) solid var(--white);
+    background: var(--dark-gray);
+    padding: 28px 28px 24px;
+    position: relative;
+  }
+
+  .protocols-section::after {
+    content: '';
+    position: absolute;
+    top: var(--shadow-offset);
+    left: var(--shadow-offset);
+    width: 100%;
+    height: 100%;
+    border: var(--border-thick) solid var(--lime);
+    z-index: -1;
+  }
+
+  .protocols-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--white);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--mid-gray);
+  }
+
+  .protocols-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 24px;
+  }
+
+  .protocol-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+  }
+
+  .protocol-bullet {
+    width: 10px;
+    height: 10px;
+    flex-shrink: 0;
+    border: 2px solid var(--white);
+  }
+
+  .protocol-bullet.lime { background: var(--lime); }
+  .protocol-bullet.coral { background: var(--coral); }
+  .protocol-bullet.white { background: var(--white); }
+
+  .protocol-name {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--white);
+  }
+
+  .protocol-txns {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.3);
+    text-transform: uppercase;
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  /* ===== DECORATIVE ELEMENTS ===== */
+  .deco-stripe {
+    position: fixed;
+    top: 0;
+    right: 60px;
+    width: 6px;
+    height: 100vh;
+    background: repeating-linear-gradient(
+      to bottom,
+      var(--lime) 0px,
+      var(--lime) 20px,
+      transparent 20px,
+      transparent 40px
+    );
+    opacity: 0.15;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .deco-stripe-2 {
+    position: fixed;
+    top: 0;
+    right: 80px;
+    width: 3px;
+    height: 100vh;
+    background: repeating-linear-gradient(
+      to bottom,
+      var(--coral) 0px,
+      var(--coral) 10px,
+      transparent 10px,
+      transparent 30px
+    );
+    opacity: 0.1;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .deco-corner {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    width: 60px;
+    height: 60px;
+    border-left: var(--border-xthick) solid var(--lime);
+    border-bottom: var(--border-xthick) solid var(--lime);
+    opacity: 0.2;
+    pointer-events: none;
+  }
+
+  .deco-corner-2 {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 60px;
+    height: 60px;
+    border-right: var(--border-xthick) solid var(--coral);
+    border-bottom: var(--border-xthick) solid var(--coral);
+    opacity: 0.15;
+    pointer-events: none;
+  }
+
+  .deco-label {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.08);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  /* ===== FOOTER ===== */
+  .footer {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 48px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-left {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.2);
+  }
+
+  .footer-left span {
+    color: var(--lime);
+    opacity: 0.5;
+  }
+
+  .footer-right {
+    display: flex;
+    gap: 24px;
+  }
+
+  .footer-right a {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.2);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  .footer-right a:hover {
+    color: var(--coral);
+  }
+
+  /* ===== SELECTION STYLING ===== */
+  ::selection {
+    background: var(--lime);
+    color: var(--black);
+  }
+
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--black);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--mid-gray);
+    border: 1px solid var(--white);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--lime);
+  }
+</style>
+</head>
+<body>
+
+<!-- Decorative stripes -->
+<div class="deco-stripe"></div>
+<div class="deco-stripe-2"></div>
+<div class="deco-corner"></div>
+<div class="deco-corner-2"></div>
+<div class="deco-label">SOLANA SCORE // SLICE ANALYTICS // ON-CHAIN REPUTATION // SOLANA SCORE // SLICE ANALYTICS</div>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-brand">
+    <div class="nav-logo">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 18L8 6H11L7 18H4Z" fill="#0A0A0A"/>
+        <path d="M10 18L14 6H17L13 18H10Z" fill="#0A0A0A"/>
+        <path d="M16 18L20 6" stroke="#0A0A0A" stroke-width="3" stroke-linecap="square"/>
+      </svg>
+    </div>
+    <div class="nav-title">Slice <span>Analytics</span></div>
+  </div>
+  <div class="nav-links">
+    <a href="#">Dashboard</a>
+    <a href="#">Leaderboard</a>
+    <a href="#">API</a>
+    <a href="#">Docs</a>
+    <button class="nav-connect">Connect Wallet</button>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<main class="main">
+
+  <!-- Header -->
+  <div class="header">
+    <h1 class="header-title">
+      SOLANA SCORE
+      <span class="shadow-text" aria-hidden="true">SOLANA SCORE</span>
+    </h1>
+    <p class="header-subtitle">On-chain reputation powered by <span>Slice Analytics</span></p>
+  </div>
+
+  <!-- Search -->
+  <div class="search-section">
+    <label class="search-label">Enter Wallet Address</label>
+    <div class="search-bar">
+      <input
+        type="text"
+        class="search-input"
+        value="7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU"
+        placeholder="Enter Solana wallet address..."
+      >
+      <button class="search-btn">Lookup Score</button>
+    </div>
+    <div class="search-wallet-display">
+      Showing results for: <span>7xKXtg...gAsU</span> &mdash; Last updated 2 min ago
+    </div>
+  </div>
+
+  <!-- Content Grid -->
+  <div class="content-grid">
+
+    <!-- Left: Score Card -->
+    <div class="score-section">
+      <div class="score-card">
+        <div class="score-top-label">Reputation Score</div>
+        <div class="score-number-container">
+          <div class="score-number">87</div>
+          <div class="score-number-outline" aria-hidden="true">87</div>
+          <span class="score-max">/100</span>
+        </div>
+
+        <!-- Tier Badge -->
+        <div class="score-tier-badge">Diamond</div>
+
+        <!-- Score Bar -->
+        <div class="score-bar-container">
+          <div class="score-bar-labels">
+            <span>0</span>
+            <span>50</span>
+            <span>100</span>
+          </div>
+          <div class="score-bar-track">
+            <div class="score-bar-fill"></div>
+          </div>
+          <div class="score-tiers">
+            <span class="score-tier">Bronze</span>
+            <span class="score-tier">Silver</span>
+            <span class="score-tier">Gold</span>
+            <span class="score-tier">Plat</span>
+            <span class="score-tier active">Diamond</span>
+          </div>
+        </div>
+
+        <div class="score-percentile">
+          Top <span>4%</span> of all Solana wallets
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="right-column">
+
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <div class="stat-block">
+          <div class="stat-label">Protocol Fees</div>
+          <div class="stat-value">$12,450</div>
+          <div class="stat-unit">Lifetime volume</div>
+        </div>
+        <div class="stat-block">
+          <div class="stat-label">Network Fees</div>
+          <div class="stat-value">2.3 SOL</div>
+          <div class="stat-unit">Total gas spent</div>
+        </div>
+        <div class="stat-block">
+          <div class="stat-label">Holdings</div>
+          <div class="stat-value">$45,200</div>
+          <div class="stat-unit">Current balance</div>
+        </div>
+        <div class="stat-block">
+          <div class="stat-label">Months Active</div>
+          <div class="stat-value">18</div>
+          <div class="stat-unit">Since Aug 2024</div>
+        </div>
+      </div>
+
+      <!-- Score Breakdown -->
+      <div class="breakdown-section">
+        <div class="breakdown-title">Score Breakdown</div>
+
+        <div class="breakdown-item">
+          <div class="breakdown-item-header">
+            <span class="breakdown-item-label">DeFi Activity</span>
+            <span class="breakdown-item-score">24 <span>/ 25</span></span>
+          </div>
+          <div class="breakdown-bar">
+            <div class="breakdown-bar-fill lime" style="width: 96%;"></div>
+          </div>
+        </div>
+
+        <div class="breakdown-item">
+          <div class="breakdown-item-header">
+            <span class="breakdown-item-label">Transaction History</span>
+            <span class="breakdown-item-score">22 <span>/ 25</span></span>
+          </div>
+          <div class="breakdown-bar">
+            <div class="breakdown-bar-fill coral" style="width: 88%;"></div>
+          </div>
+        </div>
+
+        <div class="breakdown-item">
+          <div class="breakdown-item-header">
+            <span class="breakdown-item-label">Holdings & Staking</span>
+            <span class="breakdown-item-score">21 <span>/ 25</span></span>
+          </div>
+          <div class="breakdown-bar">
+            <div class="breakdown-bar-fill lime" style="width: 84%;"></div>
+          </div>
+        </div>
+
+        <div class="breakdown-item">
+          <div class="breakdown-item-header">
+            <span class="breakdown-item-label">Network Tenure</span>
+            <span class="breakdown-item-score">20 <span>/ 25</span></span>
+          </div>
+          <div class="breakdown-bar">
+            <div class="breakdown-bar-fill white" style="width: 80%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Protocols -->
+      <div class="protocols-section">
+        <div class="protocols-title">Protocols Interacted</div>
+        <div class="protocols-list">
+          <div class="protocol-item">
+            <div class="protocol-bullet lime"></div>
+            <span class="protocol-name">Jupiter</span>
+            <span class="protocol-txns">342 txns</span>
+          </div>
+          <div class="protocol-item">
+            <div class="protocol-bullet coral"></div>
+            <span class="protocol-name">Raydium</span>
+            <span class="protocol-txns">187 txns</span>
+          </div>
+          <div class="protocol-item">
+            <div class="protocol-bullet lime"></div>
+            <span class="protocol-name">Marinade</span>
+            <span class="protocol-txns">56 txns</span>
+          </div>
+          <div class="protocol-item">
+            <div class="protocol-bullet white"></div>
+            <span class="protocol-name">Tensor</span>
+            <span class="protocol-txns">124 txns</span>
+          </div>
+          <div class="protocol-item">
+            <div class="protocol-bullet coral"></div>
+            <span class="protocol-name">Magic Eden</span>
+            <span class="protocol-txns">89 txns</span>
+          </div>
+          <div class="protocol-item">
+            <div class="protocol-bullet lime"></div>
+            <span class="protocol-name">Drift</span>
+            <span class="protocol-txns">215 txns</span>
+          </div>
+          <div class="protocol-item">
+            <div class="protocol-bullet white"></div>
+            <span class="protocol-name">Orca</span>
+            <span class="protocol-txns">78 txns</span>
+          </div>
+          <div class="protocol-item">
+            <div class="protocol-bullet coral"></div>
+            <span class="protocol-name">Kamino</span>
+            <span class="protocol-txns">163 txns</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-left"><span>//</span> Slice Analytics &mdash; 2026</div>
+  <div class="footer-right">
+    <a href="#">Twitter</a>
+    <a href="#">GitHub</a>
+    <a href="#">Discord</a>
+  </div>
+</footer>
+
+</body>
+</html>

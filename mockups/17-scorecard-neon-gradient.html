@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solana Score — Neon Gradient — @0xGug</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #060610;
+    font-family: 'Inter', -apple-system, sans-serif;
+    padding: 40px 20px;
+    color: #e0e0f0;
+  }
+
+  /* ── Keyframes ── */
+  @keyframes spin-ring {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { text-shadow: 0 0 20px rgba(153, 69, 255, 0.7), 0 0 40px rgba(20, 241, 149, 0.4), 0 0 80px rgba(0, 209, 255, 0.2); }
+    50% { text-shadow: 0 0 30px rgba(153, 69, 255, 0.9), 0 0 60px rgba(20, 241, 149, 0.6), 0 0 120px rgba(0, 209, 255, 0.35); }
+  }
+
+  @keyframes border-glow-pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+
+  /* ── Card ── */
+  .card {
+    position: relative;
+    width: 520px;
+    border-radius: 24px;
+    background: #0a0a12;
+    overflow: hidden;
+  }
+
+  /* Neon border glow — outer ring */
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 26px;
+    background: linear-gradient(135deg, #9945FF 0%, #14F195 40%, #00D1FF 70%, #9945FF 100%);
+    z-index: -1;
+    animation: border-glow-pulse 3s ease-in-out infinite;
+    filter: blur(0px);
+  }
+
+  /* Ambient glow behind card */
+  .card::after {
+    content: '';
+    position: absolute;
+    inset: -40px;
+    border-radius: 60px;
+    background: linear-gradient(135deg, rgba(153, 69, 255, 0.15) 0%, rgba(20, 241, 149, 0.08) 40%, rgba(0, 209, 255, 0.12) 70%, rgba(153, 69, 255, 0.08) 100%);
+    z-index: -2;
+    filter: blur(40px);
+    pointer-events: none;
+  }
+
+  .card-inner {
+    position: relative;
+    z-index: 1;
+    background: #0a0a12;
+    border-radius: 22px;
+    margin: 2px;
+    padding: 28px 30px 22px;
+    overflow: hidden;
+  }
+
+  /* Top ambient neon wash */
+  .card-inner::before {
+    content: '';
+    position: absolute;
+    top: -80px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 500px;
+    height: 300px;
+    background: radial-gradient(ellipse at center top, rgba(153, 69, 255, 0.12) 0%, rgba(20, 241, 149, 0.05) 30%, transparent 65%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Neon accent line at top */
+  .card-inner::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 30px;
+    right: 30px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #9945FF, #14F195, #00D1FF, transparent);
+    opacity: 0.5;
+    z-index: 2;
+  }
+
+  /* ── Glass Panel ── */
+  .glass {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 14px;
+    position: relative;
+  }
+
+  .glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 14px;
+    box-shadow: inset 0 0 20px rgba(153, 69, 255, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    pointer-events: none;
+  }
+
+  /* ── Header ── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 22px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .brand-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    background: linear-gradient(135deg, #9945FF, #14F195);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 16px rgba(153, 69, 255, 0.4);
+  }
+
+  .brand-icon svg { width: 18px; height: 18px; }
+
+  .brand-text .brand-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.02em;
+  }
+
+  .brand-text .brand-sub {
+    font-size: 9.5px;
+    color: rgba(255, 255, 255, 0.35);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .season-badge {
+    font-size: 9.5px;
+    font-weight: 600;
+    color: #14F195;
+    background: rgba(20, 241, 149, 0.08);
+    border: 1px solid rgba(20, 241, 149, 0.15);
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .x-badge {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+
+  .x-badge svg { width: 12px; height: 12px; }
+  .x-badge .check { color: #1DA1F2; }
+
+  /* ── Profile Section ── */
+  .profile-section {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .pfp-wrapper {
+    position: relative;
+    width: 68px;
+    height: 68px;
+    flex-shrink: 0;
+  }
+
+  .pfp-ring {
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: conic-gradient(#9945FF, #14F195, #00D1FF, #9945FF);
+    animation: spin-ring 4s linear infinite;
+  }
+
+  /* Glow behind ring */
+  .pfp-ring::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    background: conic-gradient(#9945FF, #14F195, #00D1FF, #9945FF);
+    filter: blur(10px);
+    opacity: 0.4;
+    animation: spin-ring 4s linear infinite;
+  }
+
+  .pfp-img {
+    position: relative;
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #0a0a12;
+    z-index: 1;
+  }
+
+  .profile-info {
+    flex: 1;
+  }
+
+  .profile-name {
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.03em;
+    margin-bottom: 2px;
+  }
+
+  .profile-handle {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: 400;
+    margin-bottom: 6px;
+  }
+
+  .profile-rank {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .rank-text {
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .rank-text strong {
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .percentile-badge {
+    font-size: 9.5px;
+    font-weight: 700;
+    color: #14F195;
+    background: rgba(20, 241, 149, 0.1);
+    border: 1px solid rgba(20, 241, 149, 0.2);
+    padding: 2px 8px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(20, 241, 149, 0.15);
+  }
+
+  /* ── Score Hero ── */
+  .score-hero {
+    text-align: center;
+    padding: 24px 20px 20px;
+    margin-bottom: 18px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Neon glow backdrop behind score */
+  .score-hero::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(153, 69, 255, 0.15) 0%, rgba(20, 241, 149, 0.06) 40%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .score-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: rgba(255, 255, 255, 0.4);
+    margin-bottom: 4px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .score-number-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 6px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .score-number {
+    font-size: 88px;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    background: linear-gradient(135deg, #9945FF 0%, #c77dff 25%, #14F195 50%, #00D1FF 75%, #9945FF 100%);
+    background-size: 300% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: pulse-glow 3s ease-in-out infinite, shimmer 6s linear infinite;
+    /* text-shadow is on a pseudo element for glow since bg-clip removes it */
+    position: relative;
+  }
+
+  /* Glow layer behind score number */
+  .score-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 88px;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: transparent;
+    text-shadow: 0 0 40px rgba(153, 69, 255, 0.5), 0 0 80px rgba(20, 241, 149, 0.3), 0 0 120px rgba(0, 209, 255, 0.2);
+    animation: pulse-glow 3s ease-in-out infinite;
+    z-index: 0;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .score-denominator {
+    font-size: 22px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.25);
+    position: relative;
+    z-index: 1;
+  }
+
+  .tier-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .tier-icon {
+    font-size: 16px;
+  }
+
+  .tier-name {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    background: linear-gradient(90deg, #00D1FF, #9945FF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Neon separator line */
+  .neon-line {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(153, 69, 255, 0.3), rgba(20, 241, 149, 0.3), rgba(0, 209, 255, 0.3), transparent);
+    margin: 0 -30px;
+  }
+
+  /* ── Score Breakdown ── */
+  .breakdown {
+    padding: 16px 18px;
+    margin: 18px 0;
+  }
+
+  .breakdown-title {
+    font-size: 9.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(255, 255, 255, 0.35);
+    margin-bottom: 14px;
+  }
+
+  .breakdown-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .breakdown-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .breakdown-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.6);
+    width: 90px;
+    flex-shrink: 0;
+  }
+
+  .breakdown-bar-track {
+    flex: 1;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .breakdown-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    position: relative;
+  }
+
+  .breakdown-bar-fill.txns {
+    width: 92%;
+    background: linear-gradient(90deg, #9945FF, #14F195);
+    box-shadow: 0 0 10px rgba(20, 241, 149, 0.3);
+  }
+
+  .breakdown-bar-fill.defi {
+    width: 88%;
+    background: linear-gradient(90deg, #9945FF, #00D1FF);
+    box-shadow: 0 0 10px rgba(0, 209, 255, 0.3);
+  }
+
+  .breakdown-bar-fill.holdings {
+    width: 85%;
+    background: linear-gradient(90deg, #14F195, #00D1FF);
+    box-shadow: 0 0 10px rgba(20, 241, 149, 0.3);
+  }
+
+  .breakdown-bar-fill.tenure {
+    width: 79%;
+    background: linear-gradient(90deg, #00D1FF, #9945FF);
+    box-shadow: 0 0 10px rgba(153, 69, 255, 0.3);
+  }
+
+  .breakdown-val {
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    width: 28px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* ── Stats Grid ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin: 18px 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .stat-card {
+    padding: 12px 10px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Subtle neon top border on stat cards */
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 20%;
+    right: 20%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(153, 69, 255, 0.3), transparent);
+  }
+
+  .stat-val {
+    font-size: 14px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 3px;
+    letter-spacing: -0.02em;
+  }
+
+  .stat-label {
+    font-size: 9px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.35);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── Protocols ── */
+  .protocols-section {
+    padding: 14px 18px;
+    margin: 18px 0;
+  }
+
+  .protocols-title {
+    font-size: 9.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(255, 255, 255, 0.35);
+    margin-bottom: 14px;
+  }
+
+  .protocols-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+  }
+
+  .protocol-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    width: 52px;
+  }
+
+  .protocol-logo-ring {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    padding: 2px;
+    background: linear-gradient(135deg, rgba(153, 69, 255, 0.3), rgba(20, 241, 149, 0.2), rgba(0, 209, 255, 0.3));
+    box-shadow: 0 0 12px rgba(153, 69, 255, 0.15), 0 0 4px rgba(20, 241, 149, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: box-shadow 0.3s ease;
+  }
+
+  .protocol-logo-ring:hover {
+    box-shadow: 0 0 20px rgba(153, 69, 255, 0.3), 0 0 8px rgba(20, 241, 149, 0.2);
+  }
+
+  .protocol-logo-inner {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: #12111e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .protocol-logo-inner img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+  }
+
+  .protocol-name {
+    font-size: 8.5px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.4);
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 18px;
+    padding-top: 14px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(153, 69, 255, 0.2), rgba(20, 241, 149, 0.2), rgba(0, 209, 255, 0.2), transparent);
+  }
+
+  .footer-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .footer-url {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.45);
+  }
+
+  .footer-date {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.25);
+  }
+
+  .share-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, #9945FF, #14F195);
+    border: none;
+    padding: 8px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    box-shadow: 0 0 20px rgba(153, 69, 255, 0.3), 0 0 8px rgba(20, 241, 149, 0.2);
+    transition: box-shadow 0.3s ease, transform 0.15s ease;
+  }
+
+  .share-btn:hover {
+    box-shadow: 0 0 30px rgba(153, 69, 255, 0.5), 0 0 14px rgba(20, 241, 149, 0.35);
+    transform: translateY(-1px);
+  }
+
+  .share-btn svg { width: 13px; height: 13px; }
+
+  /* ── Page Label ── */
+  .page-label {
+    margin-top: 32px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.2);
+    text-align: center;
+    letter-spacing: 0.04em;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-inner">
+
+    <!-- Header: Brand + Season + X Badge -->
+    <div class="header">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <div class="brand-name">Solana Score</div>
+          <div class="brand-sub">by Slice Analytics</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="season-badge">Season 1 &middot; 2026</div>
+        <div class="x-badge">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          <span>Connected</span>
+          <span class="check">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="#1DA1F2"><path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81C14.67 2.63 13.43 1.75 12 1.75S9.33 2.63 8.65 3.94c-1.39-.46-2.9-.2-3.91.81s-1.27 2.52-.81 3.91C2.63 9.33 1.75 10.57 1.75 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.9.81 3.91s2.52 1.27 3.91.81c.68 1.31 1.92 2.19 3.34 2.19s2.67-.88 3.34-2.19c1.39.46 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z"/></svg>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile -->
+    <div class="profile-section">
+      <div class="pfp-wrapper">
+        <div class="pfp-ring"></div>
+        <img class="pfp-img" src="0xgug-pfp.jpg" alt="0xGug PFP">
+      </div>
+      <div class="profile-info">
+        <div class="profile-name">0xGug</div>
+        <div class="profile-handle">@0xGug</div>
+        <div class="profile-rank">
+          <span class="rank-text"><strong>#1,247</strong> of 142,000</span>
+          <span class="percentile-badge">Top 3%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Score Hero -->
+    <div class="score-hero glass">
+      <div class="score-label">Solana Score</div>
+      <div class="score-number-row" style="position:relative;">
+        <span class="score-glow">87</span>
+        <span class="score-number">87</span>
+        <span class="score-denominator">/ 100</span>
+      </div>
+      <div class="tier-row">
+        <span class="tier-icon">&#x1F48E;</span>
+        <span class="tier-name">Diamond</span>
+      </div>
+    </div>
+
+    <!-- Neon line -->
+    <div class="neon-line"></div>
+
+    <!-- Score Breakdown -->
+    <div class="breakdown glass">
+      <div class="breakdown-title">Score Breakdown</div>
+      <div class="breakdown-rows">
+        <div class="breakdown-row">
+          <span class="breakdown-label">Transactions</span>
+          <div class="breakdown-bar-track">
+            <div class="breakdown-bar-fill txns"></div>
+          </div>
+          <span class="breakdown-val">92</span>
+        </div>
+        <div class="breakdown-row">
+          <span class="breakdown-label">DeFi</span>
+          <div class="breakdown-bar-track">
+            <div class="breakdown-bar-fill defi"></div>
+          </div>
+          <span class="breakdown-val">88</span>
+        </div>
+        <div class="breakdown-row">
+          <span class="breakdown-label">Holdings</span>
+          <div class="breakdown-bar-track">
+            <div class="breakdown-bar-fill holdings"></div>
+          </div>
+          <span class="breakdown-val">85</span>
+        </div>
+        <div class="breakdown-row">
+          <span class="breakdown-label">Tenure</span>
+          <div class="breakdown-bar-track">
+            <div class="breakdown-bar-fill tenure"></div>
+          </div>
+          <span class="breakdown-val">79</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card glass">
+        <div class="stat-val">$12,450</div>
+        <div class="stat-label">Protocol Fees</div>
+      </div>
+      <div class="stat-card glass">
+        <div class="stat-val">2.3 SOL</div>
+        <div class="stat-label">Network Fees</div>
+      </div>
+      <div class="stat-card glass">
+        <div class="stat-val">$45,200</div>
+        <div class="stat-label">Holdings</div>
+      </div>
+      <div class="stat-card glass">
+        <div class="stat-val">18 Mo</div>
+        <div class="stat-label">Active</div>
+      </div>
+    </div>
+
+    <!-- Protocols -->
+    <div class="protocols-section glass">
+      <div class="protocols-title">Top Protocols</div>
+      <div class="protocols-row">
+        <div class="protocol-item">
+          <div class="protocol-logo-ring">
+            <div class="protocol-logo-inner">
+              <img src="../public/images/protocols/jupiter.svg" alt="Jupiter">
+            </div>
+          </div>
+          <span class="protocol-name">Jupiter</span>
+        </div>
+        <div class="protocol-item">
+          <div class="protocol-logo-ring">
+            <div class="protocol-logo-inner">
+              <img src="../public/images/protocols/raydium.jpg" alt="Raydium">
+            </div>
+          </div>
+          <span class="protocol-name">Raydium</span>
+        </div>
+        <div class="protocol-item">
+          <div class="protocol-logo-ring">
+            <div class="protocol-logo-inner">
+              <img src="../public/images/protocols/meteora.jpg" alt="Meteora">
+            </div>
+          </div>
+          <span class="protocol-name">Meteora</span>
+        </div>
+        <div class="protocol-item">
+          <div class="protocol-logo-ring">
+            <div class="protocol-logo-inner">
+              <img src="../public/images/protocols/drift.png" alt="Drift">
+            </div>
+          </div>
+          <span class="protocol-name">Drift</span>
+        </div>
+        <div class="protocol-item">
+          <div class="protocol-logo-ring">
+            <div class="protocol-logo-inner">
+              <img src="../public/images/protocols/orca.jpg" alt="Orca">
+            </div>
+          </div>
+          <span class="protocol-name">Orca</span>
+        </div>
+        <div class="protocol-item">
+          <div class="protocol-logo-ring">
+            <div class="protocol-logo-inner">
+              <img src="../public/images/protocols/phantom.jpg" alt="Phantom">
+            </div>
+          </div>
+          <span class="protocol-name">Phantom</span>
+        </div>
+        <div class="protocol-item">
+          <div class="protocol-logo-ring">
+            <div class="protocol-logo-inner">
+              <img src="../public/images/protocols/pumpfun.png" alt="Pump.fun">
+            </div>
+          </div>
+          <span class="protocol-name">Pump.fun</span>
+        </div>
+        <div class="protocol-item">
+          <div class="protocol-logo-ring">
+            <div class="protocol-logo-inner">
+              <img src="../public/images/protocols/axiom.png" alt="Axiom">
+            </div>
+          </div>
+          <span class="protocol-name">Axiom</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div class="footer-left">
+        <span class="footer-url">solana-score.xyz</span>
+        <span class="footer-date">Feb 2026</span>
+      </div>
+      <button class="share-btn">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        Share on X
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<div class="page-label">Mockup 17 &mdash; Neon Gradient</div>
+
+</body>
+</html>

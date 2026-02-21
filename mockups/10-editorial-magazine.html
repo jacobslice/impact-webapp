@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solana Score — Slice Analytics</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --emerald: #10B981;
+            --emerald-dim: rgba(16, 185, 129, 0.15);
+            --bg: #0C0C0C;
+            --bg-elevated: #141414;
+            --bg-card: #1A1A1A;
+            --text-primary: #F0EDE6;
+            --text-secondary: #8A8A8A;
+            --text-tertiary: #5A5A5A;
+            --rule: #2A2A2A;
+            --rule-light: #1E1E1E;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-weight: 300;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            min-height: 100vh;
+        }
+
+        /* ── Top Bar ── */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 48px;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .topbar-brand {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            color: var(--text-primary);
+        }
+
+        .topbar-brand span {
+            color: var(--emerald);
+        }
+
+        .topbar-meta {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .topbar-label {
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+        }
+
+        .topbar-network {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .topbar-network .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--emerald);
+            display: inline-block;
+        }
+
+        /* ── Main Layout ── */
+        .main {
+            display: flex;
+            max-width: 1280px;
+            margin: 0 auto;
+            min-height: calc(100vh - 61px);
+        }
+
+        .col-left {
+            width: 60%;
+            padding: 56px 64px 56px 48px;
+            border-right: 1px solid var(--rule);
+        }
+
+        .col-right {
+            width: 40%;
+            padding: 56px 48px 56px 56px;
+        }
+
+        /* ── Section Label (ALL CAPS) ── */
+        .section-label {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            margin-bottom: 24px;
+        }
+
+        .section-label.emerald {
+            color: var(--emerald);
+        }
+
+        /* ── Horizontal Rules ── */
+        hr {
+            border: none;
+            height: 1px;
+            background: var(--rule);
+            margin: 40px 0;
+        }
+
+        hr.thin {
+            background: var(--rule-light);
+            margin: 24px 0;
+        }
+
+        /* ── Header / Search ── */
+        .header {
+            margin-bottom: 16px;
+        }
+
+        .header-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 42px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            line-height: 1.1;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .header-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 300;
+            letter-spacing: 0.01em;
+        }
+
+        .header-subtitle span {
+            color: var(--emerald);
+            font-weight: 500;
+        }
+
+        .search-container {
+            position: relative;
+            margin-top: 28px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 16px 20px 16px 20px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--rule);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 300;
+            letter-spacing: 0.02em;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-input::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .search-input:focus {
+            border-color: var(--emerald);
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 6px;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 10px 24px;
+            background: var(--emerald);
+            color: #0C0C0C;
+            border: none;
+            border-radius: 3px;
+            font-family: 'Inter', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .search-btn:hover {
+            opacity: 0.85;
+        }
+
+        /* ── Score Hero ── */
+        .score-hero {
+            padding: 48px 0 40px;
+            position: relative;
+        }
+
+        .score-number {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 220px;
+            font-weight: 900;
+            line-height: 0.85;
+            color: var(--text-primary);
+            letter-spacing: -8px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .score-number::after {
+            content: '';
+            position: absolute;
+            bottom: 8px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--emerald);
+        }
+
+        .score-meta {
+            margin-top: 32px;
+            display: flex;
+            align-items: baseline;
+            gap: 20px;
+        }
+
+        .score-tier {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 28px;
+            font-weight: 600;
+            font-style: italic;
+            color: var(--emerald);
+        }
+
+        .score-out-of {
+            font-size: 14px;
+            color: var(--text-tertiary);
+            font-weight: 300;
+        }
+
+        /* ── Pull Quote ── */
+        .pull-quote {
+            padding: 32px 0 32px 28px;
+            border-left: 2px solid var(--emerald);
+            margin: 0;
+        }
+
+        .pull-quote p {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 22px;
+            font-weight: 400;
+            font-style: italic;
+            line-height: 1.5;
+            color: var(--text-primary);
+        }
+
+        .pull-quote .attribution {
+            font-family: 'Inter', sans-serif;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            margin-top: 16px;
+            font-style: normal;
+        }
+
+        /* ── Score Breakdown ── */
+        .breakdown {
+            margin-top: 0;
+        }
+
+        .breakdown-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--rule-light);
+        }
+
+        .breakdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .breakdown-label {
+            width: 140px;
+            font-size: 12px;
+            font-weight: 400;
+            color: var(--text-secondary);
+            letter-spacing: 0.03em;
+            flex-shrink: 0;
+        }
+
+        .breakdown-bar-track {
+            flex: 1;
+            height: 3px;
+            background: var(--rule-light);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .breakdown-bar-fill {
+            height: 100%;
+            background: var(--emerald);
+            border-radius: 2px;
+            transition: width 0.8s ease;
+        }
+
+        .breakdown-value {
+            width: 36px;
+            text-align: right;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            font-variant-numeric: tabular-nums;
+            flex-shrink: 0;
+        }
+
+        /* ── Right Column: Data Callouts ── */
+        .callout-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+
+        .callout {
+            padding: 28px 0;
+            border-bottom: 1px solid var(--rule-light);
+        }
+
+        .callout:nth-child(odd) {
+            padding-right: 24px;
+            border-right: 1px solid var(--rule-light);
+        }
+
+        .callout:nth-child(even) {
+            padding-left: 24px;
+        }
+
+        .callout:nth-last-child(-n+2) {
+            border-bottom: none;
+        }
+
+        .callout-label {
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            margin-bottom: 10px;
+        }
+
+        .callout-value {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.1;
+        }
+
+        .callout-value .unit {
+            font-size: 16px;
+            font-weight: 400;
+            color: var(--text-secondary);
+            margin-left: 2px;
+        }
+
+        .callout-note {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            margin-top: 6px;
+            font-weight: 300;
+        }
+
+        /* ── Protocols Grid ── */
+        .protocols-section {
+            margin-top: 0;
+        }
+
+        .protocol-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+
+        .protocol-item {
+            padding: 20px 0;
+            border-bottom: 1px solid var(--rule-light);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .protocol-item:nth-child(odd) {
+            padding-right: 20px;
+            border-right: 1px solid var(--rule-light);
+        }
+
+        .protocol-item:nth-child(even) {
+            padding-left: 20px;
+        }
+
+        .protocol-item:nth-last-child(-n+2) {
+            border-bottom: none;
+        }
+
+        .protocol-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            flex-shrink: 0;
+            color: var(--bg);
+        }
+
+        .protocol-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .protocol-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: 0.01em;
+        }
+
+        .protocol-sector {
+            font-size: 10px;
+            font-weight: 400;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            margin-top: 2px;
+        }
+
+        .protocol-txns {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-variant-numeric: tabular-nums;
+            flex-shrink: 0;
+        }
+
+        /* ── Wallet Address ── */
+        .wallet-display {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .wallet-address {
+            font-size: 12px;
+            font-family: 'Inter', monospace;
+            font-weight: 400;
+            color: var(--text-tertiary);
+            letter-spacing: 0.04em;
+        }
+
+        .wallet-copy {
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--emerald);
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-family: 'Inter', sans-serif;
+            transition: opacity 0.2s;
+        }
+
+        .wallet-copy:hover {
+            opacity: 0.7;
+        }
+
+        /* ── Score Ring (right column accent) ── */
+        .score-ring-container {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            padding: 24px 0;
+        }
+
+        .score-ring {
+            width: 72px;
+            height: 72px;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .score-ring svg {
+            transform: rotate(-90deg);
+        }
+
+        .score-ring-bg {
+            fill: none;
+            stroke: var(--rule);
+            stroke-width: 3;
+        }
+
+        .score-ring-fill {
+            fill: none;
+            stroke: var(--emerald);
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-dasharray: 201;
+            stroke-dashoffset: 26;
+            transition: stroke-dashoffset 1s ease;
+        }
+
+        .score-ring-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .score-ring-detail {
+            flex: 1;
+        }
+
+        .score-ring-label {
+            font-size: 13px;
+            font-weight: 400;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .score-ring-label strong {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        /* ── Footer ── */
+        .footer {
+            border-top: 1px solid var(--rule);
+            padding: 20px 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .footer-left {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            font-weight: 300;
+            letter-spacing: 0.02em;
+        }
+
+        .footer-left span {
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .footer-right {
+            font-size: 10px;
+            color: var(--text-tertiary);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+
+        /* ── Timestamp badge ── */
+        .timestamp {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--text-tertiary);
+            font-weight: 300;
+            margin-top: 16px;
+        }
+
+        .timestamp .dot-green {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--emerald);
+        }
+
+        /* ── Edition marker ── */
+        .edition-marker {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 12px;
+            font-weight: 400;
+            font-style: italic;
+            color: var(--text-tertiary);
+            letter-spacing: 0.05em;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ── Top Bar ── -->
+    <header class="topbar">
+        <div class="topbar-brand">Solana Score <span>&mdash;</span> by Slice Analytics</div>
+        <div class="topbar-meta">
+            <span class="topbar-label">On-Chain Reputation</span>
+            <span class="topbar-network"><span class="dot"></span> Solana Mainnet</span>
+            <span class="edition-marker">Vol. I &mdash; Feb 2026</span>
+        </div>
+    </header>
+
+    <!-- ── Main Two-Column Layout ── -->
+    <main class="main">
+
+        <!-- ── Left Column (60%) ── -->
+        <section class="col-left">
+
+            <!-- Header & Search -->
+            <div class="header">
+                <h1 class="header-title">Solana<br>Score</h1>
+                <p class="header-subtitle">On-chain reputation analysis by <span>Slice Analytics</span></p>
+            </div>
+
+            <div class="search-container">
+                <input
+                    type="text"
+                    class="search-input"
+                    placeholder="Enter Solana wallet address..."
+                    value="7xKX...q4Wh"
+                >
+                <button class="search-btn">Analyze</button>
+            </div>
+
+            <div class="wallet-display">
+                <span class="wallet-address">7xKXrCpRbmo5JL3iYTvFxE9FqNwz8vBDgT4mR2q4Wh</span>
+                <button class="wallet-copy">Copy</button>
+            </div>
+
+            <div class="timestamp">
+                <span class="dot-green"></span>
+                Last updated Feb 20, 2026 &middot; Block #247,891,032
+            </div>
+
+            <hr>
+
+            <!-- Score Hero -->
+            <div class="score-hero">
+                <span class="section-label emerald">Composite Score</span>
+                <div class="score-number">87</div>
+                <div class="score-meta">
+                    <span class="score-tier">Diamond</span>
+                    <span class="score-out-of">/ 100</span>
+                </div>
+            </div>
+
+            <!-- Pull Quote -->
+            <blockquote class="pull-quote">
+                <p>&ldquo;Top 3% of Solana users &mdash; a consistent, high-value participant across DeFi, NFTs, and governance.&rdquo;</p>
+                <div class="attribution">Slice Analytics Assessment</div>
+            </blockquote>
+
+            <hr>
+
+            <!-- Score Breakdown -->
+            <div class="breakdown">
+                <span class="section-label">Score Breakdown</span>
+
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Transaction History</span>
+                    <div class="breakdown-bar-track">
+                        <div class="breakdown-bar-fill" style="width: 92%"></div>
+                    </div>
+                    <span class="breakdown-value">92</span>
+                </div>
+
+                <div class="breakdown-item">
+                    <span class="breakdown-label">DeFi Engagement</span>
+                    <div class="breakdown-bar-track">
+                        <div class="breakdown-bar-fill" style="width: 88%"></div>
+                    </div>
+                    <span class="breakdown-value">88</span>
+                </div>
+
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Token Diversity</span>
+                    <div class="breakdown-bar-track">
+                        <div class="breakdown-bar-fill" style="width: 79%"></div>
+                    </div>
+                    <span class="breakdown-value">79</span>
+                </div>
+
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Wallet Age</span>
+                    <div class="breakdown-bar-track">
+                        <div class="breakdown-bar-fill" style="width: 95%"></div>
+                    </div>
+                    <span class="breakdown-value">95</span>
+                </div>
+
+                <div class="breakdown-item">
+                    <span class="breakdown-label">NFT Activity</span>
+                    <div class="breakdown-bar-track">
+                        <div class="breakdown-bar-fill" style="width: 71%"></div>
+                    </div>
+                    <span class="breakdown-value">71</span>
+                </div>
+
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Governance</span>
+                    <div class="breakdown-bar-track">
+                        <div class="breakdown-bar-fill" style="width: 84%"></div>
+                    </div>
+                    <span class="breakdown-value">84</span>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ── Right Column (40%) ── -->
+        <aside class="col-right">
+
+            <!-- Score Ring Summary -->
+            <span class="section-label">Summary</span>
+            <div class="score-ring-container">
+                <div class="score-ring">
+                    <svg width="72" height="72" viewBox="0 0 72 72">
+                        <circle class="score-ring-bg" cx="36" cy="36" r="32"/>
+                        <circle class="score-ring-fill" cx="36" cy="36" r="32"/>
+                    </svg>
+                    <span class="score-ring-text">87</span>
+                </div>
+                <div class="score-ring-detail">
+                    <p class="score-ring-label">
+                        This wallet demonstrates <strong>exceptional on-chain behavior</strong> across 18 months of sustained activity on Solana mainnet.
+                    </p>
+                </div>
+            </div>
+
+            <hr>
+
+            <!-- Data Callouts -->
+            <span class="section-label">Key Figures</span>
+            <div class="callout-grid">
+                <div class="callout">
+                    <div class="callout-label">Protocol Fees</div>
+                    <div class="callout-value">$12,450</div>
+                    <div class="callout-note">Lifetime fees generated</div>
+                </div>
+                <div class="callout">
+                    <div class="callout-label">Network Fees</div>
+                    <div class="callout-value">2.3<span class="unit">SOL</span></div>
+                    <div class="callout-note">Total network fees paid</div>
+                </div>
+                <div class="callout">
+                    <div class="callout-label">Holdings</div>
+                    <div class="callout-value">$45,200</div>
+                    <div class="callout-note">Current portfolio value</div>
+                </div>
+                <div class="callout">
+                    <div class="callout-label">Months Active</div>
+                    <div class="callout-value">18</div>
+                    <div class="callout-note">Since Aug 2024</div>
+                </div>
+            </div>
+
+            <hr>
+
+            <!-- Protocols -->
+            <div class="protocols-section">
+                <span class="section-label">Protocol Interactions</span>
+                <div class="protocol-grid">
+
+                    <div class="protocol-item">
+                        <div class="protocol-icon" style="background: #1AE1C6;">Ju</div>
+                        <div class="protocol-info">
+                            <div class="protocol-name">Jupiter</div>
+                            <div class="protocol-sector">Aggregator</div>
+                        </div>
+                        <div class="protocol-txns">312 txns</div>
+                    </div>
+
+                    <div class="protocol-item">
+                        <div class="protocol-icon" style="background: #5E5CE6;">Ra</div>
+                        <div class="protocol-info">
+                            <div class="protocol-name">Raydium</div>
+                            <div class="protocol-sector">AMM / DEX</div>
+                        </div>
+                        <div class="protocol-txns">189 txns</div>
+                    </div>
+
+                    <div class="protocol-item">
+                        <div class="protocol-icon" style="background: #48C9A9;">Ma</div>
+                        <div class="protocol-info">
+                            <div class="protocol-name">Marinade</div>
+                            <div class="protocol-sector">Liquid Staking</div>
+                        </div>
+                        <div class="protocol-txns">47 txns</div>
+                    </div>
+
+                    <div class="protocol-item">
+                        <div class="protocol-icon" style="background: #E8596E;">Te</div>
+                        <div class="protocol-info">
+                            <div class="protocol-name">Tensor</div>
+                            <div class="protocol-sector">NFT Marketplace</div>
+                        </div>
+                        <div class="protocol-txns">156 txns</div>
+                    </div>
+
+                    <div class="protocol-item">
+                        <div class="protocol-icon" style="background: #E042A8;">ME</div>
+                        <div class="protocol-info">
+                            <div class="protocol-name">Magic Eden</div>
+                            <div class="protocol-sector">NFT Marketplace</div>
+                        </div>
+                        <div class="protocol-txns">93 txns</div>
+                    </div>
+
+                    <div class="protocol-item">
+                        <div class="protocol-icon" style="background: #E7832B;">Dr</div>
+                        <div class="protocol-info">
+                            <div class="protocol-name">Drift</div>
+                            <div class="protocol-sector">Perpetuals</div>
+                        </div>
+                        <div class="protocol-txns">204 txns</div>
+                    </div>
+
+                    <div class="protocol-item">
+                        <div class="protocol-icon" style="background: #FFD74B; color: #1a1a1a;">Or</div>
+                        <div class="protocol-info">
+                            <div class="protocol-name">Orca</div>
+                            <div class="protocol-sector">AMM / DEX</div>
+                        </div>
+                        <div class="protocol-txns">128 txns</div>
+                    </div>
+
+                    <div class="protocol-item">
+                        <div class="protocol-icon" style="background: #6C5DD3;">Ka</div>
+                        <div class="protocol-info">
+                            <div class="protocol-name">Kamino</div>
+                            <div class="protocol-sector">Yield Vault</div>
+                        </div>
+                        <div class="protocol-txns">67 txns</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <hr class="thin">
+
+            <!-- Total Transactions -->
+            <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 8px 0;">
+                <span style="font-size: 11px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-tertiary);">Total Transactions</span>
+                <span style="font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; color: var(--text-primary);">1,196</span>
+            </div>
+
+        </aside>
+
+    </main>
+
+    <!-- ── Footer ── -->
+    <footer class="footer">
+        <div class="footer-left">
+            &copy; 2026 <span>Slice Analytics</span> &mdash; On-chain reputation scoring for the Solana ecosystem
+        </div>
+        <div class="footer-right">Mockup &mdash; Editorial Layout</div>
+    </footer>
+
+</body>
+</html>

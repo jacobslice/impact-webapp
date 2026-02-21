@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solana Score by Slice Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  :root {
+    --bg: #0a0a0a;
+    --bg-raised: #111110;
+    --bg-subtle: #161614;
+    --text-primary: #e8e6e1;
+    --text-secondary: #6b6960;
+    --text-tertiary: #3d3b36;
+    --accent: #c9a84c;
+    --accent-dim: rgba(201, 168, 76, 0.12);
+    --accent-glow: rgba(201, 168, 76, 0.06);
+    --divider: #1e1d1a;
+  }
+
+  html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ---- Ambient glow behind score ---- */
+  .ambient {
+    position: fixed;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, rgba(201,168,76,0.04) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ---- Layout ---- */
+  .page {
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  /* ---- Header ---- */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 48px 0 80px;
+  }
+
+  .logo {
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+  }
+
+  .logo span {
+    color: var(--accent);
+  }
+
+  .by-line {
+    font-size: 11px;
+    font-weight: 300;
+    letter-spacing: 0.15em;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+  }
+
+  /* ---- Search ---- */
+  .search-section {
+    padding-bottom: 96px;
+  }
+
+  .search-wrapper {
+    position: relative;
+  }
+
+  .search-label {
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 16px;
+  }
+
+  .search-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--divider);
+    padding: 12px 0;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 300;
+    color: var(--text-primary);
+    letter-spacing: 0.02em;
+    outline: none;
+    transition: border-color 0.4s ease;
+  }
+
+  .search-input::placeholder {
+    color: var(--text-tertiary);
+    font-weight: 300;
+  }
+
+  .search-input:focus {
+    border-bottom-color: var(--accent);
+  }
+
+  .search-hint {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin-top: 12px;
+    font-weight: 300;
+  }
+
+  .search-hint span {
+    color: var(--text-secondary);
+    font-weight: 400;
+  }
+
+  /* ---- Score Hero ---- */
+  .score-section {
+    text-align: center;
+    padding-bottom: 96px;
+  }
+
+  .score-tier {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 24px;
+  }
+
+  .score-number {
+    font-size: 220px;
+    font-weight: 200;
+    line-height: 0.85;
+    letter-spacing: -0.04em;
+    color: var(--text-primary);
+    margin-bottom: 32px;
+    position: relative;
+    display: inline-block;
+  }
+
+  .score-number::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 1px;
+    background: var(--accent);
+    opacity: 0.5;
+  }
+
+  .score-of {
+    font-size: 28px;
+    font-weight: 200;
+    color: var(--text-tertiary);
+    vertical-align: top;
+    margin-left: 4px;
+    position: relative;
+    top: 48px;
+  }
+
+  .score-percentile {
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-secondary);
+    margin-top: 28px;
+    letter-spacing: 0.02em;
+  }
+
+  .score-percentile em {
+    font-style: normal;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* ---- Wallet Info ---- */
+  .wallet-info {
+    text-align: center;
+    padding-bottom: 80px;
+  }
+
+  .wallet-address {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text-tertiary);
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---- Stats Row ---- */
+  .stats-section {
+    padding-bottom: 96px;
+  }
+
+  .stats-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .stat-item {
+    text-align: center;
+    padding: 0 48px;
+    position: relative;
+  }
+
+  .stat-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 32px;
+    width: 1px;
+    background: var(--divider);
+  }
+
+  .stat-value {
+    font-size: 28px;
+    font-weight: 300;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+
+  .stat-value .unit {
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-tertiary);
+    margin-left: 2px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+
+  /* ---- Protocols ---- */
+  .protocols-section {
+    padding-bottom: 96px;
+    text-align: center;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 32px;
+  }
+
+  .protocols-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+  }
+
+  .protocol {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+    cursor: default;
+  }
+
+  .protocol:hover {
+    opacity: 1;
+  }
+
+  .protocol-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: var(--bg-raised);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .protocol-icon svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: var(--text-secondary);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .protocol-name {
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+  }
+
+  /* ---- Breakdown ---- */
+  .breakdown-section {
+    padding-bottom: 120px;
+  }
+
+  .breakdown-list {
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+  }
+
+  .breakdown-item {
+    display: grid;
+    grid-template-columns: 160px 1fr auto;
+    align-items: center;
+    gap: 32px;
+  }
+
+  .breakdown-label {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    letter-spacing: 0.02em;
+  }
+
+  .breakdown-bar-track {
+    height: 1px;
+    background: var(--divider);
+    position: relative;
+    border-radius: 1px;
+  }
+
+  .breakdown-bar-fill {
+    position: absolute;
+    top: -0.5px;
+    left: 0;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 1px;
+    transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .breakdown-score {
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+    min-width: 28px;
+    text-align: right;
+  }
+
+  /* ---- Footer ---- */
+  footer {
+    text-align: center;
+    padding-bottom: 64px;
+  }
+
+  .footer-line {
+    width: 24px;
+    height: 1px;
+    background: var(--divider);
+    margin: 0 auto 24px;
+  }
+
+  .footer-text {
+    font-size: 11px;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+  }
+
+  .footer-text a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  .footer-text a:hover {
+    color: var(--accent);
+  }
+
+  /* ---- Subtle Animations ---- */
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate {
+    animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .delay-1 { animation-delay: 0.1s; }
+  .delay-2 { animation-delay: 0.2s; }
+  .delay-3 { animation-delay: 0.35s; }
+  .delay-4 { animation-delay: 0.5s; }
+  .delay-5 { animation-delay: 0.65s; }
+  .delay-6 { animation-delay: 0.8s; }
+  .delay-7 { animation-delay: 0.95s; }
+
+  /* ---- Selection ---- */
+  ::selection {
+    background: var(--accent-dim);
+    color: var(--text-primary);
+  }
+
+  /* ---- Scrollbar ---- */
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--bg);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--divider);
+    border-radius: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="ambient"></div>
+
+<div class="page">
+
+  <!-- Header -->
+  <header class="animate delay-1">
+    <div class="logo">Solana <span>Score</span></div>
+    <div class="by-line">Slice Analytics</div>
+  </header>
+
+  <!-- Search -->
+  <section class="search-section animate delay-2">
+    <div class="search-wrapper">
+      <div class="search-label">Wallet address</div>
+      <input
+        type="text"
+        class="search-input"
+        value="7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU"
+        spellcheck="false"
+      >
+      <div class="search-hint">Showing results for <span>7xKX...gAsU</span></div>
+    </div>
+  </section>
+
+  <!-- Score Hero -->
+  <section class="score-section animate delay-3">
+    <div class="score-tier">Diamond</div>
+    <div class="score-number">87<span class="score-of">/100</span></div>
+    <div class="score-percentile">Top <em>4%</em> of all scored wallets</div>
+  </section>
+
+  <!-- Wallet Info -->
+  <div class="wallet-info animate delay-3">
+    <div class="wallet-address">7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU</div>
+  </div>
+
+  <!-- Stats Row -->
+  <section class="stats-section animate delay-4">
+    <div class="stats-row">
+      <div class="stat-item">
+        <div class="stat-value">342</div>
+        <div class="stat-label">Transactions</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">18<span class="unit">mo</span></div>
+        <div class="stat-label">Wallet Age</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">9</div>
+        <div class="stat-label">Protocols</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">$12.4<span class="unit">k</span></div>
+        <div class="stat-label">Volume</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Protocols -->
+  <section class="protocols-section animate delay-5">
+    <div class="section-label">Active Protocols</div>
+    <div class="protocols-row">
+
+      <!-- Jupiter -->
+      <div class="protocol">
+        <div class="protocol-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M8 12h8M12 8v8"/></svg>
+        </div>
+        <div class="protocol-name">Jupiter</div>
+      </div>
+
+      <!-- Marinade -->
+      <div class="protocol">
+        <div class="protocol-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 4v16M8 8l4-4 4 4M8 16l4 4 4-4"/></svg>
+        </div>
+        <div class="protocol-name">Marinade</div>
+      </div>
+
+      <!-- Raydium -->
+      <div class="protocol">
+        <div class="protocol-icon">
+          <svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 1 16 0"/><path d="M12 12l6-4"/><circle cx="12" cy="12" r="2"/></svg>
+        </div>
+        <div class="protocol-name">Raydium</div>
+      </div>
+
+      <!-- Tensor -->
+      <div class="protocol">
+        <div class="protocol-icon">
+          <svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1"/><path d="M6 12h12M12 6v12"/></svg>
+        </div>
+        <div class="protocol-name">Tensor</div>
+      </div>
+
+      <!-- Drift -->
+      <div class="protocol">
+        <div class="protocol-icon">
+          <svg viewBox="0 0 24 24"><path d="M4 20L12 4l8 16"/><path d="M8 14h8"/></svg>
+        </div>
+        <div class="protocol-name">Drift</div>
+      </div>
+
+      <!-- Orca -->
+      <div class="protocol">
+        <div class="protocol-icon">
+          <svg viewBox="0 0 24 24"><path d="M4 12c2-4 6-4 8 0s6 4 8 0"/><path d="M4 16c2-4 6-4 8 0s6 4 8 0"/></svg>
+        </div>
+        <div class="protocol-name">Orca</div>
+      </div>
+
+      <!-- Meteora -->
+      <div class="protocol">
+        <div class="protocol-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 4v3M12 17v3M4 12h3M17 12h3"/></svg>
+        </div>
+        <div class="protocol-name">Meteora</div>
+      </div>
+
+      <!-- Jito -->
+      <div class="protocol">
+        <div class="protocol-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 4l8 4v8l-8 4-8-4V8z"/></svg>
+        </div>
+        <div class="protocol-name">Jito</div>
+      </div>
+
+      <!-- Marginfi -->
+      <div class="protocol">
+        <div class="protocol-icon">
+          <svg viewBox="0 0 24 24"><path d="M4 8h16M4 12h12M4 16h8"/></svg>
+        </div>
+        <div class="protocol-name">Marginfi</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Score Breakdown -->
+  <section class="breakdown-section animate delay-6">
+    <div class="section-label">Score Breakdown</div>
+    <div class="breakdown-list">
+
+      <div class="breakdown-item">
+        <div class="breakdown-label">Transaction History</div>
+        <div class="breakdown-bar-track">
+          <div class="breakdown-bar-fill" style="width: 92%"></div>
+        </div>
+        <div class="breakdown-score">92</div>
+      </div>
+
+      <div class="breakdown-item">
+        <div class="breakdown-label">DeFi Engagement</div>
+        <div class="breakdown-bar-track">
+          <div class="breakdown-bar-fill" style="width: 88%"></div>
+        </div>
+        <div class="breakdown-score">88</div>
+      </div>
+
+      <div class="breakdown-item">
+        <div class="breakdown-label">Wallet Longevity</div>
+        <div class="breakdown-bar-track">
+          <div class="breakdown-bar-fill" style="width: 79%"></div>
+        </div>
+        <div class="breakdown-score">79</div>
+      </div>
+
+      <div class="breakdown-item">
+        <div class="breakdown-label">Staking Activity</div>
+        <div class="breakdown-bar-track">
+          <div class="breakdown-bar-fill" style="width: 85%"></div>
+        </div>
+        <div class="breakdown-score">85</div>
+      </div>
+
+      <div class="breakdown-item">
+        <div class="breakdown-label">NFT Portfolio</div>
+        <div class="breakdown-bar-track">
+          <div class="breakdown-bar-fill" style="width: 72%"></div>
+        </div>
+        <div class="breakdown-score">72</div>
+      </div>
+
+      <div class="breakdown-item">
+        <div class="breakdown-label">Governance</div>
+        <div class="breakdown-bar-track">
+          <div class="breakdown-bar-fill" style="width: 68%"></div>
+        </div>
+        <div class="breakdown-score">68</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="animate delay-7">
+    <div class="footer-line"></div>
+    <div class="footer-text"><a href="#">Slice Analytics</a> &mdash; Solana On-Chain Reputation</div>
+  </footer>
+
+</div>
+
+</body>
+</html>

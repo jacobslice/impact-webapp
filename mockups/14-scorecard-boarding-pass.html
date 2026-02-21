@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solana Score — Boarding Pass Scorecard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0a0a0f;
+    background-image:
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(139, 92, 246, 0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
+    font-family: 'Space Grotesk', sans-serif;
+    color: #e2e0eb;
+    padding: 40px 20px;
+  }
+
+  /* ── Ticket Container ── */
+  .ticket {
+    position: relative;
+    width: 620px;
+    height: 340px;
+    display: flex;
+    filter: drop-shadow(0 20px 60px rgba(139, 92, 246, 0.18))
+            drop-shadow(0 4px 20px rgba(0, 0, 0, 0.5));
+  }
+
+  /* ── Main Section (Left) ── */
+  .ticket-main {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    background: linear-gradient(135deg, rgba(30, 27, 46, 0.92) 0%, rgba(20, 18, 35, 0.96) 100%);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(139, 92, 246, 0.18);
+    border-right: none;
+    border-radius: 16px 0 0 16px;
+    padding: 22px 24px 18px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Subtle noise texture overlay */
+  .ticket-main::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  /* Top cutout semicircle */
+  .ticket-main::after {
+    content: '';
+    position: absolute;
+    right: -11px;
+    top: -11px;
+    width: 22px;
+    height: 22px;
+    background: #0a0a0f;
+    border-radius: 50%;
+    z-index: 10;
+  }
+
+  /* Bottom cutout semicircle — on the stub */
+  .ticket-stub::before {
+    content: '';
+    position: absolute;
+    left: -11px;
+    bottom: -11px;
+    width: 22px;
+    height: 22px;
+    background: #0a0a0f;
+    border-radius: 50%;
+    z-index: 10;
+  }
+
+  /* Extra cutout for main bottom-right */
+  .ticket-main .cutout-bottom {
+    position: absolute;
+    right: -11px;
+    bottom: -11px;
+    width: 22px;
+    height: 22px;
+    background: #0a0a0f;
+    border-radius: 50%;
+    z-index: 10;
+  }
+
+  /* Extra cutout for stub top-left */
+  .ticket-stub .cutout-top {
+    position: absolute;
+    left: -11px;
+    top: -11px;
+    width: 22px;
+    height: 22px;
+    background: #0a0a0f;
+    border-radius: 50%;
+    z-index: 10;
+  }
+
+  /* ── Perforation Line ── */
+  .perforation {
+    width: 0;
+    position: relative;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+  }
+
+  .perforation::after {
+    content: '';
+    position: absolute;
+    top: 12px;
+    bottom: 12px;
+    left: -1px;
+    width: 0;
+    border-left: 2px dashed rgba(139, 92, 246, 0.3);
+  }
+
+  /* ── Stub Section (Right) ── */
+  .ticket-stub {
+    position: relative;
+    width: 160px;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, rgba(35, 30, 55, 0.94) 0%, rgba(22, 19, 40, 0.97) 100%);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(139, 92, 246, 0.18);
+    border-left: none;
+    border-radius: 0 16px 16px 0;
+    padding: 22px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .ticket-stub::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  /* ── Header Row ── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .brand-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #8B5CF6, #6D28D9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 13px;
+    color: #fff;
+    letter-spacing: -0.5px;
+    flex-shrink: 0;
+  }
+
+  .brand-text {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .brand-name {
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: #fff;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  .brand-sub {
+    font-size: 9px;
+    color: rgba(139, 92, 246, 0.7);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 2px;
+    line-height: 1;
+  }
+
+  .class-badge {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(139, 92, 246, 0.08));
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #c4b5fd;
+    text-transform: uppercase;
+  }
+
+  .class-badge .diamond-icon {
+    font-size: 10px;
+  }
+
+  /* ── Route Row (FROM/TO) ── */
+  .route {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .route-point {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .route-label {
+    font-size: 8px;
+    letter-spacing: 1.5px;
+    color: rgba(139, 92, 246, 0.6);
+    text-transform: uppercase;
+    margin-bottom: 2px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .route-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.5px;
+  }
+
+  .route-line {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding-top: 10px;
+  }
+
+  .route-dash {
+    flex: 1;
+    height: 1px;
+    background: repeating-linear-gradient(
+      90deg,
+      rgba(139, 92, 246, 0.4) 0px,
+      rgba(139, 92, 246, 0.4) 4px,
+      transparent 4px,
+      transparent 8px
+    );
+  }
+
+  .route-arrow {
+    color: #8B5CF6;
+    font-size: 14px;
+    margin-left: 2px;
+  }
+
+  .wallet-addr {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: rgba(226, 224, 235, 0.5);
+    margin-top: 2px;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── Stats Grid ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    margin-bottom: 12px;
+    border-top: 1px solid rgba(139, 92, 246, 0.1);
+    border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    padding: 10px 0;
+  }
+
+  .stat {
+    text-align: center;
+    position: relative;
+  }
+
+  .stat:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 2px;
+    bottom: 2px;
+    width: 1px;
+    background: rgba(139, 92, 246, 0.12);
+  }
+
+  .stat-label {
+    font-size: 7.5px;
+    letter-spacing: 1px;
+    color: rgba(139, 92, 246, 0.55);
+    text-transform: uppercase;
+    margin-bottom: 3px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .stat-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .stat-value .unit {
+    font-size: 9px;
+    font-weight: 400;
+    color: rgba(226, 224, 235, 0.5);
+  }
+
+  /* ── Protocols Row ── */
+  .protocols-section {
+    margin-bottom: 10px;
+  }
+
+  .protocols-label {
+    font-size: 7.5px;
+    letter-spacing: 1.5px;
+    color: rgba(139, 92, 246, 0.5);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .protocols-row {
+    display: flex;
+    gap: 6px;
+  }
+
+  .protocol-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    font-weight: 700;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    cursor: default;
+  }
+
+  .protocol-dot[data-name="JUP"] {
+    background: linear-gradient(135deg, #1d7d5f, #14523e);
+  }
+  .protocol-dot[data-name="RAY"] {
+    background: linear-gradient(135deg, #4f46e5, #3730a3);
+  }
+  .protocol-dot[data-name="MND"] {
+    background: linear-gradient(135deg, #0e7490, #064e3b);
+  }
+  .protocol-dot[data-name="TNS"] {
+    background: linear-gradient(135deg, #9333ea, #6b21a8);
+  }
+  .protocol-dot[data-name="ME"] {
+    background: linear-gradient(135deg, #e11d48, #9f1239);
+  }
+  .protocol-dot[data-name="DFT"] {
+    background: linear-gradient(135deg, #d97706, #92400e);
+  }
+  .protocol-dot[data-name="ORC"] {
+    background: linear-gradient(135deg, #2563eb, #1e40af);
+  }
+  .protocol-dot[data-name="KMN"] {
+    background: linear-gradient(135deg, #059669, #047857);
+  }
+
+  /* ── Footer Row ── */
+  .footer {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: auto;
+  }
+
+  .footer-item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .footer-label {
+    font-size: 7px;
+    letter-spacing: 1.5px;
+    color: rgba(139, 92, 246, 0.45);
+    text-transform: uppercase;
+    margin-bottom: 1px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .footer-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(226, 224, 235, 0.85);
+    letter-spacing: 0.5px;
+  }
+
+  .footer-value.highlight {
+    color: #c4b5fd;
+  }
+
+  .footer-separator {
+    width: 3px;
+    height: 3px;
+    background: rgba(139, 92, 246, 0.3);
+    border-radius: 50%;
+  }
+
+  /* ── Stub Content ── */
+  .stub-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    position: relative;
+    z-index: 1;
+  }
+
+  .stub-score-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 2px;
+    color: rgba(139, 92, 246, 0.5);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .stub-score {
+    font-family: 'Space Mono', monospace;
+    font-size: 56px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+    text-shadow: 0 0 40px rgba(139, 92, 246, 0.4);
+  }
+
+  .stub-score-max {
+    font-family: 'Space Mono', monospace;
+    font-size: 16px;
+    font-weight: 400;
+    color: rgba(139, 92, 246, 0.5);
+    margin-top: 0;
+    margin-bottom: 4px;
+  }
+
+  .stub-tier {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: #c4b5fd;
+    text-transform: uppercase;
+    background: rgba(139, 92, 246, 0.12);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    padding: 3px 10px;
+    border-radius: 4px;
+    margin-bottom: 14px;
+  }
+
+  /* QR-like grid pattern */
+  .qr-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: repeat(7, 1fr);
+    gap: 2px;
+    width: 56px;
+    height: 56px;
+    margin-bottom: 10px;
+  }
+
+  .qr-cell {
+    border-radius: 1px;
+    background: rgba(139, 92, 246, 0.12);
+  }
+
+  .qr-cell.filled {
+    background: rgba(139, 92, 246, 0.45);
+  }
+
+  .qr-cell.bright {
+    background: rgba(139, 92, 246, 0.7);
+  }
+
+  .stub-url {
+    font-family: 'Space Mono', monospace;
+    font-size: 7px;
+    letter-spacing: 0.5px;
+    color: rgba(139, 92, 246, 0.4);
+    text-transform: none;
+  }
+
+  /* ── Background glow accents ── */
+  .ticket-main .glow {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .glow-1 {
+    top: -60px;
+    right: -40px;
+  }
+
+  .glow-2 {
+    bottom: -80px;
+    left: -40px;
+  }
+
+  .ticket-stub .stub-glow {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.12) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  /* ── Ensure content sits above glows ── */
+  .header, .route, .stats-grid, .protocols-section, .footer {
+    position: relative;
+    z-index: 1;
+  }
+</style>
+</head>
+<body>
+
+<div class="ticket">
+  <!-- ─── Left: Main Section ─── -->
+  <div class="ticket-main">
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+    <div class="cutout-bottom"></div>
+
+    <!-- Header -->
+    <div class="header">
+      <div class="brand">
+        <div class="brand-icon">S</div>
+        <div class="brand-text">
+          <span class="brand-name">Solana Score</span>
+          <span class="brand-sub">Slice Analytics</span>
+        </div>
+      </div>
+      <div class="class-badge">
+        <span class="diamond-icon">&#9670;</span>
+        Diamond Class
+      </div>
+    </div>
+
+    <!-- Route: FROM / TO -->
+    <div class="route">
+      <div class="route-point">
+        <span class="route-label">Wallet</span>
+        <span class="route-value">7xKXtg</span>
+        <span class="wallet-addr">7xKXtg2CW87d...JosgAsU</span>
+      </div>
+      <div class="route-line">
+        <div class="route-dash"></div>
+        <span class="route-arrow">&#9654;</span>
+      </div>
+      <div class="route-point" style="text-align:right;">
+        <span class="route-label">Destination</span>
+        <span class="route-value" style="color:#c4b5fd;">Diamond Tier</span>
+      </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="stat-label">Protocol Fees</div>
+        <div class="stat-value">$12,450</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Network Fees</div>
+        <div class="stat-value">2.3 <span class="unit">SOL</span></div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Holdings</div>
+        <div class="stat-value">$45,200</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Active</div>
+        <div class="stat-value">18 <span class="unit">MO</span></div>
+      </div>
+    </div>
+
+    <!-- Protocols -->
+    <div class="protocols-section">
+      <div class="protocols-label">Protocols (8)</div>
+      <div class="protocols-row">
+        <div class="protocol-dot" data-name="JUP" title="Jupiter">JUP</div>
+        <div class="protocol-dot" data-name="RAY" title="Raydium">RAY</div>
+        <div class="protocol-dot" data-name="MND" title="Marinade">MND</div>
+        <div class="protocol-dot" data-name="TNS" title="Tensor">TNS</div>
+        <div class="protocol-dot" data-name="ME" title="Magic Eden">ME</div>
+        <div class="protocol-dot" data-name="DFT" title="Drift">DFT</div>
+        <div class="protocol-dot" data-name="ORC" title="Orca">ORC</div>
+        <div class="protocol-dot" data-name="KMN" title="Kamino">KMN</div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div class="footer-item">
+        <span class="footer-label">Scored</span>
+        <span class="footer-value">FEB 2026</span>
+      </div>
+      <div class="footer-separator"></div>
+      <div class="footer-item">
+        <span class="footer-label">Rank</span>
+        <span class="footer-value">#1,247</span>
+      </div>
+      <div class="footer-separator"></div>
+      <div class="footer-item">
+        <span class="footer-label">Percentile</span>
+        <span class="footer-value highlight">TOP 3%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Perforation ─── -->
+  <div class="perforation"></div>
+
+  <!-- ─── Right: Stub ─── -->
+  <div class="ticket-stub">
+    <div class="stub-glow"></div>
+    <div class="cutout-top"></div>
+
+    <div class="stub-content">
+      <div class="stub-score-label">Score</div>
+      <div class="stub-score">87</div>
+      <div class="stub-score-max">/100</div>
+      <div class="stub-tier">Diamond</div>
+
+      <!-- QR-like decorative grid -->
+      <div class="qr-grid">
+        <!-- Row 1 -->
+        <div class="qr-cell bright"></div>
+        <div class="qr-cell bright"></div>
+        <div class="qr-cell bright"></div>
+        <div class="qr-cell"></div>
+        <div class="qr-cell bright"></div>
+        <div class="qr-cell bright"></div>
+        <div class="qr-cell bright"></div>
+        <!-- Row 2 -->
+        <div class="qr-cell bright"></div>
+        <div class="qr-cell"></div>
+        <div class="qr-cell bright"></div>
+        <div class="qr-cell filled"></div>
+        <div class="qr-cell bright"></div>
+        <div class="qr-cell"></div>
+        <div class="qr-cell bright"></div>
+        <!-- Row 3 -->
+        <div class="qr-cell bright"></div>
+        <div class="qr-cell bright"></div>
+        <div class="qr-cell bright"></div>
+        <div class="qr-cell"></div>
+        <div class="qr-cell bright"></div>
+        <div class="qr-cell bright"></div>
+        <div class="qr-cell bright"></div>
+        <!-- Row 4 -->
+        <div class="qr-cell"></div>
+        <div class="qr-cell filled"></div>
+        <div class="qr-cell"></div>
+        <div class="qr-cell filled"></div>
+        <div class="qr-cell"></div>
+        <div class="qr-cell filled"></div>
+        <div class="qr-cell"></div>
+        <!-- Row 5 -->
+        <div class="qr-cell bright"></div>
+        <div class="qr-cell bright"></div>
+        <div class="qr-cell bright"></div>
+        <div class="qr-cell"></div>
+        <div class="qr-cell filled"></div>
+        <div class="qr-cell"></div>
+        <div class="qr-cell filled"></div>
+        <!-- Row 6 -->
+        <div class="qr-cell bright"></div>
+        <div class="qr-cell"></div>
+        <div class="qr-cell bright"></div>
+        <div class="qr-cell filled"></div>
+        <div class="qr-cell"></div>
+        <div class="qr-cell filled"></div>
+        <div class="qr-cell"></div>
+        <!-- Row 7 -->
+        <div class="qr-cell bright"></div>
+        <div class="qr-cell bright"></div>
+        <div class="qr-cell bright"></div>
+        <div class="qr-cell"></div>
+        <div class="qr-cell filled"></div>
+        <div class="qr-cell bright"></div>
+        <div class="qr-cell bright"></div>
+      </div>
+
+      <div class="stub-url">solana-score.xyz</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

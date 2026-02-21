@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solana Score - Holographic Scorecard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0a0a0f;
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(88, 28, 135, 0.15) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 50%, rgba(15, 82, 186, 0.12) 0%, transparent 60%);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    overflow: hidden;
+  }
+
+  /* === THE CARD === */
+  .card-wrapper {
+    position: relative;
+    width: 600px;
+    height: 820px;
+    perspective: 1200px;
+  }
+
+  .card {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 24px;
+    overflow: hidden;
+    cursor: default;
+    transform-style: preserve-3d;
+    transition: transform 0.4s ease;
+  }
+
+  .card-wrapper:hover .card {
+    transform: rotateY(2deg) rotateX(-1deg);
+  }
+
+  /* Dramatic shadow */
+  .card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 24px;
+    box-shadow:
+      0 4px 20px rgba(0, 0, 0, 0.5),
+      0 20px 60px rgba(0, 0, 0, 0.6),
+      0 40px 100px rgba(0, 0, 0, 0.4),
+      0 0 80px rgba(139, 92, 246, 0.15),
+      0 0 120px rgba(59, 130, 246, 0.08);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  /* Dark base layer */
+  .card-base {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(145deg, #12121a 0%, #0d0d14 40%, #151520 100%);
+    border-radius: 24px;
+  }
+
+  /* Holographic foil overlay */
+  .holo-foil {
+    position: absolute;
+    inset: 0;
+    border-radius: 24px;
+    background:
+      conic-gradient(
+        from 0deg at 50% 50%,
+        rgba(255, 0, 128, 0.12) 0deg,
+        rgba(255, 165, 0, 0.10) 30deg,
+        rgba(255, 255, 0, 0.10) 60deg,
+        rgba(0, 255, 128, 0.12) 90deg,
+        rgba(0, 200, 255, 0.14) 120deg,
+        rgba(0, 100, 255, 0.12) 150deg,
+        rgba(128, 0, 255, 0.14) 180deg,
+        rgba(255, 0, 200, 0.12) 210deg,
+        rgba(255, 100, 100, 0.10) 240deg,
+        rgba(255, 200, 0, 0.10) 270deg,
+        rgba(0, 255, 200, 0.12) 300deg,
+        rgba(100, 0, 255, 0.12) 330deg,
+        rgba(255, 0, 128, 0.12) 360deg
+      );
+    mix-blend-mode: screen;
+    opacity: 0.7;
+    transition: opacity 0.5s ease, background 0.5s ease;
+    animation: holoShift 8s ease-in-out infinite;
+  }
+
+  .card-wrapper:hover .holo-foil {
+    opacity: 1;
+    background:
+      conic-gradient(
+        from 45deg at 50% 50%,
+        rgba(255, 0, 128, 0.22) 0deg,
+        rgba(255, 165, 0, 0.18) 30deg,
+        rgba(255, 255, 0, 0.18) 60deg,
+        rgba(0, 255, 128, 0.22) 90deg,
+        rgba(0, 200, 255, 0.25) 120deg,
+        rgba(0, 100, 255, 0.22) 150deg,
+        rgba(128, 0, 255, 0.25) 180deg,
+        rgba(255, 0, 200, 0.22) 210deg,
+        rgba(255, 100, 100, 0.18) 240deg,
+        rgba(255, 200, 0, 0.18) 270deg,
+        rgba(0, 255, 200, 0.22) 300deg,
+        rgba(100, 0, 255, 0.22) 330deg,
+        rgba(255, 0, 128, 0.22) 360deg
+      );
+  }
+
+  @keyframes holoShift {
+    0%, 100% {
+      background-position: 0% 0%;
+      filter: hue-rotate(0deg);
+    }
+    25% {
+      filter: hue-rotate(15deg);
+    }
+    50% {
+      filter: hue-rotate(-10deg);
+    }
+    75% {
+      filter: hue-rotate(20deg);
+    }
+  }
+
+  /* Shimmer streak */
+  .holo-shimmer {
+    position: absolute;
+    inset: 0;
+    border-radius: 24px;
+    background: linear-gradient(
+      105deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.04) 42%,
+      rgba(255, 255, 255, 0.12) 48%,
+      rgba(255, 255, 255, 0.04) 54%,
+      transparent 66%
+    );
+    background-size: 250% 100%;
+    animation: shimmer 6s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  .card-wrapper:hover .holo-shimmer {
+    animation: shimmerFast 2s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    0%, 100% { background-position: 200% 0; }
+    50% { background-position: -50% 0; }
+  }
+
+  @keyframes shimmerFast {
+    0% { background-position: 200% 0; }
+    100% { background-position: -100% 0; }
+  }
+
+  /* Sparkle dots */
+  .sparkle-field {
+    position: absolute;
+    inset: 0;
+    border-radius: 24px;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .sparkle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: white;
+    border-radius: 50%;
+    opacity: 0;
+    animation: sparkle 4s ease-in-out infinite;
+  }
+
+  .sparkle:nth-child(1) { top: 12%; left: 18%; animation-delay: 0s; }
+  .sparkle:nth-child(2) { top: 28%; left: 72%; animation-delay: 0.8s; }
+  .sparkle:nth-child(3) { top: 45%; left: 35%; animation-delay: 1.6s; }
+  .sparkle:nth-child(4) { top: 62%; left: 85%; animation-delay: 2.4s; }
+  .sparkle:nth-child(5) { top: 78%; left: 22%; animation-delay: 3.2s; }
+  .sparkle:nth-child(6) { top: 88%; left: 58%; animation-delay: 0.4s; }
+  .sparkle:nth-child(7) { top: 35%; left: 90%; animation-delay: 1.2s; }
+  .sparkle:nth-child(8) { top: 55%; left: 10%; animation-delay: 2.0s; }
+
+  @keyframes sparkle {
+    0%, 100% { opacity: 0; transform: scale(0); }
+    50% { opacity: 0.9; transform: scale(1); }
+  }
+
+  /* Card border - holographic edge */
+  .card-border {
+    position: absolute;
+    inset: 0;
+    border-radius: 24px;
+    padding: 2px;
+    background: conic-gradient(
+      from 0deg,
+      rgba(255, 100, 200, 0.6),
+      rgba(255, 200, 100, 0.4),
+      rgba(100, 255, 200, 0.6),
+      rgba(100, 200, 255, 0.6),
+      rgba(200, 100, 255, 0.6),
+      rgba(255, 100, 200, 0.6)
+    );
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: borderRotate 6s linear infinite;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  @keyframes borderRotate {
+    to { filter: hue-rotate(360deg); }
+  }
+
+  /* Inner border line */
+  .card-inner-border {
+    position: absolute;
+    inset: 6px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  /* === CONTENT === */
+  .card-content {
+    position: relative;
+    z-index: 5;
+    padding: 32px 36px 28px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Glassmorphism panel helper */
+  .glass {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 14px;
+  }
+
+  /* --- Header --- */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .brand-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #9945FF 0%, #14F195 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 16px;
+    color: #fff;
+    letter-spacing: -0.5px;
+    box-shadow: 0 2px 12px rgba(153, 69, 255, 0.3);
+  }
+
+  .brand-text {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .brand-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.3px;
+    line-height: 1.1;
+  }
+
+  .brand-sub {
+    font-size: 10px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.35);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .slice-badge {
+    padding: 6px 14px;
+    border-radius: 100px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.45);
+    letter-spacing: 0.5px;
+  }
+
+  /* --- Hero Score Section --- */
+  .hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0 16px;
+    position: relative;
+  }
+
+  /* Diamond tier badge/seal */
+  .tier-seal {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+
+  /* Outer rotating ring */
+  .seal-ring-outer {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    background: conic-gradient(
+      from 0deg,
+      rgba(139, 92, 246, 0.6),
+      rgba(59, 130, 246, 0.4),
+      rgba(20, 241, 149, 0.5),
+      rgba(255, 215, 0, 0.5),
+      rgba(139, 92, 246, 0.6)
+    ) border-box;
+    -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
+    mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: sealSpin 12s linear infinite;
+  }
+
+  @keyframes sealSpin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Inner decorative ring */
+  .seal-ring-inner {
+    position: absolute;
+    inset: 10px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  /* Notches around the seal */
+  .seal-notches {
+    position: absolute;
+    inset: -4px;
+    animation: sealSpin 12s linear infinite reverse;
+  }
+
+  .seal-notch {
+    position: absolute;
+    width: 8px;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 2px;
+    top: 50%;
+    left: 50%;
+  }
+
+  /* Diamond icon above score */
+  .diamond-icon {
+    position: absolute;
+    top: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .diamond-shape {
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(135deg, #a78bfa 0%, #60a5fa 50%, #34d399 100%);
+    transform: rotate(45deg);
+    border-radius: 3px;
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+  }
+
+  .score-number {
+    font-size: 88px;
+    font-weight: 900;
+    background: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0.85) 60%, rgba(167, 139, 250, 0.9) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    letter-spacing: -4px;
+    position: relative;
+    text-shadow: none;
+    filter: drop-shadow(0 2px 20px rgba(139, 92, 246, 0.3));
+  }
+
+  .tier-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .tier-text {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    background: linear-gradient(90deg, #a78bfa, #60a5fa, #34d399, #a78bfa);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: tierShine 4s linear infinite;
+  }
+
+  @keyframes tierShine {
+    to { background-position: 200% 0; }
+  }
+
+  .tier-diamond-sm {
+    width: 8px;
+    height: 8px;
+    background: linear-gradient(135deg, #a78bfa, #60a5fa);
+    transform: rotate(45deg);
+    border-radius: 1px;
+  }
+
+  /* --- Rank & Wallet --- */
+  .rank-wallet {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 18px;
+    margin-bottom: 16px;
+  }
+
+  .rank-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .rank-number {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .rank-total {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: 400;
+  }
+
+  .rank-percentile {
+    padding: 5px 12px;
+    border-radius: 100px;
+    background: linear-gradient(135deg, rgba(20, 241, 149, 0.15), rgba(20, 241, 149, 0.05));
+    border: 1px solid rgba(20, 241, 149, 0.2);
+    font-size: 13px;
+    font-weight: 700;
+    color: #14F195;
+  }
+
+  .wallet-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .wallet-label {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+  }
+
+  .wallet-address {
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
+    font-family: 'Inter', monospace;
+  }
+
+  /* --- Stats Row --- */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .stat-card {
+    padding: 12px 10px;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 3px;
+  }
+
+  .stat-label {
+    font-size: 9px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.35);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    line-height: 1.3;
+  }
+
+  /* --- Score Breakdown --- */
+  .breakdown {
+    padding: 16px 18px;
+    margin-bottom: 16px;
+  }
+
+  .breakdown-title {
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+  }
+
+  .breakdown-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .breakdown-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .breakdown-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.6);
+    width: 130px;
+    flex-shrink: 0;
+  }
+
+  .breakdown-bar-track {
+    flex: 1;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .breakdown-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s ease;
+  }
+
+  .breakdown-bar-fill.txn {
+    width: 92%;
+    background: linear-gradient(90deg, #a78bfa, #8b5cf6);
+  }
+
+  .breakdown-bar-fill.defi {
+    width: 88%;
+    background: linear-gradient(90deg, #60a5fa, #3b82f6);
+  }
+
+  .breakdown-bar-fill.holdings {
+    width: 85%;
+    background: linear-gradient(90deg, #34d399, #10b981);
+  }
+
+  .breakdown-bar-fill.age {
+    width: 79%;
+    background: linear-gradient(90deg, #fbbf24, #f59e0b);
+  }
+
+  .breakdown-score {
+    font-size: 13px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.8);
+    width: 28px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* --- Protocols --- */
+  .protocols {
+    padding: 14px 18px;
+    margin-bottom: 16px;
+  }
+
+  .protocols-title {
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 12px;
+  }
+
+  .protocol-logos {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+  }
+
+  .protocol-logo {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .protocol-logo::after {
+    content: attr(data-name);
+    position: absolute;
+    bottom: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 8px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.3);
+    white-space: nowrap;
+    letter-spacing: 0.3px;
+  }
+
+  .proto-jup { background: linear-gradient(135deg, #2dd4bf, #059669); }
+  .proto-ray { background: linear-gradient(135deg, #818cf8, #4f46e5); }
+  .proto-mar { background: linear-gradient(135deg, #f472b6, #db2777); }
+  .proto-ten { background: linear-gradient(135deg, #fb923c, #ea580c); }
+  .proto-me { background: linear-gradient(135deg, #e879f9, #a21caf); }
+  .proto-dri { background: linear-gradient(135deg, #38bdf8, #0284c7); }
+  .proto-orc { background: linear-gradient(135deg, #fbbf24, #d97706); }
+  .proto-kam { background: linear-gradient(135deg, #a3e635, #65a30d); }
+
+  /* --- Footer --- */
+  .footer {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .footer-url {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.25);
+    letter-spacing: 0.5px;
+  }
+
+  .footer-date {
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.2);
+  }
+
+  /* Subtle texture overlay */
+  .noise-texture {
+    position: absolute;
+    inset: 0;
+    border-radius: 24px;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-size: 128px 128px;
+    pointer-events: none;
+    z-index: 6;
+  }
+
+  /* Prismatic light streaks */
+  .prism-streak {
+    position: absolute;
+    border-radius: 24px;
+    overflow: hidden;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .prism-streak::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(
+      from 0deg at 30% 40%,
+      transparent 0deg,
+      rgba(255, 100, 200, 0.05) 20deg,
+      transparent 40deg,
+      transparent 140deg,
+      rgba(100, 200, 255, 0.05) 160deg,
+      transparent 180deg,
+      transparent 280deg,
+      rgba(100, 255, 150, 0.05) 300deg,
+      transparent 320deg
+    );
+    animation: prismRotate 20s linear infinite;
+  }
+
+  @keyframes prismRotate {
+    to { transform: rotate(360deg); }
+  }
+</style>
+</head>
+<body>
+
+<div class="card-wrapper">
+  <div class="card">
+    <!-- Base dark layer -->
+    <div class="card-base"></div>
+
+    <!-- Prismatic light -->
+    <div class="prism-streak"></div>
+
+    <!-- Holographic foil -->
+    <div class="holo-foil"></div>
+
+    <!-- Shimmer streak -->
+    <div class="holo-shimmer"></div>
+
+    <!-- Sparkle dots -->
+    <div class="sparkle-field">
+      <div class="sparkle"></div>
+      <div class="sparkle"></div>
+      <div class="sparkle"></div>
+      <div class="sparkle"></div>
+      <div class="sparkle"></div>
+      <div class="sparkle"></div>
+      <div class="sparkle"></div>
+      <div class="sparkle"></div>
+    </div>
+
+    <!-- Holographic border -->
+    <div class="card-border"></div>
+    <div class="card-inner-border"></div>
+
+    <!-- Noise texture -->
+    <div class="noise-texture"></div>
+
+    <!-- Content -->
+    <div class="card-content">
+
+      <!-- Header -->
+      <div class="header">
+        <div class="brand">
+          <div class="brand-icon">S</div>
+          <div class="brand-text">
+            <div class="brand-title">Solana Score</div>
+            <div class="brand-sub">by Slice Analytics</div>
+          </div>
+        </div>
+        <div class="slice-badge">SLICE</div>
+      </div>
+
+      <!-- Hero Score -->
+      <div class="hero">
+        <div class="tier-seal">
+          <div class="seal-ring-outer"></div>
+          <div class="seal-ring-inner"></div>
+          <svg class="seal-notches" viewBox="0 0 208 208" style="position:absolute;inset:-4px;width:calc(100% + 8px);height:calc(100% + 8px);">
+            <circle cx="104" cy="104" r="102" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="4 14" />
+          </svg>
+          <div class="diamond-icon">
+            <div class="diamond-shape"></div>
+          </div>
+          <div class="score-number">87</div>
+        </div>
+        <div class="tier-label">
+          <div class="tier-diamond-sm"></div>
+          <div class="tier-text">Diamond Tier</div>
+          <div class="tier-diamond-sm"></div>
+        </div>
+      </div>
+
+      <!-- Rank & Wallet -->
+      <div class="rank-wallet glass">
+        <div style="display:flex;align-items:center;gap:16px;">
+          <div class="rank-info">
+            <div class="rank-number">#1,247 <span style="font-weight:400;color:rgba(255,255,255,0.35);font-size:12px;">of 142,000</span></div>
+            <div class="rank-total">wallets scored</div>
+          </div>
+          <div class="rank-percentile">Top 3%</div>
+        </div>
+        <div class="wallet-section">
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
+            <div class="wallet-label">Wallet</div>
+            <div class="wallet-address">7xKX...AsU</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Row -->
+      <div class="stats-row">
+        <div class="stat-card glass">
+          <div class="stat-value">$12,450</div>
+          <div class="stat-label">Protocol Fees</div>
+        </div>
+        <div class="stat-card glass">
+          <div class="stat-value">2.3 SOL</div>
+          <div class="stat-label">Network Fees</div>
+        </div>
+        <div class="stat-card glass">
+          <div class="stat-value">$45,200</div>
+          <div class="stat-label">Holdings</div>
+        </div>
+        <div class="stat-card glass">
+          <div class="stat-value">18 Mo</div>
+          <div class="stat-label">Active</div>
+        </div>
+      </div>
+
+      <!-- Score Breakdown -->
+      <div class="breakdown glass">
+        <div class="breakdown-title">Score Breakdown</div>
+        <div class="breakdown-rows">
+          <div class="breakdown-row">
+            <div class="breakdown-label">Transaction History</div>
+            <div class="breakdown-bar-track">
+              <div class="breakdown-bar-fill txn"></div>
+            </div>
+            <div class="breakdown-score">92</div>
+          </div>
+          <div class="breakdown-row">
+            <div class="breakdown-label">DeFi Activity</div>
+            <div class="breakdown-bar-track">
+              <div class="breakdown-bar-fill defi"></div>
+            </div>
+            <div class="breakdown-score">88</div>
+          </div>
+          <div class="breakdown-row">
+            <div class="breakdown-label">Holdings</div>
+            <div class="breakdown-bar-track">
+              <div class="breakdown-bar-fill holdings"></div>
+            </div>
+            <div class="breakdown-score">85</div>
+          </div>
+          <div class="breakdown-row">
+            <div class="breakdown-label">Account Age</div>
+            <div class="breakdown-bar-track">
+              <div class="breakdown-bar-fill age"></div>
+            </div>
+            <div class="breakdown-score">79</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Protocols Used -->
+      <div class="protocols glass">
+        <div class="protocols-title">Protocols Used</div>
+        <div class="protocol-logos">
+          <div class="protocol-logo proto-jup" data-name="Jupiter">J</div>
+          <div class="protocol-logo proto-ray" data-name="Raydium">R</div>
+          <div class="protocol-logo proto-mar" data-name="Marinade">M</div>
+          <div class="protocol-logo proto-ten" data-name="Tensor">T</div>
+          <div class="protocol-logo proto-me" data-name="Magic Eden">ME</div>
+          <div class="protocol-logo proto-dri" data-name="Drift">D</div>
+          <div class="protocol-logo proto-orc" data-name="Orca">O</div>
+          <div class="protocol-logo proto-kam" data-name="Kamino">K</div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <div class="footer-url">solana-score.xyz</div>
+        <div class="footer-date">Feb 2026</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

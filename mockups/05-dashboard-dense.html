@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solana Score - Slice Analytics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-primary: #111;
+    --bg-secondary: #1a1a1a;
+    --bg-tertiary: #222;
+    --bg-card: #181818;
+    --border: #2a2a2a;
+    --border-light: #333;
+    --text-primary: #e8e8e8;
+    --text-secondary: #999;
+    --text-muted: #666;
+    --green: #00d97e;
+    --green-dim: #00d97e33;
+    --red: #f5365c;
+    --red-dim: #f5365c33;
+    --yellow: #f0b429;
+    --yellow-dim: #f0b42933;
+    --blue: #5e72e4;
+    --blue-dim: #5e72e433;
+    --purple: #b07aff;
+    --cyan: #2dceef;
+    --orange: #fb6340;
+    --sidebar-w: 56px;
+    --topbar-h: 48px;
+  }
+
+  body {
+    font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 13px;
+    line-height: 1.4;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: var(--sidebar-w);
+    height: 100vh;
+    background: #0d0d0d;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 0;
+    z-index: 100;
+    gap: 4px;
+  }
+
+  .sidebar-logo {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--green), var(--cyan));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px; color: #111;
+    margin-bottom: 16px;
+    flex-shrink: 0;
+  }
+
+  .sidebar-icon {
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 8px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .sidebar-icon:hover { background: var(--bg-tertiary); color: var(--text-secondary); }
+  .sidebar-icon.active { color: var(--green); background: var(--green-dim); }
+  .sidebar-icon svg { width: 18px; height: 18px; }
+
+  .sidebar-spacer { flex: 1; }
+
+  .sidebar-bottom {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    padding-bottom: 4px;
+  }
+
+  /* ── Top Bar ── */
+  .topbar {
+    position: fixed;
+    top: 0;
+    left: var(--sidebar-w);
+    right: 0;
+    height: var(--topbar-h);
+    background: #0d0d0dee;
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    z-index: 90;
+    gap: 16px;
+  }
+
+  .topbar-brand {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-primary);
+    white-space: nowrap;
+    letter-spacing: -0.3px;
+  }
+  .topbar-brand span { color: var(--text-muted); font-weight: 400; margin-left: 6px; font-size: 11px; }
+
+  .topbar-search {
+    flex: 1;
+    max-width: 480px;
+    position: relative;
+  }
+  .topbar-search input {
+    width: 100%;
+    height: 32px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0 12px 0 34px;
+    color: var(--text-primary);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .topbar-search input::placeholder { color: var(--text-muted); }
+  .topbar-search input:focus { border-color: var(--green); }
+  .topbar-search-icon {
+    position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+    color: var(--text-muted); width: 14px; height: 14px;
+  }
+
+  .topbar-right {
+    display: flex; align-items: center; gap: 12px; margin-left: auto;
+  }
+
+  .topbar-stat {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 11px; color: var(--text-secondary);
+  }
+  .topbar-stat .val { font-family: 'IBM Plex Mono', monospace; color: var(--text-primary); font-weight: 500; }
+
+  .topbar-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+  }
+
+  .topbar-network {
+    font-size: 11px;
+    color: var(--text-secondary);
+    display: flex; align-items: center; gap: 6px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+  }
+
+  /* ── Main Layout ── */
+  .main {
+    margin-left: var(--sidebar-w);
+    margin-top: var(--topbar-h);
+    padding: 16px 20px 32px;
+    max-width: 1300px;
+  }
+
+  /* ── Wallet Header ── */
+  .wallet-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .wallet-info { display: flex; align-items: center; gap: 12px; }
+
+  .wallet-avatar {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #5e72e4, #b07aff);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700;
+  }
+
+  .wallet-addr {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+
+  .wallet-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 1px;
+  }
+
+  .wallet-actions { display: flex; gap: 8px; }
+
+  .btn-sm {
+    height: 28px;
+    padding: 0 12px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .btn-sm:hover { border-color: var(--text-muted); color: var(--text-primary); }
+  .btn-sm.primary { background: var(--green); color: #111; border-color: var(--green); font-weight: 600; }
+
+  /* ── Grid System ── */
+  .grid-top {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .grid-bottom {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .grid-full { margin-bottom: 16px; }
+
+  /* ── Card ── */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+  }
+  .card-header .tag {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    background: var(--bg-tertiary);
+    color: var(--text-muted);
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  .card-body { padding: 14px; }
+
+  /* ── Score Gauge ── */
+  .score-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 14px 14px;
+  }
+
+  .gauge-container {
+    position: relative;
+    width: 220px;
+    height: 130px;
+    margin-bottom: 12px;
+  }
+
+  .gauge-svg { width: 220px; height: 130px; }
+
+  .gauge-value {
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+  }
+  .gauge-value .number {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 42px;
+    font-weight: 700;
+    color: var(--green);
+    line-height: 1;
+    letter-spacing: -2px;
+  }
+  .gauge-value .max {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  .tier-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    border-radius: 20px;
+    background: var(--green-dim);
+    border: 1px solid #00d97e55;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--green);
+    margin-bottom: 14px;
+  }
+
+  .tier-badge .diamond { font-size: 10px; }
+
+  .score-meta {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .score-meta-item {
+    background: var(--bg-tertiary);
+    border-radius: 6px;
+    padding: 8px 10px;
+    text-align: center;
+  }
+  .score-meta-item .label { font-size: 10px; color: var(--text-muted); margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.3px; }
+  .score-meta-item .val { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; }
+
+  /* ── Stats Grid ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .stat-card {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px;
+  }
+
+  .stat-card .label {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 6px;
+  }
+
+  .stat-card .value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-card .change {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    display: flex; align-items: center; gap: 3px;
+  }
+  .stat-card .change.up { color: var(--green); }
+  .stat-card .change.down { color: var(--red); }
+
+  .stat-card .sparkline {
+    margin-top: 8px;
+    height: 24px;
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+  }
+  .stat-card .sparkline .bar {
+    flex: 1;
+    border-radius: 1px;
+    min-height: 2px;
+    opacity: 0.6;
+  }
+
+  /* ── Breakdown Bars ── */
+  .breakdown-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .breakdown-row {
+    display: grid;
+    grid-template-columns: 120px 1fr 44px;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .breakdown-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .breakdown-bar-track {
+    height: 8px;
+    background: var(--bg-primary);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .breakdown-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s ease;
+  }
+
+  .breakdown-val {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: right;
+  }
+
+  /* ── Protocols Table ── */
+  .protocols-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .protocol-cell {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: border-color 0.15s;
+    cursor: default;
+  }
+  .protocol-cell:hover { border-color: var(--border-light); }
+
+  .protocol-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .protocol-icon {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .protocol-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.2;
+  }
+
+  .protocol-sector {
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+
+  .protocol-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .protocol-stat-item { text-align: left; }
+  .protocol-stat-item .lbl { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.2px; }
+  .protocol-stat-item .v { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: var(--text-secondary); }
+
+  /* ── Activity Table ── */
+  .activity-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .activity-table thead th {
+    text-align: left;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--text-muted);
+    padding: 0 10px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .activity-table thead th:last-child { text-align: right; }
+
+  .activity-table tbody td {
+    padding: 8px 10px;
+    font-size: 12px;
+    border-bottom: 1px solid #1f1f1f;
+    vertical-align: middle;
+  }
+  .activity-table tbody tr:last-child td { border-bottom: none; }
+  .activity-table tbody tr:hover td { background: #1c1c1c; }
+  .activity-table tbody td:last-child { text-align: right; }
+
+  .activity-type {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 500;
+  }
+
+  .activity-type-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .activity-hash {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .activity-ago {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .activity-amount {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  /* ── Leaderboard ── */
+  .lb-table { width: 100%; border-collapse: collapse; }
+  .lb-table thead th {
+    text-align: left; font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.4px;
+    color: var(--text-muted); padding: 0 10px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .lb-table thead th:nth-child(1) { width: 36px; }
+  .lb-table thead th:last-child { text-align: right; }
+  .lb-table tbody td {
+    padding: 7px 10px; font-size: 12px;
+    border-bottom: 1px solid #1f1f1f;
+  }
+  .lb-table tbody tr:last-child td { border-bottom: none; }
+  .lb-table tbody tr:hover td { background: #1c1c1c; }
+
+  .lb-rank {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; font-weight: 600;
+    color: var(--text-muted);
+    width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 4px;
+    background: var(--bg-primary);
+  }
+  .lb-rank.top1 { color: var(--yellow); background: var(--yellow-dim); }
+  .lb-rank.top2 { color: #c0c0c0; background: #c0c0c022; }
+  .lb-rank.top3 { color: #cd7f32; background: #cd7f3222; }
+
+  .lb-addr {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; color: var(--text-secondary);
+  }
+  .lb-addr.you { color: var(--green); font-weight: 600; }
+
+  .lb-score {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px; font-weight: 600;
+    text-align: right;
+  }
+
+  .lb-mini-bar {
+    width: 60px; height: 6px;
+    background: var(--bg-primary);
+    border-radius: 3px;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+  .lb-mini-bar-fill { height: 100%; border-radius: 3px; }
+
+  /* ── Score Distribution Mini Chart ── */
+  .dist-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .dist-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    width: 40px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .dist-bar {
+    flex: 1;
+    height: 10px;
+    background: var(--bg-primary);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .dist-bar-fill { height: 100%; border-radius: 2px; }
+  .dist-pct {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    width: 32px;
+    flex-shrink: 0;
+  }
+
+  /* ── Utilities ── */
+  .text-green { color: var(--green); }
+  .text-red { color: var(--red); }
+  .text-yellow { color: var(--yellow); }
+  .text-blue { color: var(--blue); }
+  .text-muted { color: var(--text-muted); }
+  .text-secondary { color: var(--text-secondary); }
+
+  .tag-defi { background: var(--blue-dim); color: var(--blue); }
+  .tag-nft { background: #b07aff33; color: var(--purple); }
+  .tag-lsd { background: var(--yellow-dim); color: var(--yellow); }
+  .tag-perp { background: var(--red-dim); color: var(--red); }
+  .tag-amm { background: var(--green-dim); color: var(--green); }
+
+  .sector-tag {
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.2px;
+    display: inline-block;
+  }
+
+  .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* subtle grid pattern overlay */
+  .main::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .main > * { position: relative; z-index: 1; }
+</style>
+</head>
+<body>
+
+<!-- ════════ Sidebar ════════ -->
+<nav class="sidebar">
+  <div class="sidebar-logo">S</div>
+
+  <div class="sidebar-icon active" title="Dashboard">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+  </div>
+  <div class="sidebar-icon" title="Search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+  </div>
+  <div class="sidebar-icon" title="Analytics">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+  </div>
+  <div class="sidebar-icon" title="Leaderboard">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17V3"/><path d="m17 8-5 5-5-5"/></svg>
+  </div>
+  <div class="sidebar-icon" title="Protocols">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg>
+  </div>
+
+  <div class="sidebar-spacer"></div>
+
+  <div class="sidebar-bottom">
+    <div class="sidebar-icon" title="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+    </div>
+  </div>
+</nav>
+
+<!-- ════════ Top Bar ════════ -->
+<header class="topbar">
+  <div class="topbar-brand">
+    Solana Score
+    <span>by Slice Analytics</span>
+  </div>
+
+  <div class="topbar-search">
+    <svg class="topbar-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" placeholder="Search wallet address or .sol domain..." value="7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU">
+  </div>
+
+  <div class="topbar-right">
+    <div class="topbar-stat">
+      SOL <span class="val mono">$148.32</span>
+    </div>
+    <div class="topbar-stat">
+      TPS <span class="val mono">3,812</span>
+    </div>
+    <div class="topbar-network">
+      <div class="topbar-dot"></div>
+      Mainnet
+    </div>
+  </div>
+</header>
+
+<!-- ════════ Main Content ════════ -->
+<main class="main">
+
+  <!-- Wallet Header -->
+  <div class="wallet-header">
+    <div class="wallet-info">
+      <div class="wallet-avatar">7x</div>
+      <div>
+        <div class="wallet-addr">7xKXtg...gAsU</div>
+        <div class="wallet-label">Last active 2h ago &middot; Created Jan 2024</div>
+      </div>
+    </div>
+    <div class="wallet-actions">
+      <button class="btn-sm">Export</button>
+      <button class="btn-sm">Share</button>
+      <button class="btn-sm primary">Track Wallet</button>
+    </div>
+  </div>
+
+  <!-- ── Top Row: Gauge + Stats ── -->
+  <div class="grid-top">
+
+    <!-- Score Gauge Card -->
+    <div class="card">
+      <div class="card-header">
+        Reputation Score
+        <span class="tag">Updated 2m ago</span>
+      </div>
+      <div class="card-body score-panel">
+        <div class="gauge-container">
+          <svg class="gauge-svg" viewBox="0 0 220 130">
+            <!-- Background arc -->
+            <path d="M 20 120 A 90 90 0 0 1 200 120" fill="none" stroke="#222" stroke-width="16" stroke-linecap="round"/>
+            <!-- Red zone (0-33) -->
+            <path d="M 20 120 A 90 90 0 0 1 52.7 42.5" fill="none" stroke="#f5365c" stroke-width="16" stroke-linecap="round" opacity="0.3"/>
+            <!-- Yellow zone (33-66) -->
+            <path d="M 52.7 42.5 A 90 90 0 0 1 167.3 42.5" fill="none" stroke="#f0b429" stroke-width="16" stroke-linecap="round" opacity="0.3"/>
+            <!-- Green zone (66-100) -->
+            <path d="M 167.3 42.5 A 90 90 0 0 1 200 120" fill="none" stroke="#00d97e" stroke-width="16" stroke-linecap="round" opacity="0.3"/>
+            <!-- Score fill arc (87/100) -->
+            <path d="M 20 120 A 90 90 0 0 1 190.8 70.2" fill="none" stroke="url(#gaugeGrad)" stroke-width="16" stroke-linecap="round"/>
+            <!-- Tick marks -->
+            <line x1="20" y1="120" x2="20" y2="112" stroke="#444" stroke-width="1"/>
+            <line x1="110" y1="30" x2="110" y2="38" stroke="#444" stroke-width="1"/>
+            <line x1="200" y1="120" x2="200" y2="112" stroke="#444" stroke-width="1"/>
+            <!-- Tick labels -->
+            <text x="18" y="132" fill="#555" font-size="10" font-family="IBM Plex Mono" text-anchor="middle">0</text>
+            <text x="110" y="26" fill="#555" font-size="10" font-family="IBM Plex Mono" text-anchor="middle">50</text>
+            <text x="202" y="132" fill="#555" font-size="10" font-family="IBM Plex Mono" text-anchor="middle">100</text>
+            <!-- Needle dot -->
+            <circle cx="190.8" cy="70.2" r="5" fill="#00d97e" opacity="0.9"/>
+            <circle cx="190.8" cy="70.2" r="8" fill="#00d97e" opacity="0.2"/>
+            <defs>
+              <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#f5365c"/>
+                <stop offset="40%" stop-color="#f0b429"/>
+                <stop offset="100%" stop-color="#00d97e"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="gauge-value">
+            <span class="number">87</span><span class="max"> / 100</span>
+          </div>
+        </div>
+
+        <div class="tier-badge">
+          <span class="diamond">&#9670;</span>
+          Diamond Tier
+          <span class="diamond">&#9670;</span>
+        </div>
+
+        <div class="score-meta">
+          <div class="score-meta-item">
+            <div class="label">Percentile</div>
+            <div class="val text-green">Top 4%</div>
+          </div>
+          <div class="score-meta-item">
+            <div class="label">Rank</div>
+            <div class="val mono">#12,847</div>
+          </div>
+          <div class="score-meta-item">
+            <div class="label">7d Change</div>
+            <div class="val text-green mono">+3</div>
+          </div>
+          <div class="score-meta-item">
+            <div class="label">30d Change</div>
+            <div class="val text-green mono">+8</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats + Breakdown -->
+    <div style="display:flex; flex-direction:column; gap:16px;">
+
+      <!-- Stats Grid -->
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:10px;">
+        <div class="stat-card">
+          <div class="label">Protocol Fees</div>
+          <div class="value text-green mono">$12,450</div>
+          <div class="change up mono">+18.2% <span style="color:var(--text-muted)">30d</span></div>
+          <div class="sparkline">
+            <div class="bar" style="height:40%;background:var(--green)"></div>
+            <div class="bar" style="height:55%;background:var(--green)"></div>
+            <div class="bar" style="height:35%;background:var(--green)"></div>
+            <div class="bar" style="height:70%;background:var(--green)"></div>
+            <div class="bar" style="height:60%;background:var(--green)"></div>
+            <div class="bar" style="height:85%;background:var(--green)"></div>
+            <div class="bar" style="height:65%;background:var(--green)"></div>
+            <div class="bar" style="height:90%;background:var(--green)"></div>
+            <div class="bar" style="height:75%;background:var(--green)"></div>
+            <div class="bar" style="height:100%;background:var(--green)"></div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="label">Network Fees</div>
+          <div class="value mono" style="color:var(--cyan)">2.3 SOL</div>
+          <div class="change up mono">+5.1% <span style="color:var(--text-muted)">30d</span></div>
+          <div class="sparkline">
+            <div class="bar" style="height:60%;background:var(--cyan)"></div>
+            <div class="bar" style="height:45%;background:var(--cyan)"></div>
+            <div class="bar" style="height:55%;background:var(--cyan)"></div>
+            <div class="bar" style="height:50%;background:var(--cyan)"></div>
+            <div class="bar" style="height:70%;background:var(--cyan)"></div>
+            <div class="bar" style="height:65%;background:var(--cyan)"></div>
+            <div class="bar" style="height:80%;background:var(--cyan)"></div>
+            <div class="bar" style="height:60%;background:var(--cyan)"></div>
+            <div class="bar" style="height:75%;background:var(--cyan)"></div>
+            <div class="bar" style="height:70%;background:var(--cyan)"></div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="label">Holdings</div>
+          <div class="value mono" style="color:var(--purple)">$45,200</div>
+          <div class="change down mono">-3.4% <span style="color:var(--text-muted)">30d</span></div>
+          <div class="sparkline">
+            <div class="bar" style="height:100%;background:var(--purple)"></div>
+            <div class="bar" style="height:95%;background:var(--purple)"></div>
+            <div class="bar" style="height:85%;background:var(--purple)"></div>
+            <div class="bar" style="height:80%;background:var(--purple)"></div>
+            <div class="bar" style="height:90%;background:var(--purple)"></div>
+            <div class="bar" style="height:75%;background:var(--purple)"></div>
+            <div class="bar" style="height:70%;background:var(--purple)"></div>
+            <div class="bar" style="height:78%;background:var(--purple)"></div>
+            <div class="bar" style="height:72%;background:var(--purple)"></div>
+            <div class="bar" style="height:68%;background:var(--purple)"></div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="label">Months Active</div>
+          <div class="value mono" style="color:var(--yellow)">18</div>
+          <div class="change" style="color:var(--text-muted)">
+            <span class="mono">Since Aug 2024</span>
+          </div>
+          <div class="sparkline">
+            <div class="bar" style="height:30%;background:var(--yellow)"></div>
+            <div class="bar" style="height:50%;background:var(--yellow)"></div>
+            <div class="bar" style="height:65%;background:var(--yellow)"></div>
+            <div class="bar" style="height:70%;background:var(--yellow)"></div>
+            <div class="bar" style="height:80%;background:var(--yellow)"></div>
+            <div class="bar" style="height:85%;background:var(--yellow)"></div>
+            <div class="bar" style="height:90%;background:var(--yellow)"></div>
+            <div class="bar" style="height:92%;background:var(--yellow)"></div>
+            <div class="bar" style="height:95%;background:var(--yellow)"></div>
+            <div class="bar" style="height:100%;background:var(--yellow)"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Score Breakdown -->
+      <div class="card" style="flex:1;">
+        <div class="card-header">
+          Score Breakdown
+          <span class="tag">6 Factors</span>
+        </div>
+        <div class="card-body">
+          <div class="breakdown-list">
+            <div class="breakdown-row">
+              <span class="breakdown-label">Transaction Volume</span>
+              <div class="breakdown-bar-track">
+                <div class="breakdown-bar-fill" style="width:92%;background:var(--green)"></div>
+              </div>
+              <span class="breakdown-val text-green">92</span>
+            </div>
+            <div class="breakdown-row">
+              <span class="breakdown-label">Protocol Diversity</span>
+              <div class="breakdown-bar-track">
+                <div class="breakdown-bar-fill" style="width:88%;background:var(--green)"></div>
+              </div>
+              <span class="breakdown-val text-green">88</span>
+            </div>
+            <div class="breakdown-row">
+              <span class="breakdown-label">Account Age</span>
+              <div class="breakdown-bar-track">
+                <div class="breakdown-bar-fill" style="width:85%;background:var(--green)"></div>
+              </div>
+              <span class="breakdown-val text-green">85</span>
+            </div>
+            <div class="breakdown-row">
+              <span class="breakdown-label">DeFi Activity</span>
+              <div class="breakdown-bar-track">
+                <div class="breakdown-bar-fill" style="width:90%;background:var(--green)"></div>
+              </div>
+              <span class="breakdown-val text-green">90</span>
+            </div>
+            <div class="breakdown-row">
+              <span class="breakdown-label">NFT Engagement</span>
+              <div class="breakdown-bar-track">
+                <div class="breakdown-bar-fill" style="width:72%;background:var(--yellow)"></div>
+              </div>
+              <span class="breakdown-val text-yellow">72</span>
+            </div>
+            <div class="breakdown-row">
+              <span class="breakdown-label">Governance</span>
+              <div class="breakdown-bar-track">
+                <div class="breakdown-bar-fill" style="width:65%;background:var(--yellow)"></div>
+              </div>
+              <span class="breakdown-val text-yellow">65</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Protocols ── -->
+  <div class="grid-full">
+    <div class="card">
+      <div class="card-header">
+        Protocols Used
+        <span class="tag">8 Protocols</span>
+      </div>
+      <div class="card-body">
+        <div class="protocols-grid">
+
+          <div class="protocol-cell">
+            <div class="protocol-top">
+              <div class="protocol-icon" style="background:linear-gradient(135deg,#1fcfcf,#18a0a0)">J</div>
+              <div>
+                <div class="protocol-name">Jupiter</div>
+                <span class="sector-tag tag-defi">DEX Aggregator</span>
+              </div>
+            </div>
+            <div class="protocol-stats">
+              <div class="protocol-stat-item"><div class="lbl">TXNs</div><div class="v">342</div></div>
+              <div class="protocol-stat-item"><div class="lbl">Volume</div><div class="v">$28.4K</div></div>
+              <div class="protocol-stat-item"><div class="lbl">Last</div><div class="v">2h</div></div>
+            </div>
+          </div>
+
+          <div class="protocol-cell">
+            <div class="protocol-top">
+              <div class="protocol-icon" style="background:linear-gradient(135deg,#5c6bc0,#3949ab)">R</div>
+              <div>
+                <div class="protocol-name">Raydium</div>
+                <span class="sector-tag tag-amm">AMM</span>
+              </div>
+            </div>
+            <div class="protocol-stats">
+              <div class="protocol-stat-item"><div class="lbl">TXNs</div><div class="v">187</div></div>
+              <div class="protocol-stat-item"><div class="lbl">Volume</div><div class="v">$15.1K</div></div>
+              <div class="protocol-stat-item"><div class="lbl">Last</div><div class="v">6h</div></div>
+            </div>
+          </div>
+
+          <div class="protocol-cell">
+            <div class="protocol-top">
+              <div class="protocol-icon" style="background:linear-gradient(135deg,#ef5350,#c62828)">M</div>
+              <div>
+                <div class="protocol-name">Marinade</div>
+                <span class="sector-tag tag-lsd">Liquid Staking</span>
+              </div>
+            </div>
+            <div class="protocol-stats">
+              <div class="protocol-stat-item"><div class="lbl">TXNs</div><div class="v">24</div></div>
+              <div class="protocol-stat-item"><div class="lbl">Staked</div><div class="v">120 SOL</div></div>
+              <div class="protocol-stat-item"><div class="lbl">Last</div><div class="v">1d</div></div>
+            </div>
+          </div>
+
+          <div class="protocol-cell">
+            <div class="protocol-top">
+              <div class="protocol-icon" style="background:linear-gradient(135deg,#ab47bc,#7b1fa2)">T</div>
+              <div>
+                <div class="protocol-name">Tensor</div>
+                <span class="sector-tag tag-nft">NFT Marketplace</span>
+              </div>
+            </div>
+            <div class="protocol-stats">
+              <div class="protocol-stat-item"><div class="lbl">TXNs</div><div class="v">96</div></div>
+              <div class="protocol-stat-item"><div class="lbl">Volume</div><div class="v">$8.7K</div></div>
+              <div class="protocol-stat-item"><div class="lbl">Last</div><div class="v">4h</div></div>
+            </div>
+          </div>
+
+          <div class="protocol-cell">
+            <div class="protocol-top">
+              <div class="protocol-icon" style="background:linear-gradient(135deg,#e040fb,#9c27b0)">ME</div>
+              <div>
+                <div class="protocol-name">Magic Eden</div>
+                <span class="sector-tag tag-nft">NFT Marketplace</span>
+              </div>
+            </div>
+            <div class="protocol-stats">
+              <div class="protocol-stat-item"><div class="lbl">TXNs</div><div class="v">53</div></div>
+              <div class="protocol-stat-item"><div class="lbl">Volume</div><div class="v">$4.2K</div></div>
+              <div class="protocol-stat-item"><div class="lbl">Last</div><div class="v">3d</div></div>
+            </div>
+          </div>
+
+          <div class="protocol-cell">
+            <div class="protocol-top">
+              <div class="protocol-icon" style="background:linear-gradient(135deg,#ff7043,#d84315)">D</div>
+              <div>
+                <div class="protocol-name">Drift</div>
+                <span class="sector-tag tag-perp">Perps</span>
+              </div>
+            </div>
+            <div class="protocol-stats">
+              <div class="protocol-stat-item"><div class="lbl">TXNs</div><div class="v">218</div></div>
+              <div class="protocol-stat-item"><div class="lbl">Volume</div><div class="v">$92.3K</div></div>
+              <div class="protocol-stat-item"><div class="lbl">Last</div><div class="v">1h</div></div>
+            </div>
+          </div>
+
+          <div class="protocol-cell">
+            <div class="protocol-top">
+              <div class="protocol-icon" style="background:linear-gradient(135deg,#26c6da,#00838f)">O</div>
+              <div>
+                <div class="protocol-name">Orca</div>
+                <span class="sector-tag tag-amm">AMM</span>
+              </div>
+            </div>
+            <div class="protocol-stats">
+              <div class="protocol-stat-item"><div class="lbl">TXNs</div><div class="v">74</div></div>
+              <div class="protocol-stat-item"><div class="lbl">Volume</div><div class="v">$6.8K</div></div>
+              <div class="protocol-stat-item"><div class="lbl">Last</div><div class="v">12h</div></div>
+            </div>
+          </div>
+
+          <div class="protocol-cell">
+            <div class="protocol-top">
+              <div class="protocol-icon" style="background:linear-gradient(135deg,#66bb6a,#2e7d32)">K</div>
+              <div>
+                <div class="protocol-name">Kamino</div>
+                <span class="sector-tag tag-defi">Lending</span>
+              </div>
+            </div>
+            <div class="protocol-stats">
+              <div class="protocol-stat-item"><div class="lbl">TXNs</div><div class="v">31</div></div>
+              <div class="protocol-stat-item"><div class="lbl">Supplied</div><div class="v">$12.4K</div></div>
+              <div class="protocol-stat-item"><div class="lbl">Last</div><div class="v">8h</div></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Bottom Row: Activity + Leaderboard ── -->
+  <div class="grid-bottom">
+
+    <!-- Recent Activity -->
+    <div class="card">
+      <div class="card-header">
+        Recent Activity
+        <span class="tag">Last 24h</span>
+      </div>
+      <div class="card-body" style="padding:10px 0 6px;">
+        <table class="activity-table">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Protocol</th>
+              <th>TX</th>
+              <th>Age</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="activity-type">
+                  <span class="activity-type-dot" style="background:var(--green)"></span>
+                  Swap
+                </span>
+              </td>
+              <td style="color:var(--text-secondary)">Jupiter</td>
+              <td><span class="activity-hash">4kWz...8mNp</span></td>
+              <td><span class="activity-ago">2h ago</span></td>
+              <td><span class="activity-amount text-green mono">+142.5 USDC</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="activity-type">
+                  <span class="activity-type-dot" style="background:var(--orange)"></span>
+                  Trade
+                </span>
+              </td>
+              <td style="color:var(--text-secondary)">Drift</td>
+              <td><span class="activity-hash">9aRx...3pLq</span></td>
+              <td><span class="activity-ago">3h ago</span></td>
+              <td><span class="activity-amount text-red mono">-0.85 SOL</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="activity-type">
+                  <span class="activity-type-dot" style="background:var(--blue)"></span>
+                  Supply
+                </span>
+              </td>
+              <td style="color:var(--text-secondary)">Kamino</td>
+              <td><span class="activity-hash">2mFd...7kTs</span></td>
+              <td><span class="activity-ago">5h ago</span></td>
+              <td><span class="activity-amount mono" style="color:var(--text-secondary)">500 USDC</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="activity-type">
+                  <span class="activity-type-dot" style="background:var(--green)"></span>
+                  Swap
+                </span>
+              </td>
+              <td style="color:var(--text-secondary)">Raydium</td>
+              <td><span class="activity-hash">6pNv...1wRa</span></td>
+              <td><span class="activity-ago">8h ago</span></td>
+              <td><span class="activity-amount text-green mono">+3.2 SOL</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="activity-type">
+                  <span class="activity-type-dot" style="background:var(--purple)"></span>
+                  NFT Buy
+                </span>
+              </td>
+              <td style="color:var(--text-secondary)">Tensor</td>
+              <td><span class="activity-hash">8bCw...4jEm</span></td>
+              <td><span class="activity-ago">12h ago</span></td>
+              <td><span class="activity-amount text-red mono">-12.4 SOL</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="activity-type">
+                  <span class="activity-type-dot" style="background:var(--yellow)"></span>
+                  Stake
+                </span>
+              </td>
+              <td style="color:var(--text-secondary)">Marinade</td>
+              <td><span class="activity-hash">1xLp...9gVn</span></td>
+              <td><span class="activity-ago">18h ago</span></td>
+              <td><span class="activity-amount mono" style="color:var(--text-secondary)">25.0 SOL</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="activity-type">
+                  <span class="activity-type-dot" style="background:var(--cyan)"></span>
+                  LP Add
+                </span>
+              </td>
+              <td style="color:var(--text-secondary)">Orca</td>
+              <td><span class="activity-hash">5tQr...2hDf</span></td>
+              <td><span class="activity-ago">22h ago</span></td>
+              <td><span class="activity-amount mono" style="color:var(--text-secondary)">$1,200</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Leaderboard + Distribution -->
+    <div style="display:flex; flex-direction:column; gap:16px;">
+
+      <!-- Leaderboard -->
+      <div class="card" style="flex:1;">
+        <div class="card-header">
+          Leaderboard
+          <span class="tag">Top 10</span>
+        </div>
+        <div class="card-body" style="padding:10px 0 6px;">
+          <table class="lb-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Address</th>
+                <th>Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="lb-rank top1">1</div></td>
+                <td><span class="lb-addr">DeFi_wh...9xKp</span></td>
+                <td class="lb-score">
+                  <span class="lb-mini-bar"><span class="lb-mini-bar-fill" style="width:98%;background:var(--green)"></span></span>
+                  <span class="text-green">98</span>
+                </td>
+              </tr>
+              <tr>
+                <td><div class="lb-rank top2">2</div></td>
+                <td><span class="lb-addr">whale_m...3nBx</span></td>
+                <td class="lb-score">
+                  <span class="lb-mini-bar"><span class="lb-mini-bar-fill" style="width:96%;background:var(--green)"></span></span>
+                  <span class="text-green">96</span>
+                </td>
+              </tr>
+              <tr>
+                <td><div class="lb-rank top3">3</div></td>
+                <td><span class="lb-addr">sol_max...7fWt</span></td>
+                <td class="lb-score">
+                  <span class="lb-mini-bar"><span class="lb-mini-bar-fill" style="width:94%;background:var(--green)"></span></span>
+                  <span class="text-green">94</span>
+                </td>
+              </tr>
+              <tr>
+                <td><div class="lb-rank">4</div></td>
+                <td><span class="lb-addr">alpha_t...2mRc</span></td>
+                <td class="lb-score">
+                  <span class="lb-mini-bar"><span class="lb-mini-bar-fill" style="width:93%;background:var(--green)"></span></span>
+                  <span class="text-green">93</span>
+                </td>
+              </tr>
+              <tr>
+                <td><div class="lb-rank">5</div></td>
+                <td><span class="lb-addr">nft_kin...8jPd</span></td>
+                <td class="lb-score">
+                  <span class="lb-mini-bar"><span class="lb-mini-bar-fill" style="width:91%;background:var(--green)"></span></span>
+                  <span class="text-green">91</span>
+                </td>
+              </tr>
+              <tr style="background:#00d97e0a;">
+                <td><div class="lb-rank" style="color:var(--green);background:var(--green-dim)">...</div></td>
+                <td><span class="lb-addr you">7xKXtg...gAsU (You)</span></td>
+                <td class="lb-score">
+                  <span class="lb-mini-bar"><span class="lb-mini-bar-fill" style="width:87%;background:var(--green)"></span></span>
+                  <span class="text-green" style="font-weight:700;">87</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Score Distribution -->
+      <div class="card">
+        <div class="card-header">
+          Score Distribution
+          <span class="tag">All Wallets</span>
+        </div>
+        <div class="card-body">
+          <div class="dist-row">
+            <span class="dist-label">90-100</span>
+            <div class="dist-bar"><div class="dist-bar-fill" style="width:8%;background:var(--green)"></div></div>
+            <span class="dist-pct">8%</span>
+          </div>
+          <div class="dist-row" style="background:var(--green-dim);border-radius:3px;padding:2px 0;">
+            <span class="dist-label" style="color:var(--green)">80-89</span>
+            <div class="dist-bar"><div class="dist-bar-fill" style="width:14%;background:var(--green)"></div></div>
+            <span class="dist-pct" style="color:var(--green)">14%</span>
+          </div>
+          <div class="dist-row">
+            <span class="dist-label">70-79</span>
+            <div class="dist-bar"><div class="dist-bar-fill" style="width:18%;background:var(--green);opacity:0.6"></div></div>
+            <span class="dist-pct">18%</span>
+          </div>
+          <div class="dist-row">
+            <span class="dist-label">50-69</span>
+            <div class="dist-bar"><div class="dist-bar-fill" style="width:32%;background:var(--yellow)"></div></div>
+            <span class="dist-pct">32%</span>
+          </div>
+          <div class="dist-row">
+            <span class="dist-label">25-49</span>
+            <div class="dist-bar"><div class="dist-bar-fill" style="width:20%;background:var(--orange)"></div></div>
+            <span class="dist-pct">20%</span>
+          </div>
+          <div class="dist-row">
+            <span class="dist-label">0-24</span>
+            <div class="dist-bar"><div class="dist-bar-fill" style="width:8%;background:var(--red)"></div></div>
+            <span class="dist-pct">8%</span>
+          </div>
+          <div style="text-align:center;margin-top:8px;font-size:10px;color:var(--text-muted);">
+            Your score <span style="color:var(--green);font-weight:600;">87</span> is in the <span style="color:var(--green);font-weight:600;">80-89</span> range (highlighted)
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div style="display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid var(--border);font-size:10px;color:var(--text-muted);">
+    <span>Slice Analytics &middot; Solana Score v2.4.1 &middot; Data refreshed every 60s</span>
+    <span class="mono">Block #298,412,847 &middot; Epoch 642</span>
+  </div>
+
+</main>
+
+</body>
+</html>

@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solana Score - Shareable Scorecard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+  body{
+    min-height:100vh;
+    background:#0a0a0f;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+    padding:40px 20px;
+    overflow-x:hidden;
+  }
+
+  /* ─── ambient glow behind card ─── */
+  body::before{
+    content:'';
+    position:fixed;
+    width:600px;height:900px;
+    top:50%;left:50%;
+    transform:translate(-50%,-50%);
+    background:radial-gradient(ellipse,rgba(168,50,220,.25) 0%,rgba(255,60,120,.15) 40%,transparent 70%);
+    pointer-events:none;
+    filter:blur(60px);
+  }
+
+  /* ─── CARD ─── */
+  .card{
+    position:relative;
+    width:420px;
+    min-height:750px;
+    border-radius:24px;
+    overflow:hidden;
+    /* bold saturated gradient — the hero */
+    background:
+      linear-gradient(165deg,
+        #1a0533 0%,
+        #3b0764 12%,
+        #7c1494 28%,
+        #c026d3 42%,
+        #e040a0 55%,
+        #f0406a 66%,
+        #f97316 82%,
+        #fbbf24 100%
+      );
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,.08),
+      0 30px 80px -20px rgba(168,50,220,.45),
+      0 10px 30px -5px rgba(0,0,0,.5);
+  }
+
+  /* noise texture overlay for depth */
+  .card::before{
+    content:'';
+    position:absolute;inset:0;
+    background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    background-size:128px 128px;
+    opacity:.55;
+    pointer-events:none;
+    z-index:0;
+  }
+
+  /* subtle radial highlight */
+  .card::after{
+    content:'';
+    position:absolute;
+    top:-30%;left:-20%;
+    width:140%;height:70%;
+    background:radial-gradient(ellipse at 50% 80%,rgba(255,255,255,.10) 0%,transparent 60%);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .card-inner{
+    position:relative;
+    z-index:1;
+    padding:32px 28px 28px;
+    display:flex;
+    flex-direction:column;
+    gap:0;
+    min-height:750px;
+  }
+
+  /* ─── TOP HEADER ─── */
+  .top-bar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:6px;
+  }
+  .top-bar .label{
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:rgba(255,255,255,.6);
+  }
+  .season-badge{
+    background:rgba(255,255,255,.12);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    border:1px solid rgba(255,255,255,.15);
+    border-radius:20px;
+    padding:4px 14px;
+    font-size:12px;
+    font-weight:800;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:#fff;
+  }
+
+  .title{
+    font-size:26px;
+    font-weight:900;
+    color:#fff;
+    letter-spacing:-.02em;
+    line-height:1.1;
+    margin-bottom:18px;
+  }
+
+  /* ─── HERO SCORE ─── */
+  .hero{
+    text-align:center;
+    margin-bottom:10px;
+  }
+  .score-num{
+    font-size:148px;
+    font-weight:900;
+    color:#fff;
+    line-height:.88;
+    letter-spacing:-.06em;
+    text-shadow:
+      0 4px 30px rgba(0,0,0,.30),
+      0 0 80px rgba(255,255,255,.10);
+    position:relative;
+  }
+  /* subtle shine on the number */
+  .score-num::after{
+    content:'87';
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg,rgba(255,255,255,.28) 0%,transparent 55%);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
+    pointer-events:none;
+  }
+
+  .tier-row{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    margin-top:6px;
+    margin-bottom:8px;
+  }
+  .tier-label{
+    font-size:22px;
+    font-weight:900;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:#fff;
+  }
+  .sparkle{
+    display:inline-flex;
+    font-size:18px;
+    animation:pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:1;transform:scale(1.2)}}
+
+  .percentile-pill{
+    display:inline-block;
+    background:rgba(255,255,255,.15);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    border:1px solid rgba(255,255,255,.18);
+    border-radius:20px;
+    padding:6px 18px;
+    font-size:13px;
+    font-weight:700;
+    color:#fff;
+    letter-spacing:.01em;
+  }
+
+  /* ─── DIVIDER ─── */
+  .divider{
+    height:1px;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);
+    margin:18px 0 16px;
+  }
+
+  /* ─── FUN STATS ─── */
+  .stats{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-bottom:4px;
+  }
+  .stat{
+    background:rgba(255,255,255,.08);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:14px;
+    padding:12px 16px;
+  }
+  .stat-text{
+    font-size:13.5px;
+    font-weight:600;
+    color:rgba(255,255,255,.72);
+    line-height:1.35;
+  }
+  .stat-highlight{
+    color:#fff;
+    font-weight:800;
+    font-size:15px;
+  }
+
+  /* ─── PROTOCOLS ─── */
+  .section-label{
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:rgba(255,255,255,.4);
+    margin-top:16px;
+    margin-bottom:10px;
+  }
+  .protocol-row{
+    display:flex;
+    gap:6px;
+    justify-content:center;
+    flex-wrap:nowrap;
+    margin-bottom:8px;
+  }
+  .proto{
+    width:40px;height:40px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:13px;
+    font-weight:800;
+    color:#fff;
+    letter-spacing:-.01em;
+    border:2px solid rgba(255,255,255,.12);
+    flex-shrink:0;
+    position:relative;
+    overflow:hidden;
+  }
+  /* glass sheen on circles */
+  .proto::after{
+    content:'';
+    position:absolute;
+    top:0;left:0;right:0;
+    height:50%;
+    background:linear-gradient(180deg,rgba(255,255,255,.18),transparent);
+    border-radius:50% 50% 0 0;
+    pointer-events:none;
+  }
+  .proto-jup{background:#18a058}
+  .proto-ray{background:#5d4dff}
+  .proto-mar{background:#1aadbe}
+  .proto-ten{background:#e03c8a}
+  .proto-me{background:#e44dff}
+  .proto-dri{background:#f06424}
+  .proto-orc{background:#ffb429}
+  .proto-kam{background:#3b82f6}
+
+  .top-proto{
+    text-align:center;
+    font-size:13px;
+    font-weight:600;
+    color:rgba(255,255,255,.55);
+    margin-bottom:2px;
+  }
+  .top-proto strong{
+    color:#fff;
+    font-weight:800;
+  }
+
+  /* ─── SCORE BREAKDOWN ─── */
+  .breakdown{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-bottom:4px;
+  }
+  .bar-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .bar-label{
+    font-size:12px;
+    font-weight:700;
+    color:rgba(255,255,255,.6);
+    width:120px;
+    flex-shrink:0;
+    text-align:right;
+  }
+  .bar-track{
+    flex:1;
+    height:22px;
+    background:rgba(255,255,255,.08);
+    border-radius:11px;
+    overflow:hidden;
+    position:relative;
+  }
+  .bar-fill{
+    height:100%;
+    border-radius:11px;
+    position:relative;
+  }
+  /* shine on bar fills */
+  .bar-fill::after{
+    content:'';
+    position:absolute;
+    top:0;left:0;right:0;
+    height:50%;
+    background:linear-gradient(180deg,rgba(255,255,255,.22),transparent);
+    border-radius:11px 11px 0 0;
+  }
+  .bar-fill.c1{background:linear-gradient(90deg,#a855f7,#c084fc);width:92%}
+  .bar-fill.c2{background:linear-gradient(90deg,#d946ef,#f0abfc);width:88%}
+  .bar-fill.c3{background:linear-gradient(90deg,#ec4899,#f9a8d4);width:85%}
+  .bar-fill.c4{background:linear-gradient(90deg,#f97316,#fdba74);width:79%}
+
+  .bar-score{
+    font-size:13px;
+    font-weight:800;
+    color:#fff;
+    width:28px;
+    flex-shrink:0;
+    text-align:right;
+  }
+
+  /* ─── BOTTOM FOOTER ─── */
+  .footer{
+    margin-top:auto;
+    padding-top:14px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+  }
+  .wallet{
+    font-size:12px;
+    font-weight:600;
+    color:rgba(255,255,255,.35);
+    letter-spacing:.04em;
+    font-family:'Plus Jakarta Sans',monospace;
+  }
+  .footer-brand{
+    display:flex;
+    align-items:center;
+    gap:16px;
+  }
+  .footer-url{
+    font-size:13px;
+    font-weight:700;
+    color:rgba(255,255,255,.55);
+    letter-spacing:.01em;
+  }
+  .footer-dot{
+    width:3px;height:3px;
+    border-radius:50%;
+    background:rgba(255,255,255,.25);
+  }
+  .footer-slice{
+    font-size:12px;
+    font-weight:700;
+    color:rgba(255,255,255,.40);
+    letter-spacing:.06em;
+    text-transform:uppercase;
+  }
+
+  .share-btn{
+    margin-top:8px;
+    background:rgba(255,255,255,.14);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    border:1px solid rgba(255,255,255,.18);
+    border-radius:20px;
+    padding:8px 28px;
+    font-size:13px;
+    font-weight:800;
+    color:#fff;
+    cursor:pointer;
+    letter-spacing:.03em;
+    transition:all .2s ease;
+  }
+  .share-btn:hover{
+    background:rgba(255,255,255,.22);
+    transform:translateY(-1px);
+    box-shadow:0 4px 20px rgba(255,255,255,.08);
+  }
+
+  /* ─── PAGE LABEL (outside card) ─── */
+  .page-label{
+    position:fixed;
+    bottom:20px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:12px;
+    font-weight:600;
+    color:rgba(255,255,255,.15);
+    letter-spacing:.06em;
+    pointer-events:none;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-inner">
+
+    <!-- TOP -->
+    <div class="top-bar">
+      <span class="label">Solana Score</span>
+      <span class="season-badge">Season 1 &middot; 2026</span>
+    </div>
+    <div class="title">Your Solana Score</div>
+
+    <!-- HERO -->
+    <div class="hero">
+      <div class="score-num">87</div>
+      <div class="tier-row">
+        <span class="sparkle">&#10022;</span>
+        <span class="tier-label">Diamond</span>
+        <span class="sparkle">&#10022;</span>
+      </div>
+      <span class="percentile-pill">Top 3% of all Solana users</span>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- FUN STATS -->
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-text">You've paid <span class="stat-highlight">$12,450</span> in protocol fees</div>
+      </div>
+      <div class="stat">
+        <div class="stat-text">Active for <span class="stat-highlight">18 months</span> straight</div>
+      </div>
+      <div class="stat">
+        <div class="stat-text">Used <span class="stat-highlight">8 protocols</span> across Solana</div>
+      </div>
+    </div>
+
+    <!-- PROTOCOLS -->
+    <div class="section-label">Your Protocols</div>
+    <div class="protocol-row">
+      <div class="proto proto-jup" title="Jupiter">J</div>
+      <div class="proto proto-ray" title="Raydium">R</div>
+      <div class="proto proto-mar" title="Marinade">M</div>
+      <div class="proto proto-ten" title="Tensor">T</div>
+      <div class="proto proto-me" title="Magic Eden">ME</div>
+      <div class="proto proto-dri" title="Drift">D</div>
+      <div class="proto proto-orc" title="Orca">O</div>
+      <div class="proto proto-kam" title="Kamino">K</div>
+    </div>
+    <div class="top-proto">Your top protocol: <strong>Jupiter</strong></div>
+
+    <div class="divider"></div>
+
+    <!-- SCORE BREAKDOWN -->
+    <div class="section-label">Score Breakdown</div>
+    <div class="breakdown">
+      <div class="bar-row">
+        <span class="bar-label">Tx History</span>
+        <div class="bar-track"><div class="bar-fill c1"></div></div>
+        <span class="bar-score">92</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">DeFi Activity</span>
+        <div class="bar-track"><div class="bar-fill c2"></div></div>
+        <span class="bar-score">88</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">Holdings</span>
+        <div class="bar-track"><div class="bar-fill c3"></div></div>
+        <span class="bar-score">85</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">Account Age</span>
+        <div class="bar-track"><div class="bar-fill c4"></div></div>
+        <span class="bar-score">79</span>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+      <div class="wallet">7xKX...AsU</div>
+      <div class="footer-brand">
+        <span class="footer-url">solana-score.xyz</span>
+        <span class="footer-dot"></span>
+        <span class="footer-slice">Slice Analytics</span>
+      </div>
+      <button class="share-btn">Share your score &#8599;</button>
+    </div>
+
+  </div>
+</div>
+
+<div class="page-label">Mockup 15 &mdash; Scorecard Wrapped</div>
+
+</body>
+</html>

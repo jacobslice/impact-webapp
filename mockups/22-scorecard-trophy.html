@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solana Score - Trophy Achievement - @0xGug</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #08080c;
+    font-family: 'Inter', -apple-system, sans-serif;
+    padding: 40px 20px;
+  }
+
+  /* ── Confetti Particles ── */
+  @keyframes confetti-fall-1 {
+    0% { transform: translateY(-20px) rotate(0deg) scale(0); opacity: 0; }
+    10% { opacity: 1; transform: translateY(0) rotate(30deg) scale(1); }
+    100% { transform: translateY(600px) rotate(720deg) scale(0.3); opacity: 0; }
+  }
+  @keyframes confetti-fall-2 {
+    0% { transform: translateY(-20px) rotate(0deg) scale(0); opacity: 0; }
+    15% { opacity: 1; transform: translateY(0) rotate(-20deg) scale(1); }
+    100% { transform: translateY(550px) rotate(-540deg) scale(0.2); opacity: 0; }
+  }
+  @keyframes confetti-fall-3 {
+    0% { transform: translateY(-10px) rotate(0deg) scale(0); opacity: 0; }
+    12% { opacity: 1; transform: translateY(0) rotate(45deg) scale(1); }
+    100% { transform: translateY(620px) rotate(480deg) scale(0.4); opacity: 0; }
+  }
+
+  .confetti-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .confetti {
+    position: absolute;
+    top: -10px;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+  }
+
+  .confetti:nth-child(1) { left: 8%; background: #FFD700; animation: confetti-fall-1 4s ease-in 0.2s infinite; }
+  .confetti:nth-child(2) { left: 15%; background: #9945FF; animation: confetti-fall-2 4.5s ease-in 0.8s infinite; width: 6px; height: 10px; border-radius: 50%; }
+  .confetti:nth-child(3) { left: 25%; background: #FFA500; animation: confetti-fall-3 3.8s ease-in 0.4s infinite; }
+  .confetti:nth-child(4) { left: 35%; background: #14F195; animation: confetti-fall-1 4.2s ease-in 1.2s infinite; width: 10px; height: 6px; }
+  .confetti:nth-child(5) { left: 48%; background: #FFD700; animation: confetti-fall-2 3.6s ease-in 0.1s infinite; border-radius: 50%; }
+  .confetti:nth-child(6) { left: 58%; background: #9945FF; animation: confetti-fall-3 4.8s ease-in 1.5s infinite; width: 7px; height: 7px; }
+  .confetti:nth-child(7) { left: 68%; background: #FFA500; animation: confetti-fall-1 3.9s ease-in 0.6s infinite; width: 5px; height: 12px; }
+  .confetti:nth-child(8) { left: 78%; background: #FFD700; animation: confetti-fall-2 4.3s ease-in 1.0s infinite; border-radius: 50%; width: 6px; height: 6px; }
+  .confetti:nth-child(9) { left: 88%; background: #14F195; animation: confetti-fall-3 4.1s ease-in 0.3s infinite; }
+  .confetti:nth-child(10) { left: 93%; background: #9945FF; animation: confetti-fall-1 3.7s ease-in 1.8s infinite; width: 9px; height: 5px; }
+  .confetti:nth-child(11) { left: 5%; background: #14F195; animation: confetti-fall-2 4.6s ease-in 2.0s infinite; width: 5px; height: 5px; border-radius: 50%; }
+  .confetti:nth-child(12) { left: 42%; background: #FFA500; animation: confetti-fall-1 3.5s ease-in 0.9s infinite; width: 6px; height: 9px; }
+
+  /* ── Card ── */
+  .card {
+    position: relative;
+    width: 520px;
+    border-radius: 24px;
+    overflow: hidden;
+    background: #0c0c18;
+    /* Certificate double-border */
+    border: 3px solid rgba(255, 215, 0, 0.35);
+    outline: 2px solid rgba(255, 215, 0, 0.12);
+    outline-offset: 4px;
+    box-shadow:
+      0 0 100px rgba(255, 215, 0, 0.08),
+      0 0 60px rgba(153, 69, 255, 0.1),
+      0 40px 80px rgba(0, 0, 0, 0.7);
+  }
+
+  /* Inner certificate border */
+  .card::after {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border: 1px solid rgba(255, 215, 0, 0.12);
+    border-radius: 18px;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .card-inner {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Achievement Banner ── */
+  @keyframes shimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+
+  .achievement-banner {
+    position: relative;
+    background: linear-gradient(135deg, #1a1520 0%, #201828 50%, #1a1520 100%);
+    padding: 14px 32px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 215, 0, 0.15);
+    overflow: hidden;
+  }
+
+  .achievement-banner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 215, 0, 0.06) 25%,
+      rgba(255, 215, 0, 0.15) 50%,
+      rgba(255, 215, 0, 0.06) 75%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 3s ease-in-out infinite;
+  }
+
+  .achievement-text {
+    position: relative;
+    z-index: 1;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    background: linear-gradient(90deg, #FFD700, #FFA500, #FFD700);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .achievement-stars {
+    position: relative;
+    z-index: 1;
+    font-size: 10px;
+    letter-spacing: 6px;
+    color: rgba(255, 215, 0, 0.5);
+    margin-top: 2px;
+  }
+
+  /* ── Content Area ── */
+  .content {
+    padding: 24px 28px 20px;
+  }
+
+  /* ── Header: Brand + X Badge ── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .brand-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #9945FF, #14F195);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .brand-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .brand-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .brand-sub {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.35);
+    font-weight: 400;
+    margin-top: 1px;
+  }
+
+  .x-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .x-badge svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .x-verified {
+    width: 14px;
+    height: 14px;
+    color: #1d9bf0;
+  }
+
+  /* ── Profile Section ── */
+  .profile-section {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  @keyframes ring-rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .pfp-wrapper {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+  }
+
+  .pfp-ring {
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: conic-gradient(#FFD700, #9945FF, #14F195, #FFA500, #FFD700);
+    animation: ring-rotate 4s linear infinite;
+  }
+
+  .pfp-ring-inner {
+    position: absolute;
+    inset: 2px;
+    border-radius: 50%;
+    background: #0c0c18;
+  }
+
+  .pfp-img {
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
+    object-fit: cover;
+    width: calc(100% - 8px);
+    height: calc(100% - 8px);
+  }
+
+  .profile-info {
+    flex: 1;
+  }
+
+  .display-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .handle {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.4);
+    margin-top: 1px;
+  }
+
+  .rank-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+  }
+
+  .rank-number {
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .rank-top {
+    font-size: 11px;
+    font-weight: 800;
+    color: #FFD700;
+    background: rgba(255, 215, 0, 0.1);
+    padding: 2px 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+  }
+
+  /* ── Central Score / Trophy Area ── */
+  .trophy-area {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 0 24px;
+    margin-bottom: 18px;
+  }
+
+  /* Radial glow */
+  .trophy-area::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 320px;
+    height: 220px;
+    background: radial-gradient(ellipse, rgba(255, 215, 0, 0.1) 0%, rgba(153, 69, 255, 0.06) 40%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* Starburst decoration */
+  @keyframes starburst-spin {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+
+  .starburst {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 200px;
+    pointer-events: none;
+    animation: starburst-spin 30s linear infinite;
+  }
+
+  .starburst-ray {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 2px;
+    height: 90px;
+    transform-origin: bottom center;
+    background: linear-gradient(to top, transparent, rgba(255, 215, 0, 0.06));
+    border-radius: 1px;
+  }
+
+  /* CSS Trophy */
+  .trophy {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 14px;
+  }
+
+  .trophy-cup {
+    width: 52px;
+    height: 40px;
+    background: linear-gradient(180deg, #FFD700, #FFA500);
+    border-radius: 4px 4px 20px 20px;
+    position: relative;
+    margin: 0 auto;
+    box-shadow: 0 4px 20px rgba(255, 215, 0, 0.3);
+  }
+
+  .trophy-cup::before {
+    content: '';
+    position: absolute;
+    top: 6px;
+    left: -14px;
+    width: 14px;
+    height: 20px;
+    border: 3px solid #FFD700;
+    border-right: none;
+    border-radius: 12px 0 0 12px;
+  }
+
+  .trophy-cup::after {
+    content: '';
+    position: absolute;
+    top: 6px;
+    right: -14px;
+    width: 14px;
+    height: 20px;
+    border: 3px solid #FFD700;
+    border-left: none;
+    border-radius: 0 12px 12px 0;
+  }
+
+  .trophy-stem {
+    width: 10px;
+    height: 12px;
+    background: linear-gradient(180deg, #FFA500, #e6960a);
+    margin: 0 auto;
+    border-radius: 0 0 2px 2px;
+  }
+
+  .trophy-base {
+    width: 36px;
+    height: 8px;
+    background: linear-gradient(180deg, #FFD700, #d4a800);
+    margin: 0 auto;
+    border-radius: 2px 2px 4px 4px;
+  }
+
+  .trophy-star {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 16px;
+    height: 16px;
+    /* CSS star */
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    background: #fff;
+    opacity: 0.9;
+  }
+
+  /* Laurel wreath around score */
+  .score-section {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .laurel-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 160px;
+    height: 100px;
+  }
+
+  /* Left laurel */
+  .laurel-left, .laurel-right {
+    position: absolute;
+    top: 50%;
+    width: 40px;
+    height: 80px;
+    transform: translateY(-50%);
+  }
+
+  .laurel-left { left: 0; }
+  .laurel-right { right: 0; transform: translateY(-50%) scaleX(-1); }
+
+  .laurel-leaf {
+    position: absolute;
+    width: 12px;
+    height: 6px;
+    border-radius: 50% 50% 50% 0;
+    background: rgba(255, 215, 0, 0.25);
+    border: 1px solid rgba(255, 215, 0, 0.35);
+  }
+
+  .laurel-left .laurel-leaf:nth-child(1) { top: 6px; left: 18px; transform: rotate(-60deg); }
+  .laurel-left .laurel-leaf:nth-child(2) { top: 16px; left: 12px; transform: rotate(-45deg); }
+  .laurel-left .laurel-leaf:nth-child(3) { top: 28px; left: 8px; transform: rotate(-30deg); }
+  .laurel-left .laurel-leaf:nth-child(4) { top: 40px; left: 6px; transform: rotate(-10deg); }
+  .laurel-left .laurel-leaf:nth-child(5) { top: 52px; left: 8px; transform: rotate(10deg); }
+  .laurel-left .laurel-leaf:nth-child(6) { top: 62px; left: 14px; transform: rotate(30deg); }
+
+  .laurel-right .laurel-leaf:nth-child(1) { top: 6px; left: 18px; transform: rotate(-60deg); }
+  .laurel-right .laurel-leaf:nth-child(2) { top: 16px; left: 12px; transform: rotate(-45deg); }
+  .laurel-right .laurel-leaf:nth-child(3) { top: 28px; left: 8px; transform: rotate(-30deg); }
+  .laurel-right .laurel-leaf:nth-child(4) { top: 40px; left: 6px; transform: rotate(-10deg); }
+  .laurel-right .laurel-leaf:nth-child(5) { top: 52px; left: 8px; transform: rotate(10deg); }
+  .laurel-right .laurel-leaf:nth-child(6) { top: 62px; left: 14px; transform: rotate(30deg); }
+
+  .score-value {
+    font-size: 48px;
+    font-weight: 900;
+    background: linear-gradient(180deg, #FFD700 0%, #FFA500 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    text-shadow: none;
+    position: relative;
+    z-index: 2;
+  }
+
+  .score-total {
+    font-size: 20px;
+    font-weight: 400;
+    opacity: 0.5;
+  }
+
+  /* Diamond Tier Label */
+  @keyframes gold-shimmer {
+    0% { background-position: -100% center; }
+    100% { background-position: 200% center; }
+  }
+
+  .tier-label {
+    margin-top: 10px;
+    position: relative;
+    z-index: 1;
+    padding: 6px 24px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.08), rgba(255, 165, 0, 0.15), rgba(255, 215, 0, 0.08));
+    border: 1.5px solid rgba(255, 215, 0, 0.35);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #FFD700;
+    overflow: hidden;
+  }
+
+  .tier-label::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.15), transparent);
+    background-size: 200% 100%;
+    animation: gold-shimmer 2.5s ease-in-out infinite;
+  }
+
+  .tier-icon {
+    display: inline-block;
+    margin-right: 6px;
+    font-style: normal;
+  }
+
+  /* ── Score Breakdown ── */
+  .breakdown {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .breakdown-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 215, 0, 0.08);
+    border-radius: 12px;
+    padding: 12px 8px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .breakdown-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.3), transparent);
+  }
+
+  .breakdown-icon {
+    font-size: 10px;
+    margin-bottom: 4px;
+    color: rgba(255, 215, 0, 0.6);
+  }
+
+  .breakdown-score {
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.1;
+  }
+
+  .breakdown-label {
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: rgba(255, 255, 255, 0.35);
+    margin-top: 4px;
+  }
+
+  /* ── Stats / Achievements Grid ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .stat-item {
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 10px 8px;
+    text-align: center;
+  }
+
+  .stat-trophy {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(255, 215, 0, 0.1);
+    margin-bottom: 6px;
+  }
+
+  .stat-trophy svg {
+    width: 11px;
+    height: 11px;
+    color: #FFD700;
+  }
+
+  .stat-value {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+  }
+
+  .stat-label {
+    font-size: 9px;
+    color: rgba(255, 255, 255, 0.35);
+    margin-top: 3px;
+    font-weight: 500;
+  }
+
+  /* ── Protocols ── */
+  .protocols-section {
+    margin-bottom: 18px;
+  }
+
+  .protocols-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: rgba(255, 255, 255, 0.3);
+    margin-bottom: 10px;
+    text-align: center;
+  }
+
+  .protocols-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .protocol-logo {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 215, 0, 0.12);
+    object-fit: cover;
+    transition: border-color 0.3s;
+  }
+
+  .protocol-logo:hover {
+    border-color: rgba(255, 215, 0, 0.4);
+  }
+
+  /* ── Footer ── */
+  .footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 28px;
+    background: rgba(255, 255, 255, 0.02);
+    border-top: 1px solid rgba(255, 215, 0, 0.08);
+  }
+
+  .footer-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .footer-url {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  .footer-date {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.25);
+  }
+
+  .share-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 16px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 165, 0, 0.1));
+    border: 1px solid rgba(255, 215, 0, 0.25);
+    font-size: 12px;
+    font-weight: 600;
+    color: #FFD700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .share-btn:hover {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(255, 165, 0, 0.2));
+    border-color: rgba(255, 215, 0, 0.45);
+  }
+
+  .share-btn svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  /* ── Page Label ── */
+  .page-label {
+    margin-top: 32px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.2);
+  }
+
+  /* ── Decorative corner stars ── */
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.3; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.2); }
+  }
+
+  .corner-star {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    background: #FFD700;
+    z-index: 3;
+    animation: twinkle 2s ease-in-out infinite;
+  }
+
+  .corner-star:nth-child(1) { top: 20px; left: 20px; animation-delay: 0s; }
+  .corner-star:nth-child(2) { top: 20px; right: 20px; animation-delay: 0.5s; }
+  .corner-star:nth-child(3) { bottom: 50px; left: 20px; animation-delay: 1s; }
+  .corner-star:nth-child(4) { bottom: 50px; right: 20px; animation-delay: 1.5s; }
+  .corner-star:nth-child(5) { top: 50%; left: 14px; animation-delay: 0.8s; width: 4px; height: 4px; }
+  .corner-star:nth-child(6) { top: 50%; right: 14px; animation-delay: 1.3s; width: 4px; height: 4px; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <!-- Confetti particles -->
+  <div class="confetti-container">
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+  </div>
+
+  <!-- Decorative corner stars -->
+  <div class="corner-star"></div>
+  <div class="corner-star"></div>
+  <div class="corner-star"></div>
+  <div class="corner-star"></div>
+  <div class="corner-star"></div>
+  <div class="corner-star"></div>
+
+  <!-- Achievement Unlocked Banner -->
+  <div class="achievement-banner">
+    <div class="achievement-stars">&#9733; &#9733; &#9733; &#9733; &#9733;</div>
+    <div class="achievement-text">Achievement Unlocked</div>
+    <div class="achievement-stars">&#9733; &#9733; &#9733; &#9733; &#9733;</div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="content">
+
+    <!-- Header: Brand + X Badge -->
+    <div class="header">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-name">Solana Score</div>
+          <div class="brand-sub">by Slice Analytics</div>
+        </div>
+      </div>
+      <div class="x-badge">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        <span>X Connected</span>
+        <svg class="x-verified" viewBox="0 0 24 24" fill="currentColor"><path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81C14.67 2.63 13.43 1.75 12 1.75S9.33 2.63 8.66 3.94c-1.39-.46-2.9-.2-3.91.81s-1.27 2.52-.81 3.91C2.63 9.33 1.75 10.57 1.75 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.9.81 3.91s2.52 1.27 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.67-.88 3.34-2.19c1.39.46 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34zm-11.04 4.3l-3.81-3.81 1.48-1.48 2.33 2.33 5.93-5.93 1.48 1.48-7.41 7.41z"/></svg>
+      </div>
+    </div>
+
+    <!-- Profile Row -->
+    <div class="profile-section">
+      <div class="pfp-wrapper">
+        <div class="pfp-ring"></div>
+        <div class="pfp-ring-inner"></div>
+        <img class="pfp-img" src="0xgug-pfp.jpg" alt="0xGug PFP">
+      </div>
+      <div class="profile-info">
+        <div class="display-name">0xGug</div>
+        <div class="handle">@0xGug</div>
+      </div>
+      <div class="rank-badge">
+        <div class="rank-number">#1,247 of 142,000</div>
+        <div class="rank-top">Top 3%</div>
+      </div>
+    </div>
+
+    <!-- Central Trophy + Score -->
+    <div class="trophy-area">
+      <!-- Starburst rays -->
+      <div class="starburst">
+        <div class="starburst-ray" style="transform: translate(-50%, 0) rotate(0deg);"></div>
+        <div class="starburst-ray" style="transform: translate(-50%, 0) rotate(30deg);"></div>
+        <div class="starburst-ray" style="transform: translate(-50%, 0) rotate(60deg);"></div>
+        <div class="starburst-ray" style="transform: translate(-50%, 0) rotate(90deg);"></div>
+        <div class="starburst-ray" style="transform: translate(-50%, 0) rotate(120deg);"></div>
+        <div class="starburst-ray" style="transform: translate(-50%, 0) rotate(150deg);"></div>
+        <div class="starburst-ray" style="transform: translate(-50%, 0) rotate(180deg);"></div>
+        <div class="starburst-ray" style="transform: translate(-50%, 0) rotate(210deg);"></div>
+        <div class="starburst-ray" style="transform: translate(-50%, 0) rotate(240deg);"></div>
+        <div class="starburst-ray" style="transform: translate(-50%, 0) rotate(270deg);"></div>
+        <div class="starburst-ray" style="transform: translate(-50%, 0) rotate(300deg);"></div>
+        <div class="starburst-ray" style="transform: translate(-50%, 0) rotate(330deg);"></div>
+      </div>
+
+      <!-- CSS Trophy -->
+      <div class="trophy">
+        <div class="trophy-cup">
+          <div class="trophy-star"></div>
+        </div>
+        <div class="trophy-stem"></div>
+        <div class="trophy-base"></div>
+      </div>
+
+      <!-- Score with laurel wreath -->
+      <div class="score-section">
+        <div class="laurel-wrapper">
+          <div class="laurel-left">
+            <div class="laurel-leaf"></div>
+            <div class="laurel-leaf"></div>
+            <div class="laurel-leaf"></div>
+            <div class="laurel-leaf"></div>
+            <div class="laurel-leaf"></div>
+            <div class="laurel-leaf"></div>
+          </div>
+          <span class="score-value">87<span class="score-total">/100</span></span>
+          <div class="laurel-right">
+            <div class="laurel-leaf"></div>
+            <div class="laurel-leaf"></div>
+            <div class="laurel-leaf"></div>
+            <div class="laurel-leaf"></div>
+            <div class="laurel-leaf"></div>
+            <div class="laurel-leaf"></div>
+          </div>
+        </div>
+        <div class="tier-label">
+          <span class="tier-icon">&#9830;</span>Diamond Tier Achieved
+        </div>
+      </div>
+    </div>
+
+    <!-- Score Breakdown -->
+    <div class="breakdown">
+      <div class="breakdown-item">
+        <div class="breakdown-icon">&#9733;</div>
+        <div class="breakdown-score">92</div>
+        <div class="breakdown-label">Transactions</div>
+      </div>
+      <div class="breakdown-item">
+        <div class="breakdown-icon">&#9733;</div>
+        <div class="breakdown-score">88</div>
+        <div class="breakdown-label">DeFi</div>
+      </div>
+      <div class="breakdown-item">
+        <div class="breakdown-icon">&#9733;</div>
+        <div class="breakdown-score">85</div>
+        <div class="breakdown-label">Holdings</div>
+      </div>
+      <div class="breakdown-item">
+        <div class="breakdown-icon">&#9733;</div>
+        <div class="breakdown-score">79</div>
+        <div class="breakdown-label">Tenure</div>
+      </div>
+    </div>
+
+    <!-- Stats / Achievements -->
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-trophy">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </div>
+        <div class="stat-value">$12,450</div>
+        <div class="stat-label">Protocol Fees</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-trophy">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </div>
+        <div class="stat-value">2.3 SOL</div>
+        <div class="stat-label">Network Fees</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-trophy">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </div>
+        <div class="stat-value">$45,200</div>
+        <div class="stat-label">Holdings</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-trophy">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </div>
+        <div class="stat-value">18 Mo</div>
+        <div class="stat-label">Active</div>
+      </div>
+    </div>
+
+    <!-- Protocol Logos -->
+    <div class="protocols-section">
+      <div class="protocols-label">Protocols Used</div>
+      <div class="protocols-row">
+        <img class="protocol-logo" src="../public/images/protocols/jupiter.svg" alt="Jupiter" title="Jupiter">
+        <img class="protocol-logo" src="../public/images/protocols/raydium.jpg" alt="Raydium" title="Raydium">
+        <img class="protocol-logo" src="../public/images/protocols/meteora.jpg" alt="Meteora" title="Meteora">
+        <img class="protocol-logo" src="../public/images/protocols/drift.png" alt="Drift" title="Drift">
+        <img class="protocol-logo" src="../public/images/protocols/orca.jpg" alt="Orca" title="Orca">
+        <img class="protocol-logo" src="../public/images/protocols/phantom.jpg" alt="Phantom" title="Phantom">
+        <img class="protocol-logo" src="../public/images/protocols/pumpfun.png" alt="Pump.fun" title="Pump.fun">
+        <img class="protocol-logo" src="../public/images/protocols/axiom.png" alt="Axiom" title="Axiom">
+      </div>
+    </div>
+
+  </div><!-- end .content -->
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-left">
+      <span class="footer-url">solana-score.xyz</span>
+      <span class="footer-date">Feb 2026</span>
+    </div>
+    <button class="share-btn">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      Share on X
+    </button>
+  </div>
+</div>
+
+<div class="page-label">Mockup 22 — Trophy Achievement</div>
+
+</body>
+</html>

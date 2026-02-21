@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solana Score by Slice Analytics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  :root {
+    --bg: #0d0d0d;
+    --violet: #7c3aed;
+    --deep-violet: #5b21b6;
+    --coral: #f87171;
+    --soft-coral: #fb923c;
+    --teal: #5eead4;
+    --muted-teal: #2dd4bf;
+    --amber: #fbbf24;
+    --warm-amber: #f59e0b;
+    --surface: rgba(255, 255, 255, 0.04);
+    --surface-hover: rgba(255, 255, 255, 0.07);
+    --border: rgba(255, 255, 255, 0.06);
+    --text-primary: #f5f5f5;
+    --text-secondary: rgba(255, 255, 255, 0.55);
+    --text-tertiary: rgba(255, 255, 255, 0.35);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  /* ======================== */
+  /*  AMBIENT BACKGROUND BLOBS */
+  /* ======================== */
+  .blob-container {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .blob {
+    position: absolute;
+    filter: blur(100px);
+    opacity: 0.35;
+    will-change: transform, border-radius;
+  }
+
+  .blob-1 {
+    width: 600px;
+    height: 500px;
+    background: linear-gradient(135deg, var(--deep-violet), #a855f7);
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+    top: -120px;
+    left: -100px;
+    animation: morph1 18s ease-in-out infinite alternate;
+  }
+
+  .blob-2 {
+    width: 500px;
+    height: 450px;
+    background: linear-gradient(135deg, var(--coral), var(--soft-coral));
+    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+    top: 200px;
+    right: -80px;
+    animation: morph2 22s ease-in-out infinite alternate;
+  }
+
+  .blob-3 {
+    width: 550px;
+    height: 480px;
+    background: linear-gradient(135deg, var(--muted-teal), #06b6d4);
+    border-radius: 50% 60% 40% 70% / 55% 40% 65% 45%;
+    bottom: -60px;
+    left: 30%;
+    animation: morph3 20s ease-in-out infinite alternate;
+  }
+
+  .blob-4 {
+    width: 350px;
+    height: 320px;
+    background: linear-gradient(135deg, var(--amber), var(--warm-amber));
+    border-radius: 70% 30% 50% 50% / 30% 60% 40% 70%;
+    top: 50%;
+    left: 10%;
+    animation: morph4 25s ease-in-out infinite alternate;
+  }
+
+  .blob-5 {
+    width: 400px;
+    height: 350px;
+    background: linear-gradient(135deg, #8b5cf6, var(--coral));
+    border-radius: 45% 55% 65% 35% / 50% 45% 55% 50%;
+    bottom: 20%;
+    right: 15%;
+    animation: morph5 16s ease-in-out infinite alternate;
+  }
+
+  @keyframes morph1 {
+    0%   { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; transform: translate(0, 0) rotate(0deg) scale(1); }
+    33%  { border-radius: 40% 60% 50% 50% / 50% 60% 40% 60%; transform: translate(40px, 30px) rotate(5deg) scale(1.05); }
+    66%  { border-radius: 50% 50% 40% 60% / 40% 50% 60% 50%; transform: translate(-20px, 50px) rotate(-3deg) scale(0.95); }
+    100% { border-radius: 70% 30% 60% 40% / 55% 45% 55% 45%; transform: translate(30px, -20px) rotate(8deg) scale(1.02); }
+  }
+
+  @keyframes morph2 {
+    0%   { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; transform: translate(0, 0) rotate(0deg); }
+    33%  { border-radius: 55% 45% 50% 50% / 60% 40% 55% 45%; transform: translate(-30px, 40px) rotate(-4deg); }
+    66%  { border-radius: 45% 55% 35% 65% / 50% 55% 45% 55%; transform: translate(20px, -30px) rotate(6deg); }
+    100% { border-radius: 60% 40% 55% 45% / 45% 60% 40% 60%; transform: translate(-15px, 20px) rotate(-2deg); }
+  }
+
+  @keyframes morph3 {
+    0%   { border-radius: 50% 60% 40% 70% / 55% 40% 65% 45%; transform: translate(0, 0) rotate(0deg); }
+    50%  { border-radius: 65% 35% 55% 45% / 40% 60% 35% 65%; transform: translate(40px, -30px) rotate(5deg); }
+    100% { border-radius: 40% 60% 65% 35% / 60% 35% 60% 40%; transform: translate(-25px, 25px) rotate(-4deg); }
+  }
+
+  @keyframes morph4 {
+    0%   { border-radius: 70% 30% 50% 50% / 30% 60% 40% 70%; transform: translate(0, 0) scale(1); }
+    50%  { border-radius: 40% 60% 60% 40% / 55% 45% 50% 50%; transform: translate(30px, -40px) scale(1.08); }
+    100% { border-radius: 55% 45% 40% 60% / 45% 55% 60% 40%; transform: translate(-20px, 30px) scale(0.95); }
+  }
+
+  @keyframes morph5 {
+    0%   { border-radius: 45% 55% 65% 35% / 50% 45% 55% 50%; transform: translate(0, 0) rotate(0deg); }
+    50%  { border-radius: 60% 40% 45% 55% / 40% 60% 50% 50%; transform: translate(-35px, 25px) rotate(7deg); }
+    100% { border-radius: 50% 50% 55% 45% / 55% 50% 45% 55%; transform: translate(25px, -35px) rotate(-5deg); }
+  }
+
+  /* ======================== */
+  /*   MAIN CONTENT WRAPPER   */
+  /* ======================== */
+  .content {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 48px 40px 80px;
+  }
+
+  /* ======================== */
+  /*         HEADER           */
+  /* ======================== */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 56px;
+  }
+
+  .logo-group {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo-mark {
+    width: 44px;
+    height: 44px;
+    border-radius: 50% 60% 40% 55% / 55% 40% 60% 50%;
+    background: linear-gradient(135deg, var(--violet), var(--coral));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: logoPulse 6s ease-in-out infinite alternate;
+  }
+
+  @keyframes logoPulse {
+    0%   { border-radius: 50% 60% 40% 55% / 55% 40% 60% 50%; }
+    50%  { border-radius: 60% 40% 55% 45% / 45% 55% 50% 50%; }
+    100% { border-radius: 45% 55% 50% 50% / 55% 45% 55% 45%; }
+  }
+
+  .logo-mark svg {
+    width: 22px;
+    height: 22px;
+    fill: white;
+  }
+
+  .logo-text {
+    font-size: 22px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #e0d4fc, #f5f0ff 40%, var(--teal) 80%, var(--amber));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.3px;
+  }
+
+  .logo-sub {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-tertiary);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-left: 2px;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .header-link {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 100px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .header-link:hover {
+    color: var(--text-primary);
+    background: var(--surface);
+  }
+
+  .connect-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    background: linear-gradient(135deg, var(--violet), #9333ea);
+    border: none;
+    padding: 10px 24px;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(124, 58, 237, 0.3);
+  }
+
+  .connect-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 28px rgba(124, 58, 237, 0.45);
+  }
+
+  /* ======================== */
+  /*     SEARCH SECTION       */
+  /* ======================== */
+  .search-section {
+    text-align: center;
+    margin-bottom: 64px;
+  }
+
+  .search-title {
+    font-size: 44px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, #f5f0ff 0%, #e0d4fc 30%, var(--teal) 70%, var(--amber) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+  }
+
+  .search-subtitle {
+    font-size: 16px;
+    color: var(--text-secondary);
+    margin-bottom: 36px;
+    font-weight: 400;
+  }
+
+  .search-bar {
+    position: relative;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  .search-bar input {
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--text-primary);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 18px 140px 18px 24px;
+    outline: none;
+    transition: all 0.4s ease;
+    box-shadow: 0 0 0 0 rgba(124, 58, 237, 0);
+  }
+
+  .search-bar input::placeholder {
+    color: var(--text-tertiary);
+  }
+
+  .search-bar input:focus {
+    border-color: rgba(124, 58, 237, 0.4);
+    box-shadow: 0 0 40px rgba(124, 58, 237, 0.12), 0 0 80px rgba(124, 58, 237, 0.06);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .search-btn {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    background: linear-gradient(135deg, var(--violet), #a855f7);
+    border: none;
+    padding: 12px 28px;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .search-btn:hover {
+    box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4);
+  }
+
+  /* ======================== */
+  /*     SCORE SECTION        */
+  /* ======================== */
+  .score-section {
+    display: flex;
+    gap: 40px;
+    margin-bottom: 56px;
+    align-items: stretch;
+  }
+
+  .score-blob-wrapper {
+    flex: 0 0 340px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    min-height: 340px;
+  }
+
+  /* Ambient glow behind the score blob */
+  .score-blob-wrapper::before {
+    content: '';
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(124, 58, 237, 0.2) 0%, transparent 70%);
+    filter: blur(40px);
+    animation: scoreGlow 6s ease-in-out infinite alternate;
+  }
+
+  @keyframes scoreGlow {
+    0% { transform: scale(1); opacity: 0.6; }
+    100% { transform: scale(1.15); opacity: 0.9; }
+  }
+
+  .score-blob {
+    position: relative;
+    width: 280px;
+    height: 280px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+  }
+
+  .score-blob-bg {
+    position: absolute;
+    inset: 0;
+    border-radius: 60% 40% 55% 45% / 50% 60% 40% 50%;
+    background: linear-gradient(145deg, rgba(124, 58, 237, 0.18), rgba(248, 113, 113, 0.1), rgba(94, 234, 212, 0.08));
+    border: 1px solid rgba(124, 58, 237, 0.15);
+    backdrop-filter: blur(20px);
+    animation: scoreMorph 12s ease-in-out infinite alternate;
+  }
+
+  @keyframes scoreMorph {
+    0%   { border-radius: 60% 40% 55% 45% / 50% 60% 40% 50%; }
+    25%  { border-radius: 45% 55% 50% 50% / 60% 40% 55% 45%; }
+    50%  { border-radius: 55% 45% 40% 60% / 45% 55% 50% 50%; }
+    75%  { border-radius: 50% 50% 60% 40% / 55% 45% 45% 55%; }
+    100% { border-radius: 40% 60% 50% 50% / 50% 50% 60% 40%; }
+  }
+
+  .score-blob-ring {
+    position: absolute;
+    inset: -8px;
+    border-radius: 60% 40% 55% 45% / 50% 60% 40% 50%;
+    border: 2px solid transparent;
+    background: linear-gradient(var(--bg), var(--bg)) padding-box,
+                linear-gradient(135deg, var(--violet), var(--coral), var(--teal), var(--amber)) border-box;
+    opacity: 0.4;
+    animation: scoreMorph 12s ease-in-out infinite alternate;
+  }
+
+  .score-number {
+    font-size: 72px;
+    font-weight: 700;
+    letter-spacing: -3px;
+    background: linear-gradient(135deg, #f5f0ff, var(--teal));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    position: relative;
+    z-index: 2;
+    line-height: 1;
+  }
+
+  .score-max {
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--text-tertiary);
+    position: relative;
+    z-index: 2;
+    margin-top: 2px;
+  }
+
+  .score-tier {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 14px;
+    padding: 6px 16px;
+    border-radius: 100px;
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(168, 85, 247, 0.1));
+    border: 1px solid rgba(124, 58, 237, 0.2);
+    font-size: 13px;
+    font-weight: 600;
+    color: #c4b5fd;
+    letter-spacing: 0.5px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .score-tier svg {
+    width: 14px;
+    height: 14px;
+    fill: #c4b5fd;
+  }
+
+  /* Right side info panel */
+  .score-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .wallet-display {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+  }
+
+  .wallet-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50% 45% 55% 50% / 55% 50% 50% 45%;
+    background: linear-gradient(135deg, var(--violet), var(--coral));
+    flex-shrink: 0;
+  }
+
+  .wallet-addr {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    font-family: 'DM Sans', monospace;
+    letter-spacing: 0.3px;
+  }
+
+  .wallet-label {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin-top: 2px;
+  }
+
+  .percentile-card {
+    padding: 20px 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+  }
+
+  .percentile-header {
+    font-size: 13px;
+    color: var(--text-tertiary);
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+
+  .percentile-bar-track {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 100px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+
+  .percentile-bar-fill {
+    height: 100%;
+    width: 94%;
+    border-radius: 100px;
+    background: linear-gradient(90deg, var(--violet), var(--teal));
+    position: relative;
+  }
+
+  .percentile-bar-fill::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: -3px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--teal);
+    box-shadow: 0 0 12px rgba(94, 234, 212, 0.5);
+  }
+
+  .percentile-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--teal);
+  }
+
+  .percentile-text span {
+    color: var(--text-secondary);
+    font-weight: 400;
+  }
+
+  .score-meta-row {
+    display: flex;
+    gap: 12px;
+  }
+
+  .score-meta-tag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .score-meta-tag .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .dot-green { background: #22c55e; box-shadow: 0 0 8px rgba(34, 197, 94, 0.4); }
+  .dot-amber { background: var(--amber); box-shadow: 0 0 8px rgba(251, 191, 36, 0.4); }
+
+  /* ======================== */
+  /*      STATS PILLS         */
+  /* ======================== */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 56px;
+  }
+
+  .stat-pill {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 24px 22px;
+    transition: all 0.35s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-pill::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    filter: blur(30px);
+    opacity: 0.15;
+    transition: opacity 0.35s ease;
+  }
+
+  .stat-pill:nth-child(1)::before { background: var(--violet); }
+  .stat-pill:nth-child(2)::before { background: var(--teal); }
+  .stat-pill:nth-child(3)::before { background: var(--coral); }
+  .stat-pill:nth-child(4)::before { background: var(--amber); }
+
+  .stat-pill:hover {
+    background: var(--surface-hover);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  }
+
+  .stat-pill:hover::before {
+    opacity: 0.3;
+  }
+
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50% 45% 55% 50% / 55% 50% 50% 45%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .stat-pill:nth-child(1) .stat-icon { background: rgba(124, 58, 237, 0.15); }
+  .stat-pill:nth-child(2) .stat-icon { background: rgba(94, 234, 212, 0.12); }
+  .stat-pill:nth-child(3) .stat-icon { background: rgba(248, 113, 113, 0.12); }
+  .stat-pill:nth-child(4) .stat-icon { background: rgba(251, 191, 36, 0.12); }
+
+  .stat-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .stat-pill:nth-child(1) .stat-icon svg { fill: var(--violet); }
+  .stat-pill:nth-child(2) .stat-icon svg { fill: var(--teal); }
+  .stat-pill:nth-child(3) .stat-icon svg { fill: var(--coral); }
+  .stat-pill:nth-child(4) .stat-icon svg { fill: var(--amber); }
+
+  .stat-label {
+    font-size: 13px;
+    color: var(--text-tertiary);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  .stat-value {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text-primary);
+  }
+
+  .stat-change {
+    font-size: 12px;
+    font-weight: 500;
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .stat-change.positive { color: #22c55e; }
+  .stat-change.neutral { color: var(--text-tertiary); }
+
+  /* ======================== */
+  /*    PROTOCOLS SECTION     */
+  /* ======================== */
+  .section-label {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    color: var(--text-primary);
+  }
+
+  .protocols-section {
+    margin-bottom: 56px;
+  }
+
+  .protocols-grid {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .protocol-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+
+  .protocol-item:hover {
+    transform: translateY(-4px);
+  }
+
+  .protocol-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    font-size: 24px;
+    font-weight: 700;
+    color: white;
+    transition: box-shadow 0.3s ease;
+  }
+
+  .protocol-avatar::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    padding: 3px;
+    background: linear-gradient(135deg, var(--glow-start), var(--glow-end));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+  }
+
+  .protocol-item:hover .protocol-avatar::before {
+    opacity: 1;
+  }
+
+  .protocol-item:hover .protocol-avatar {
+    box-shadow: 0 0 24px var(--glow-shadow);
+  }
+
+  .protocol-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-align: center;
+  }
+
+  .protocol-txns {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-top: -6px;
+  }
+
+  /* ======================== */
+  /*   SCORE BREAKDOWN        */
+  /* ======================== */
+  .breakdown-section {
+    margin-bottom: 48px;
+  }
+
+  .breakdown-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .breakdown-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 20px 24px;
+    transition: all 0.3s ease;
+  }
+
+  .breakdown-item:hover {
+    background: var(--surface-hover);
+  }
+
+  .breakdown-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .breakdown-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+
+  .breakdown-score {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .breakdown-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+
+  .breakdown-fill {
+    height: 100%;
+    border-radius: 100px;
+    transition: width 0.8s ease;
+  }
+
+  .breakdown-description {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin-top: 10px;
+    line-height: 1.5;
+  }
+
+  /* ======================== */
+  /*        FOOTER            */
+  /* ======================== */
+  .footer {
+    text-align: center;
+    padding: 32px 0;
+    border-top: 1px solid var(--border);
+    margin-top: 20px;
+  }
+
+  .footer-text {
+    font-size: 13px;
+    color: var(--text-tertiary);
+  }
+
+  .footer-text a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+
+  .footer-text a:hover {
+    color: var(--text-primary);
+  }
+
+  /* ======================== */
+  /*   FLOATING PARTICLES     */
+  /* ======================== */
+  .particles {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    animation: floatUp linear infinite;
+  }
+
+  @keyframes floatUp {
+    0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 1; }
+    100% { transform: translateY(-20vh) scale(1); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Ambient blobs -->
+<div class="blob-container">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+  <div class="blob blob-4"></div>
+  <div class="blob blob-5"></div>
+</div>
+
+<!-- Floating particles -->
+<div class="particles" id="particles"></div>
+
+<!-- Main content -->
+<div class="content">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="logo-group">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      </div>
+      <div>
+        <div class="logo-text">Solana Score</div>
+        <div class="logo-sub">by Slice Analytics</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <a href="#" class="header-link">Leaderboard</a>
+      <a href="#" class="header-link">API</a>
+      <a href="#" class="header-link">Docs</a>
+      <button class="connect-btn">Connect Wallet</button>
+    </div>
+  </header>
+
+  <!-- Search -->
+  <section class="search-section">
+    <h1 class="search-title">Your On-Chain Reputation</h1>
+    <p class="search-subtitle">Enter any Solana wallet address to reveal its reputation score and activity breakdown.</p>
+    <div class="search-bar">
+      <input type="text" value="7xKX...q3Fp" placeholder="Enter Solana wallet address...">
+      <button class="search-btn">Check Score</button>
+    </div>
+  </section>
+
+  <!-- Score display -->
+  <section class="score-section">
+    <div class="score-blob-wrapper">
+      <div class="score-blob">
+        <div class="score-blob-bg"></div>
+        <div class="score-blob-ring"></div>
+        <div class="score-number">87</div>
+        <div class="score-max">/ 100</div>
+        <div class="score-tier">
+          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          Diamond Tier
+        </div>
+      </div>
+    </div>
+
+    <div class="score-info">
+      <div class="wallet-display">
+        <div class="wallet-avatar"></div>
+        <div>
+          <div class="wallet-addr">7xKXzRk...q3Fp</div>
+          <div class="wallet-label">Connected Wallet</div>
+        </div>
+      </div>
+
+      <div class="percentile-card">
+        <div class="percentile-header">Reputation Percentile</div>
+        <div class="percentile-bar-track">
+          <div class="percentile-bar-fill"></div>
+        </div>
+        <div class="percentile-text">Top 6% <span>of all scored wallets</span></div>
+      </div>
+
+      <div class="score-meta-row">
+        <div class="score-meta-tag">
+          <span class="dot dot-green"></span>
+          Last active 2 hours ago
+        </div>
+        <div class="score-meta-tag">
+          <span class="dot dot-amber"></span>
+          432 total transactions
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats pills -->
+  <section class="stats-grid">
+    <div class="stat-pill">
+      <div class="stat-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.94s4.18 1.36 4.18 3.85c0 1.89-1.44 2.96-3.12 3.19z"/></svg>
+      </div>
+      <div class="stat-label">Protocol Fees</div>
+      <div class="stat-value">$12,450</div>
+      <div class="stat-change positive">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M5 1l4 5H1z"/></svg>
+        +18% vs avg
+      </div>
+    </div>
+    <div class="stat-pill">
+      <div class="stat-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+      </div>
+      <div class="stat-label">Network Fees</div>
+      <div class="stat-value">2.3 SOL</div>
+      <div class="stat-change positive">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M5 1l4 5H1z"/></svg>
+        +12% vs avg
+      </div>
+    </div>
+    <div class="stat-pill">
+      <div class="stat-icon">
+        <svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+      </div>
+      <div class="stat-label">Holdings</div>
+      <div class="stat-value">$45,200</div>
+      <div class="stat-change positive">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M5 1l4 5H1z"/></svg>
+        +31% 30d
+      </div>
+    </div>
+    <div class="stat-pill">
+      <div class="stat-icon">
+        <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM9 10H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/></svg>
+      </div>
+      <div class="stat-label">Months Active</div>
+      <div class="stat-value">18</div>
+      <div class="stat-change neutral">Since Aug 2024</div>
+    </div>
+  </section>
+
+  <!-- Protocols -->
+  <section class="protocols-section">
+    <h2 class="section-label">Protocols Used</h2>
+    <div class="protocols-grid">
+
+      <div class="protocol-item">
+        <div class="protocol-avatar" style="background: linear-gradient(135deg, #22d1ee, #1b9e7a); --glow-start: #22d1ee; --glow-end: #1b9e7a; --glow-shadow: rgba(34, 209, 238, 0.3);">
+          J
+        </div>
+        <div class="protocol-name">Jupiter</div>
+        <div class="protocol-txns">142 txns</div>
+      </div>
+
+      <div class="protocol-item">
+        <div class="protocol-avatar" style="background: linear-gradient(135deg, #6366f1, #4f46e5); --glow-start: #6366f1; --glow-end: #4f46e5; --glow-shadow: rgba(99, 102, 241, 0.3);">
+          R
+        </div>
+        <div class="protocol-name">Raydium</div>
+        <div class="protocol-txns">89 txns</div>
+      </div>
+
+      <div class="protocol-item">
+        <div class="protocol-avatar" style="background: linear-gradient(135deg, #14b8a6, #0d9488); --glow-start: #14b8a6; --glow-end: #0d9488; --glow-shadow: rgba(20, 184, 166, 0.3);">
+          M
+        </div>
+        <div class="protocol-name">Marinade</div>
+        <div class="protocol-txns">34 txns</div>
+      </div>
+
+      <div class="protocol-item">
+        <div class="protocol-avatar" style="background: linear-gradient(135deg, #f43f5e, #e11d48); --glow-start: #f43f5e; --glow-end: #e11d48; --glow-shadow: rgba(244, 63, 94, 0.3);">
+          T
+        </div>
+        <div class="protocol-name">Tensor</div>
+        <div class="protocol-txns">67 txns</div>
+      </div>
+
+      <div class="protocol-item">
+        <div class="protocol-avatar" style="background: linear-gradient(135deg, #e879f9, #a855f7); --glow-start: #e879f9; --glow-end: #a855f7; --glow-shadow: rgba(232, 121, 249, 0.3);">
+          ME
+        </div>
+        <div class="protocol-name">Magic Eden</div>
+        <div class="protocol-txns">53 txns</div>
+      </div>
+
+      <div class="protocol-item">
+        <div class="protocol-avatar" style="background: linear-gradient(135deg, #fb923c, #ea580c); --glow-start: #fb923c; --glow-end: #ea580c; --glow-shadow: rgba(251, 146, 60, 0.3);">
+          D
+        </div>
+        <div class="protocol-name">Drift</div>
+        <div class="protocol-txns">28 txns</div>
+      </div>
+
+      <div class="protocol-item">
+        <div class="protocol-avatar" style="background: linear-gradient(135deg, #fbbf24, #d97706); --glow-start: #fbbf24; --glow-end: #d97706; --glow-shadow: rgba(251, 191, 36, 0.3);">
+          O
+        </div>
+        <div class="protocol-name">Orca</div>
+        <div class="protocol-txns">41 txns</div>
+      </div>
+
+      <div class="protocol-item">
+        <div class="protocol-avatar" style="background: linear-gradient(135deg, #38bdf8, #0284c7); --glow-start: #38bdf8; --glow-end: #0284c7; --glow-shadow: rgba(56, 189, 248, 0.3);">
+          K
+        </div>
+        <div class="protocol-name">Kamino</div>
+        <div class="protocol-txns">19 txns</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Score Breakdown -->
+  <section class="breakdown-section">
+    <h2 class="section-label">Score Breakdown</h2>
+    <div class="breakdown-grid">
+
+      <div class="breakdown-item">
+        <div class="breakdown-header">
+          <span class="breakdown-label">Transaction History</span>
+          <span class="breakdown-score">22 / 25</span>
+        </div>
+        <div class="breakdown-bar">
+          <div class="breakdown-fill" style="width: 88%; background: linear-gradient(90deg, var(--violet), #a855f7);"></div>
+        </div>
+        <div class="breakdown-description">Based on 432 transactions over 18 months with consistent activity patterns.</div>
+      </div>
+
+      <div class="breakdown-item">
+        <div class="breakdown-header">
+          <span class="breakdown-label">DeFi Engagement</span>
+          <span class="breakdown-score">24 / 25</span>
+        </div>
+        <div class="breakdown-bar">
+          <div class="breakdown-fill" style="width: 96%; background: linear-gradient(90deg, var(--teal), #06b6d4);"></div>
+        </div>
+        <div class="breakdown-description">Active across 8 protocols including swaps, lending, staking, and NFT marketplaces.</div>
+      </div>
+
+      <div class="breakdown-item">
+        <div class="breakdown-header">
+          <span class="breakdown-label">Asset Holdings</span>
+          <span class="breakdown-score">21 / 25</span>
+        </div>
+        <div class="breakdown-bar">
+          <div class="breakdown-fill" style="width: 84%; background: linear-gradient(90deg, var(--coral), var(--soft-coral));"></div>
+        </div>
+        <div class="breakdown-description">Diversified portfolio worth $45,200 across SOL, stablecoins, and DeFi positions.</div>
+      </div>
+
+      <div class="breakdown-item">
+        <div class="breakdown-header">
+          <span class="breakdown-label">Account Longevity</span>
+          <span class="breakdown-score">20 / 25</span>
+        </div>
+        <div class="breakdown-bar">
+          <div class="breakdown-fill" style="width: 80%; background: linear-gradient(90deg, var(--amber), var(--warm-amber));"></div>
+        </div>
+        <div class="breakdown-description">Wallet created 18 months ago with no prolonged periods of inactivity detected.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p class="footer-text">Built by <a href="#">Slice Analytics</a> &middot; Data sourced from Solana mainnet &middot; Updated every 15 minutes</p>
+  </footer>
+
+</div>
+
+<script>
+  // Generate floating particles
+  (function() {
+    const container = document.getElementById('particles');
+    const count = 20;
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.style.left = Math.random() * 100 + '%';
+      p.style.width = p.style.height = (2 + Math.random() * 3) + 'px';
+      p.style.animationDuration = (12 + Math.random() * 18) + 's';
+      p.style.animationDelay = (Math.random() * 15) + 's';
+      p.style.opacity = 0.05 + Math.random() * 0.1;
+      container.appendChild(p);
+    }
+  })();
+</script>
+
+</body>
+</html>
