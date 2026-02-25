@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solana Score — Minimal Premium | Mockup 28</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-deep: #0c0b14;
+    --bg-card: #0f0e17;
+    --glass-bg: rgba(255,255,255,0.03);
+    --glass-border: rgba(255,255,255,0.05);
+    --glass-border-hover: rgba(255,255,255,0.10);
+    --text-primary: #f0eef6;
+    --text-secondary: rgba(240,238,246,0.55);
+    --text-tertiary: rgba(240,238,246,0.35);
+    --accent-purple: #9945FF;
+    --accent-green: #14F195;
+    --accent-cyan: #00D1FF;
+    --radius: 16px;
+    --sidebar-w: 56px;
+    --topbar-h: 56px;
+  }
+
+  html { font-size: 14px; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 128px 128px;
+  }
+
+  /* --- SIDEBAR --- */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: var(--sidebar-w);
+    height: 100vh;
+    background: rgba(15,14,23,0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-right: 1px solid var(--glass-border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 0;
+    z-index: 100;
+  }
+
+  .sidebar-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-green));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 28px;
+    flex-shrink: 0;
+  }
+
+  .sidebar-logo svg { width: 18px; height: 18px; }
+
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+  }
+
+  .nav-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    color: var(--text-tertiary);
+  }
+
+  .nav-icon:hover {
+    background: rgba(255,255,255,0.04);
+    color: var(--text-secondary);
+  }
+
+  .nav-icon.active {
+    background: rgba(153,69,255,0.12);
+    color: var(--accent-purple);
+  }
+
+  .nav-icon.active::before {
+    content: '';
+    position: absolute;
+    left: -9px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 20px;
+    border-radius: 0 3px 3px 0;
+    background: var(--accent-purple);
+  }
+
+  .nav-icon svg { width: 18px; height: 18px; stroke-width: 1.5; }
+
+  .sidebar-bottom {
+    margin-top: auto;
+    padding-top: 16px;
+  }
+
+  /* --- TOPBAR --- */
+  .topbar {
+    position: fixed;
+    top: 0;
+    left: var(--sidebar-w);
+    right: 0;
+    height: var(--topbar-h);
+    background: rgba(12,11,20,0.80);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--glass-border);
+    display: flex;
+    align-items: center;
+    padding: 0 28px;
+    z-index: 99;
+    gap: 20px;
+  }
+
+  .topbar-brand {
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    background: linear-gradient(135deg, var(--text-primary), rgba(240,238,246,0.7));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .topbar-search {
+    flex: 1;
+    max-width: 400px;
+    position: relative;
+  }
+
+  .topbar-search input {
+    width: 100%;
+    height: 34px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    padding: 0 14px 0 36px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    outline: none;
+    transition: all 0.2s ease;
+  }
+
+  .topbar-search input::placeholder { color: var(--text-tertiary); }
+  .topbar-search input:focus {
+    border-color: rgba(153,69,255,0.3);
+    background: rgba(255,255,255,0.06);
+    box-shadow: 0 0 0 3px rgba(153,69,255,0.08);
+  }
+
+  .topbar-search svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    color: var(--text-tertiary);
+  }
+
+  .topbar-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .topbar-sol {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .topbar-sol .sol-icon {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+  }
+
+  .topbar-badge {
+    font-size: 0.7rem;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 8px;
+    background: rgba(20,241,149,0.08);
+    color: var(--accent-green);
+    border: 1px solid rgba(20,241,149,0.12);
+    letter-spacing: 0.03em;
+  }
+
+  /* --- MAIN CONTENT --- */
+  .main {
+    margin-left: var(--sidebar-w);
+    margin-top: var(--topbar-h);
+    padding: 28px;
+    min-height: calc(100vh - var(--topbar-h));
+    display: flex;
+    justify-content: center;
+  }
+
+  .main-inner {
+    width: 100%;
+    max-width: 1100px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  /* --- GLASS CARD --- */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    transition: all 0.25s ease;
+  }
+
+  .glass:hover {
+    border-color: var(--glass-border-hover);
+  }
+
+  /* Page label */
+  .page-label {
+    font-size: 0.7rem;
+    color: var(--text-tertiary);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: -8px;
+  }
+
+  /* --- HERO SECTION --- */
+  .hero {
+    padding: 32px 36px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -80px;
+    right: -40px;
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, rgba(153,69,255,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-top {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    position: relative;
+  }
+
+  .hero-pfp {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .hero-pfp-ring {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    padding: 3px;
+    background: conic-gradient(from 0deg, var(--accent-purple), var(--accent-green), var(--accent-cyan), var(--accent-purple));
+  }
+
+  .hero-pfp-ring img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--bg-deep);
+  }
+
+  .hero-identity {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .hero-name {
+    font-size: 1.55rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+
+  .hero-handle {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 400;
+  }
+
+  .hero-x-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--accent-cyan);
+    background: rgba(0,209,255,0.06);
+    border: 1px solid rgba(0,209,255,0.10);
+    padding: 3px 10px;
+    border-radius: 8px;
+    width: fit-content;
+    margin-top: 4px;
+  }
+
+  .hero-x-badge svg { width: 11px; height: 11px; }
+
+  .hero-score {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 36px;
+    flex-shrink: 0;
+  }
+
+  .score-ring-wrap {
+    position: relative;
+    width: 140px;
+    height: 140px;
+  }
+
+  .score-ring-wrap svg { width: 140px; height: 140px; transform: rotate(-90deg); }
+
+  .score-ring-bg { fill: none; stroke: rgba(255,255,255,0.04); stroke-width: 6; }
+  .score-ring-fg {
+    fill: none;
+    stroke: url(#scoreGrad);
+    stroke-width: 6;
+    stroke-linecap: round;
+    stroke-dasharray: 408;
+    stroke-dashoffset: 53;
+    transition: stroke-dashoffset 1s ease;
+  }
+
+  .score-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .score-value {
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    background: linear-gradient(135deg, #fff, rgba(255,255,255,0.75));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .score-max {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    margin-top: 2px;
+    font-weight: 400;
+  }
+
+  .score-tier {
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--accent-cyan);
+  }
+
+  .score-tier svg { width: 14px; height: 14px; }
+
+  .hero-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+  }
+
+  .hero-rank {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    text-align: right;
+  }
+
+  .hero-rank strong {
+    display: block;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  .hero-rank-pct {
+    font-size: 0.72rem;
+    color: var(--accent-green);
+    font-weight: 500;
+    margin-top: 2px;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .btn-primary {
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: none;
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-share {
+    background: linear-gradient(135deg, var(--accent-purple), #7934d4);
+    color: #fff;
+  }
+
+  .btn-share:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(153,69,255,0.25);
+  }
+
+  .btn-track {
+    background: rgba(255,255,255,0.05);
+    color: var(--text-secondary);
+    border: 1px solid var(--glass-border);
+  }
+
+  .btn-track:hover {
+    background: rgba(255,255,255,0.08);
+    color: var(--text-primary);
+  }
+
+  .btn-primary svg { width: 13px; height: 13px; }
+
+  /* Score breakdown bars */
+  .hero-divider {
+    height: 1px;
+    background: var(--glass-border);
+    margin: 24px 0 20px;
+  }
+
+  .score-breakdown {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 16px;
+  }
+
+  .breakdown-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .breakdown-label {
+    font-size: 0.72rem;
+    color: var(--text-tertiary);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .breakdown-bar {
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.04);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .breakdown-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.8s ease;
+  }
+
+  .breakdown-val {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  /* --- STATS GRID --- */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+
+  .stat-card {
+    padding: 22px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    cursor: default;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .stat-value-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .stat-value {
+    font-size: 1.55rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+
+  .stat-change {
+    font-size: 0.75rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .stat-change.up { color: var(--accent-green); }
+  .stat-change.down { color: #f45;  }
+
+  .stat-spark {
+    margin-top: auto;
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 28px;
+    padding-top: 6px;
+  }
+
+  .spark-bar {
+    flex: 1;
+    border-radius: 2px;
+    background: rgba(153,69,255,0.2);
+    transition: all 0.2s ease;
+  }
+
+  .stat-card:hover .spark-bar {
+    background: rgba(153,69,255,0.35);
+  }
+
+  .stat-sub {
+    font-size: 0.72rem;
+    color: var(--text-tertiary);
+    margin-top: 2px;
+  }
+
+  /* --- TWO COLUMN --- */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+
+  .section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .section-link {
+    font-size: 0.75rem;
+    color: var(--accent-purple);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+    cursor: pointer;
+  }
+
+  .section-link:hover { color: var(--accent-cyan); }
+
+  /* Protocols */
+  .protocols-panel {
+    padding: 24px 28px;
+  }
+
+  .protocol-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .protocol-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.03);
+    transition: all 0.25s ease;
+    cursor: default;
+  }
+
+  .protocol-card:hover {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(255,255,255,0.06);
+    transform: translateX(3px);
+  }
+
+  .protocol-logo {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.05);
+  }
+
+  .protocol-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .protocol-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .protocol-desc {
+    font-size: 0.72rem;
+    color: var(--text-tertiary);
+    margin-top: 2px;
+  }
+
+  .protocol-stats {
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .protocol-volume {
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .protocol-txns {
+    font-size: 0.72rem;
+    color: var(--text-tertiary);
+    margin-top: 2px;
+  }
+
+  /* Leaderboard */
+  .leaderboard-panel {
+    padding: 24px 28px;
+  }
+
+  .lb-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .lb-table th {
+    font-size: 0.68rem;
+    font-weight: 500;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0 0 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--glass-border);
+  }
+
+  .lb-table th:last-child,
+  .lb-table td:last-child { text-align: right; }
+
+  .lb-table td {
+    padding: 14px 0;
+    font-size: 0.85rem;
+    border-bottom: 1px solid rgba(255,255,255,0.025);
+    vertical-align: middle;
+  }
+
+  .lb-table tr:last-child td { border-bottom: none; }
+
+  .lb-rank {
+    font-weight: 600;
+    color: var(--text-tertiary);
+    width: 36px;
+    font-size: 0.78rem;
+  }
+
+  .lb-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .lb-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .lb-name { font-weight: 500; }
+
+  .lb-score-val {
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: -0.01em;
+  }
+
+  .lb-you {
+    background: rgba(153,69,255,0.06);
+    border-radius: 10px;
+  }
+
+  .lb-you td {
+    padding: 14px 10px;
+    border-bottom-color: transparent;
+  }
+
+  .lb-you td:first-child { border-radius: 10px 0 0 10px; }
+  .lb-you td:last-child { border-radius: 0 10px 10px 0; }
+
+  .lb-you .lb-name { color: var(--accent-purple); }
+
+  /* --- DISTRIBUTION --- */
+  .distribution-panel {
+    padding: 28px 36px;
+  }
+
+  .dist-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 4px;
+  }
+
+  .dist-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .dist-label {
+    width: 80px;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .dist-track {
+    flex: 1;
+    height: 28px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .dist-fill {
+    height: 100%;
+    border-radius: 8px;
+    transition: width 0.8s ease;
+    position: relative;
+  }
+
+  .dist-fill::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 8px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05));
+  }
+
+  .dist-pct {
+    width: 40px;
+    font-size: 0.78rem;
+    color: var(--text-tertiary);
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  .dist-you {
+    position: relative;
+  }
+
+  .dist-you .dist-label { color: var(--accent-purple); font-weight: 600; }
+  .dist-you .dist-pct { color: var(--accent-purple); }
+
+  /* --- FOOTER --- */
+  .footer {
+    text-align: center;
+    padding: 28px 0 8px;
+    font-size: 0.72rem;
+    color: var(--text-tertiary);
+    letter-spacing: 0.02em;
+  }
+
+  /* --- SCROLLBAR --- */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.12); }
+
+  /* --- ANIMATIONS --- */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate-in {
+    animation: fadeUp 0.5s ease forwards;
+    opacity: 0;
+  }
+
+  .delay-1 { animation-delay: 0.05s; }
+  .delay-2 { animation-delay: 0.1s; }
+  .delay-3 { animation-delay: 0.15s; }
+  .delay-4 { animation-delay: 0.2s; }
+  .delay-5 { animation-delay: 0.25s; }
+</style>
+</head>
+<body>
+
+<!-- ===== SIDEBAR ===== -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+  </div>
+  <div class="sidebar-nav">
+    <!-- Dashboard (active) -->
+    <div class="nav-icon active" title="Dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    </div>
+    <!-- Search -->
+    <div class="nav-icon" title="Search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </div>
+    <!-- Analytics -->
+    <div class="nav-icon" title="Analytics">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    </div>
+    <!-- Leaderboard -->
+    <div class="nav-icon" title="Leaderboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10l-1 8H8L7 4z"/><path d="M7 8H4l1 4h3"/><path d="M17 8h3l-1 4h-3"/></svg>
+    </div>
+    <!-- Protocols -->
+    <div class="nav-icon" title="Protocols">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+    </div>
+  </div>
+  <div class="sidebar-bottom">
+    <div class="nav-icon" title="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== TOPBAR ===== -->
+<header class="topbar">
+  <span class="topbar-brand">Solana Score</span>
+  <div class="topbar-search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" placeholder="Search wallet address or .sol domain..." />
+  </div>
+  <div class="topbar-right">
+    <div class="topbar-sol">
+      <div class="sol-icon"></div>
+      SOL $148.32
+    </div>
+    <span class="topbar-badge">Mainnet</span>
+  </div>
+</header>
+
+<!-- ===== MAIN ===== -->
+<main class="main">
+  <div class="main-inner">
+
+    <div class="page-label animate-in">Mockup 28 — Site: Minimal Premium</div>
+
+    <!-- HERO: Profile + Score -->
+    <section class="glass hero animate-in delay-1">
+
+      <!-- SVG gradient defs -->
+      <svg width="0" height="0" style="position:absolute">
+        <defs>
+          <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#9945FF"/>
+            <stop offset="50%" stop-color="#14F195"/>
+            <stop offset="100%" stop-color="#00D1FF"/>
+          </linearGradient>
+          <linearGradient id="barGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#9945FF"/><stop offset="100%" stop-color="#b76aff"/>
+          </linearGradient>
+          <linearGradient id="barGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#14F195"/><stop offset="100%" stop-color="#5ffcbe"/>
+          </linearGradient>
+          <linearGradient id="barGrad3" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#00D1FF"/><stop offset="100%" stop-color="#62e4ff"/>
+          </linearGradient>
+          <linearGradient id="barGrad4" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#9945FF"/><stop offset="100%" stop-color="#14F195"/>
+          </linearGradient>
+          <linearGradient id="barGrad5" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#00D1FF"/><stop offset="100%" stop-color="#9945FF"/>
+          </linearGradient>
+          <linearGradient id="barGrad6" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#14F195"/><stop offset="100%" stop-color="#00D1FF"/>
+          </linearGradient>
+        </defs>
+      </svg>
+
+      <div class="hero-top">
+        <!-- PFP -->
+        <div class="hero-pfp">
+          <div class="hero-pfp-ring">
+            <img src="0xgug-pfp.jpg" alt="0xGug" />
+          </div>
+        </div>
+
+        <!-- Identity -->
+        <div class="hero-identity">
+          <div class="hero-name">0xGug</div>
+          <div class="hero-handle">@0xGug</div>
+          <div class="hero-x-badge">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            X Connected
+          </div>
+        </div>
+
+        <!-- Score Ring -->
+        <div class="hero-score">
+          <div class="score-ring-wrap">
+            <svg viewBox="0 0 140 140">
+              <circle class="score-ring-bg" cx="70" cy="70" r="65"/>
+              <circle class="score-ring-fg" cx="70" cy="70" r="65"/>
+            </svg>
+            <div class="score-center">
+              <div class="score-value">87</div>
+              <div class="score-max">/ 100</div>
+              <div class="score-tier">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61z"/></svg>
+                Diamond
+              </div>
+            </div>
+          </div>
+
+          <!-- Rank + Actions -->
+          <div class="hero-meta">
+            <div class="hero-rank">
+              Rank
+              <strong>#12,847</strong>
+              <div class="hero-rank-pct">Top 4%</div>
+            </div>
+            <div class="hero-actions">
+              <button class="btn-primary btn-share">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                Share on X
+              </button>
+              <button class="btn-primary btn-track">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                Track Wallet
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div class="hero-divider"></div>
+
+      <!-- Score Breakdown -->
+      <div class="score-breakdown">
+        <div class="breakdown-item">
+          <div class="breakdown-label">DeFi</div>
+          <div class="breakdown-bar"><div class="breakdown-fill" style="width:92%;background:url(#barGrad1);background:linear-gradient(90deg,#9945FF,#b76aff)"></div></div>
+          <div class="breakdown-val">92</div>
+        </div>
+        <div class="breakdown-item">
+          <div class="breakdown-label">Volume</div>
+          <div class="breakdown-bar"><div class="breakdown-fill" style="width:88%;background:linear-gradient(90deg,#14F195,#5ffcbe)"></div></div>
+          <div class="breakdown-val">88</div>
+        </div>
+        <div class="breakdown-item">
+          <div class="breakdown-label">Loyalty</div>
+          <div class="breakdown-bar"><div class="breakdown-fill" style="width:85%;background:linear-gradient(90deg,#00D1FF,#62e4ff)"></div></div>
+          <div class="breakdown-val">85</div>
+        </div>
+        <div class="breakdown-item">
+          <div class="breakdown-label">History</div>
+          <div class="breakdown-bar"><div class="breakdown-fill" style="width:90%;background:linear-gradient(90deg,#9945FF,#14F195)"></div></div>
+          <div class="breakdown-val">90</div>
+        </div>
+        <div class="breakdown-item">
+          <div class="breakdown-label">NFTs</div>
+          <div class="breakdown-bar"><div class="breakdown-fill" style="width:72%;background:linear-gradient(90deg,#00D1FF,#9945FF)"></div></div>
+          <div class="breakdown-val">72</div>
+        </div>
+        <div class="breakdown-item">
+          <div class="breakdown-label">Staking</div>
+          <div class="breakdown-bar"><div class="breakdown-fill" style="width:80%;background:linear-gradient(90deg,#14F195,#00D1FF)"></div></div>
+          <div class="breakdown-val">80</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATS -->
+    <section class="stats-grid animate-in delay-2">
+      <div class="glass stat-card">
+        <div class="stat-label">Protocol Fees</div>
+        <div class="stat-value-row">
+          <div class="stat-value">$12,450</div>
+          <div class="stat-change up">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 1L9 6H1L5 1Z" fill="currentColor"/></svg>
+            +18.2% 30d
+          </div>
+        </div>
+        <div class="stat-spark">
+          <div class="spark-bar" style="height:40%"></div>
+          <div class="spark-bar" style="height:55%"></div>
+          <div class="spark-bar" style="height:45%"></div>
+          <div class="spark-bar" style="height:65%"></div>
+          <div class="spark-bar" style="height:50%"></div>
+          <div class="spark-bar" style="height:75%"></div>
+          <div class="spark-bar" style="height:70%"></div>
+          <div class="spark-bar" style="height:85%"></div>
+          <div class="spark-bar" style="height:80%"></div>
+          <div class="spark-bar" style="height:100%"></div>
+        </div>
+      </div>
+
+      <div class="glass stat-card">
+        <div class="stat-label">Network Fees</div>
+        <div class="stat-value-row">
+          <div class="stat-value">2.3 SOL</div>
+          <div class="stat-change up">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 1L9 6H1L5 1Z" fill="currentColor"/></svg>
+            +5.1%
+          </div>
+        </div>
+        <div class="stat-spark">
+          <div class="spark-bar" style="height:60%"></div>
+          <div class="spark-bar" style="height:45%"></div>
+          <div class="spark-bar" style="height:70%"></div>
+          <div class="spark-bar" style="height:55%"></div>
+          <div class="spark-bar" style="height:80%"></div>
+          <div class="spark-bar" style="height:65%"></div>
+          <div class="spark-bar" style="height:75%"></div>
+          <div class="spark-bar" style="height:90%"></div>
+          <div class="spark-bar" style="height:85%"></div>
+          <div class="spark-bar" style="height:95%"></div>
+        </div>
+      </div>
+
+      <div class="glass stat-card">
+        <div class="stat-label">Holdings</div>
+        <div class="stat-value-row">
+          <div class="stat-value">$45,200</div>
+          <div class="stat-change down">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 9L1 4H9L5 9Z" fill="currentColor"/></svg>
+            -3.4%
+          </div>
+        </div>
+        <div class="stat-spark">
+          <div class="spark-bar" style="height:90%"></div>
+          <div class="spark-bar" style="height:95%"></div>
+          <div class="spark-bar" style="height:85%"></div>
+          <div class="spark-bar" style="height:80%"></div>
+          <div class="spark-bar" style="height:75%"></div>
+          <div class="spark-bar" style="height:70%"></div>
+          <div class="spark-bar" style="height:72%"></div>
+          <div class="spark-bar" style="height:68%"></div>
+          <div class="spark-bar" style="height:65%"></div>
+          <div class="spark-bar" style="height:60%"></div>
+        </div>
+      </div>
+
+      <div class="glass stat-card">
+        <div class="stat-label">Months Active</div>
+        <div class="stat-value-row">
+          <div class="stat-value">18</div>
+        </div>
+        <div class="stat-sub">Since Aug 2024</div>
+      </div>
+    </section>
+
+    <!-- TWO COLUMN: Protocols + Leaderboard -->
+    <section class="two-col animate-in delay-3">
+      <!-- Protocols -->
+      <div class="glass protocols-panel">
+        <div class="section-header">
+          <div class="section-title">Top Protocols</div>
+          <span class="section-link">+4 more</span>
+        </div>
+        <div class="protocol-list">
+          <div class="protocol-card">
+            <img class="protocol-logo" src="../public/images/protocols/jupiter.svg" alt="Jupiter" />
+            <div class="protocol-info">
+              <div class="protocol-name">Jupiter</div>
+              <div class="protocol-desc">Aggregator &middot; 342 txns</div>
+            </div>
+            <div class="protocol-stats">
+              <div class="protocol-volume">$28,400</div>
+              <div class="protocol-txns">Volume</div>
+            </div>
+          </div>
+          <div class="protocol-card">
+            <img class="protocol-logo" src="../public/images/protocols/raydium.jpg" alt="Raydium" />
+            <div class="protocol-info">
+              <div class="protocol-name">Raydium</div>
+              <div class="protocol-desc">AMM &middot; 186 txns</div>
+            </div>
+            <div class="protocol-stats">
+              <div class="protocol-volume">$14,200</div>
+              <div class="protocol-txns">Volume</div>
+            </div>
+          </div>
+          <div class="protocol-card">
+            <img class="protocol-logo" src="../public/images/protocols/drift.png" alt="Drift" />
+            <div class="protocol-info">
+              <div class="protocol-name">Drift</div>
+              <div class="protocol-desc">Perps &middot; 94 txns</div>
+            </div>
+            <div class="protocol-stats">
+              <div class="protocol-volume">$9,800</div>
+              <div class="protocol-txns">Volume</div>
+            </div>
+          </div>
+          <div class="protocol-card">
+            <img class="protocol-logo" src="../public/images/protocols/orca.jpg" alt="Orca" />
+            <div class="protocol-info">
+              <div class="protocol-name">Orca</div>
+              <div class="protocol-desc">DEX &middot; 67 txns</div>
+            </div>
+            <div class="protocol-stats">
+              <div class="protocol-volume">$6,100</div>
+              <div class="protocol-txns">Volume</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Leaderboard -->
+      <div class="glass leaderboard-panel">
+        <div class="section-header">
+          <div class="section-title">Leaderboard</div>
+          <span class="section-link">View all</span>
+        </div>
+        <table class="lb-table">
+          <thead>
+            <tr>
+              <th style="width:36px">#</th>
+              <th>Wallet</th>
+              <th>Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="lb-rank">1</td>
+              <td>
+                <div class="lb-user">
+                  <div class="lb-avatar" style="background:linear-gradient(135deg,#FFD700,#FFA500)">S</div>
+                  <span class="lb-name">sol_whale.sol</span>
+                </div>
+              </td>
+              <td class="lb-score-val">99</td>
+            </tr>
+            <tr>
+              <td class="lb-rank">2</td>
+              <td>
+                <div class="lb-user">
+                  <div class="lb-avatar" style="background:linear-gradient(135deg,#C0C0C0,#A0A0A0)">D</div>
+                  <span class="lb-name">defi_maxi.sol</span>
+                </div>
+              </td>
+              <td class="lb-score-val">97</td>
+            </tr>
+            <tr>
+              <td class="lb-rank">3</td>
+              <td>
+                <div class="lb-user">
+                  <div class="lb-avatar" style="background:linear-gradient(135deg,#CD7F32,#B8860B)">N</div>
+                  <span class="lb-name">nft_degen.sol</span>
+                </div>
+              </td>
+              <td class="lb-score-val">96</td>
+            </tr>
+            <tr>
+              <td class="lb-rank">4</td>
+              <td>
+                <div class="lb-user">
+                  <div class="lb-avatar" style="background:rgba(255,255,255,0.06)">A</div>
+                  <span class="lb-name">airdrop_hunt</span>
+                </div>
+              </td>
+              <td class="lb-score-val">95</td>
+            </tr>
+            <tr>
+              <td class="lb-rank">5</td>
+              <td>
+                <div class="lb-user">
+                  <div class="lb-avatar" style="background:rgba(255,255,255,0.06)">V</div>
+                  <span class="lb-name">validator_op</span>
+                </div>
+              </td>
+              <td class="lb-score-val">94</td>
+            </tr>
+            <tr class="lb-you">
+              <td class="lb-rank" style="color:var(--accent-purple)">12,847</td>
+              <td>
+                <div class="lb-user">
+                  <div class="lb-avatar" style="background:linear-gradient(135deg,var(--accent-purple),var(--accent-cyan))">G</div>
+                  <span class="lb-name">0xGug (You)</span>
+                </div>
+              </td>
+              <td class="lb-score-val" style="color:var(--accent-purple)">87</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SCORE DISTRIBUTION -->
+    <section class="glass distribution-panel animate-in delay-4">
+      <div class="section-header" style="margin-bottom:22px">
+        <div class="section-title">Score Distribution</div>
+        <span style="font-size:0.72rem;color:var(--text-tertiary)">325,000 wallets scored</span>
+      </div>
+      <div class="dist-bars">
+        <div class="dist-row">
+          <div class="dist-label">90 - 100</div>
+          <div class="dist-track">
+            <div class="dist-fill" style="width:8%;background:linear-gradient(90deg,#9945FF,#b76aff)"></div>
+          </div>
+          <div class="dist-pct">8%</div>
+        </div>
+        <div class="dist-row dist-you">
+          <div class="dist-label">80 - 89</div>
+          <div class="dist-track">
+            <div class="dist-fill" style="width:14%;background:linear-gradient(90deg,#9945FF,#14F195)"></div>
+          </div>
+          <div class="dist-pct">14%</div>
+        </div>
+        <div class="dist-row">
+          <div class="dist-label">70 - 79</div>
+          <div class="dist-track">
+            <div class="dist-fill" style="width:22%;background:linear-gradient(90deg,#14F195,#5ffcbe)"></div>
+          </div>
+          <div class="dist-pct">22%</div>
+        </div>
+        <div class="dist-row">
+          <div class="dist-label">60 - 69</div>
+          <div class="dist-track">
+            <div class="dist-fill" style="width:26%;background:linear-gradient(90deg,#00D1FF,#62e4ff)"></div>
+          </div>
+          <div class="dist-pct">26%</div>
+        </div>
+        <div class="dist-row">
+          <div class="dist-label">50 - 59</div>
+          <div class="dist-track">
+            <div class="dist-fill" style="width:18%;background:linear-gradient(90deg,#00D1FF,#9945FF)"></div>
+          </div>
+          <div class="dist-pct">18%</div>
+        </div>
+        <div class="dist-row">
+          <div class="dist-label">0 - 49</div>
+          <div class="dist-track">
+            <div class="dist-fill" style="width:12%;background:rgba(255,255,255,0.08)"></div>
+          </div>
+          <div class="dist-pct">12%</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer animate-in delay-5">
+      Slice Analytics &middot; Solana Score
+    </footer>
+
+  </div>
+</main>
+
+</body>
+</html>

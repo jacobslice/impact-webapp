@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup 26 — Site: Profile Hero | Solana Score</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scrollbar-width:thin;scrollbar-color:#9945FF33 #0c0b14;}
+body{
+  font-family:'Inter',sans-serif;
+  background:#0c0b14;
+  color:#e2e0ea;
+  min-height:100vh;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;
+  z-index:9999;
+  opacity:0.5;
+}
+
+/* Sidebar */
+.sidebar{
+  position:fixed;
+  left:0;top:0;bottom:0;
+  width:56px;
+  background:#08080c;
+  border-right:1px solid rgba(139,92,246,0.12);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:16px 0;
+  z-index:100;
+}
+.sidebar-logo{
+  width:36px;height:36px;
+  border-radius:10px;
+  background:linear-gradient(135deg,#9945FF,#14F195);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:18px;color:#fff;
+  margin-bottom:28px;
+  box-shadow:0 0 20px rgba(153,69,255,0.3);
+}
+.sidebar-nav{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  flex:1;
+}
+.sidebar-icon{
+  width:40px;height:40px;
+  border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  transition:all 0.2s;
+  position:relative;
+  color:#5a567a;
+}
+.sidebar-icon:hover{color:#b4afd0;background:rgba(255,255,255,0.04);}
+.sidebar-icon.active{
+  color:#c4b5fd;
+  background:rgba(139,92,246,0.15);
+  box-shadow:0 0 16px rgba(139,92,246,0.2);
+}
+.sidebar-icon.active::before{
+  content:'';position:absolute;left:-8px;top:50%;transform:translateY(-50%);
+  width:3px;height:20px;border-radius:0 3px 3px 0;
+  background:linear-gradient(180deg,#9945FF,#14F195);
+}
+.sidebar-icon svg{width:20px;height:20px;}
+.sidebar-bottom{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  padding-top:12px;
+  border-top:1px solid rgba(139,92,246,0.08);
+}
+
+/* Top Bar */
+.topbar{
+  position:fixed;
+  top:0;left:56px;right:0;
+  height:52px;
+  background:rgba(15,14,23,0.85);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(139,92,246,0.1);
+  display:flex;
+  align-items:center;
+  padding:0 24px;
+  z-index:90;
+  gap:16px;
+}
+.topbar-brand{
+  display:flex;align-items:center;gap:8px;
+  white-space:nowrap;
+}
+.topbar-brand-name{
+  font-weight:700;font-size:15px;
+  background:linear-gradient(135deg,#c4b5fd,#14F195);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.topbar-brand-sub{
+  font-size:10px;color:#5a567a;font-weight:500;
+}
+.topbar-search{
+  flex:1;max-width:480px;
+  position:relative;
+}
+.topbar-search input{
+  width:100%;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(139,92,246,0.12);
+  border-radius:8px;
+  padding:7px 12px 7px 34px;
+  color:#b4afd0;
+  font-family:'Inter',monospace;
+  font-size:12px;
+  outline:none;
+  transition:border-color 0.2s;
+}
+.topbar-search input:focus{border-color:rgba(153,69,255,0.4);}
+.topbar-search input::placeholder{color:#3d395a;}
+.topbar-search-icon{
+  position:absolute;left:10px;top:50%;transform:translateY(-50%);
+  color:#5a567a;
+}
+.topbar-search-icon svg{width:14px;height:14px;}
+.topbar-stats{
+  display:flex;align-items:center;gap:18px;
+  margin-left:auto;
+  white-space:nowrap;
+}
+.topbar-stat{
+  display:flex;align-items:center;gap:5px;
+  font-size:12px;
+}
+.topbar-stat-label{color:#5a567a;font-weight:500;}
+.topbar-stat-value{color:#e2e0ea;font-weight:600;}
+.topbar-stat-value.green{color:#14F195;}
+.topbar-mainnet{
+  display:flex;align-items:center;gap:5px;
+  font-size:11px;font-weight:600;color:#14F195;
+  background:rgba(20,241,149,0.08);
+  padding:4px 10px;border-radius:6px;
+  border:1px solid rgba(20,241,149,0.15);
+}
+.topbar-mainnet-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:#14F195;
+  box-shadow:0 0 6px rgba(20,241,149,0.5);
+  animation:pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot{
+  0%,100%{opacity:1;}50%{opacity:0.4;}
+}
+
+/* Main Content */
+.main{
+  margin-left:56px;
+  padding-top:52px;
+  min-height:100vh;
+}
+.content{
+  padding:24px;
+  max-width:1360px;
+  margin:0 auto;
+}
+
+/* Hero Section */
+.hero{
+  position:relative;
+  background:rgba(255,255,255,0.035);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:16px;
+  backdrop-filter:blur(12px);
+  padding:32px 36px 24px;
+  margin-bottom:24px;
+  overflow:hidden;
+}
+.hero::before{
+  content:'';
+  position:absolute;
+  top:-120px;left:50%;transform:translateX(-50%);
+  width:600px;height:350px;
+  background:radial-gradient(ellipse,rgba(153,69,255,0.12) 0%,rgba(153,69,255,0.04) 40%,transparent 70%);
+  pointer-events:none;
+}
+.hero-grid{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  gap:40px;
+  align-items:center;
+  position:relative;
+  z-index:1;
+}
+
+/* Hero Left — Profile */
+.hero-profile{display:flex;align-items:center;gap:20px;}
+.hero-pfp-wrap{
+  position:relative;
+  width:84px;height:84px;
+  flex-shrink:0;
+}
+.hero-pfp{
+  width:80px;height:80px;
+  border-radius:50%;
+  object-fit:cover;
+  position:absolute;
+  top:2px;left:2px;
+  z-index:2;
+}
+.hero-pfp-ring{
+  position:absolute;inset:0;
+  border-radius:50%;
+  padding:2px;
+  background:conic-gradient(from 0deg,#9945FF,#14F195,#00D1FF,#9945FF);
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;
+  mask-composite:exclude;
+  animation:spin-ring 4s linear infinite;
+}
+@keyframes spin-ring{
+  to{transform:rotate(360deg);}
+}
+.hero-info h2{
+  font-size:22px;font-weight:700;color:#fff;
+  margin-bottom:2px;
+}
+.hero-handle{
+  font-size:13px;color:#8b7fad;margin-bottom:6px;
+  display:flex;align-items:center;gap:8px;
+}
+.hero-verified{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:10px;font-weight:600;
+  color:#1d9bf0;
+  background:rgba(29,155,240,0.1);
+  padding:2px 8px;border-radius:4px;
+  border:1px solid rgba(29,155,240,0.2);
+}
+.hero-verified svg{width:12px;height:12px;}
+.hero-wallet{
+  font-size:11px;color:#5a567a;font-family:monospace;
+  margin-bottom:3px;
+}
+.hero-last-active{
+  font-size:11px;color:#4a4668;
+}
+
+/* Hero Center — Score */
+.hero-score{
+  display:flex;flex-direction:column;align-items:center;
+  position:relative;
+}
+.score-ring-wrap{
+  position:relative;
+  width:160px;height:160px;
+  margin-bottom:12px;
+}
+.score-ring-wrap svg{
+  width:160px;height:160px;
+  transform:rotate(-90deg);
+  filter:drop-shadow(0 0 12px rgba(153,69,255,0.3));
+}
+.score-ring-bg{
+  fill:none;
+  stroke:rgba(139,92,246,0.1);
+  stroke-width:8;
+}
+.score-ring-fill{
+  fill:none;
+  stroke:url(#scoreGrad);
+  stroke-width:8;
+  stroke-linecap:round;
+  stroke-dasharray:440;
+  stroke-dashoffset:57.2;
+  transition:stroke-dashoffset 1.5s ease;
+}
+.score-value{
+  position:absolute;
+  inset:0;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+}
+.score-num{
+  font-size:38px;font-weight:800;color:#fff;
+  line-height:1;
+  background:linear-gradient(135deg,#c4b5fd,#14F195);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.score-denom{
+  font-size:13px;color:#5a567a;font-weight:500;margin-top:2px;
+}
+.score-tier{
+  display:flex;align-items:center;gap:6px;
+  font-size:14px;font-weight:700;
+  color:#c4b5fd;
+  margin-bottom:6px;
+}
+.score-tier-icon{font-size:18px;}
+.score-rank{
+  font-size:12px;color:#8b7fad;font-weight:600;
+  margin-bottom:2px;
+}
+.score-percentile{
+  font-size:11px;color:#14F195;font-weight:600;
+  background:rgba(20,241,149,0.08);
+  padding:2px 10px;border-radius:4px;
+  border:1px solid rgba(20,241,149,0.12);
+}
+
+/* Hero Right — Breakdown */
+.hero-breakdown{
+  display:flex;flex-direction:column;gap:10px;
+}
+.breakdown-item{
+  display:flex;align-items:center;gap:10px;
+}
+.breakdown-label{
+  font-size:11px;color:#8b7fad;
+  width:120px;white-space:nowrap;
+  font-weight:500;
+}
+.breakdown-bar-wrap{
+  flex:1;height:6px;
+  background:rgba(139,92,246,0.1);
+  border-radius:3px;
+  overflow:hidden;
+  min-width:100px;
+}
+.breakdown-bar{
+  height:100%;border-radius:3px;
+  background:linear-gradient(90deg,#9945FF,#14F195);
+  transition:width 1s ease;
+}
+.breakdown-val{
+  font-size:11px;font-weight:700;color:#c4b5fd;
+  width:24px;text-align:right;
+}
+
+/* Hero Actions */
+.hero-actions{
+  display:flex;align-items:center;gap:10px;
+  margin-top:24px;
+  padding-top:20px;
+  border-top:1px solid rgba(139,92,246,0.08);
+  position:relative;
+  z-index:1;
+}
+.btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 18px;border-radius:8px;
+  font-size:12px;font-weight:600;
+  cursor:pointer;border:none;
+  transition:all 0.2s;
+  font-family:'Inter',sans-serif;
+}
+.btn-ghost{
+  background:rgba(255,255,255,0.04);
+  color:#b4afd0;
+  border:1px solid rgba(139,92,246,0.12);
+}
+.btn-ghost:hover{background:rgba(255,255,255,0.07);border-color:rgba(139,92,246,0.25);}
+.btn-twitter{
+  background:rgba(29,155,240,0.12);
+  color:#1d9bf0;
+  border:1px solid rgba(29,155,240,0.2);
+}
+.btn-twitter:hover{background:rgba(29,155,240,0.2);}
+.btn-primary{
+  background:linear-gradient(135deg,rgba(20,241,149,0.15),rgba(20,241,149,0.08));
+  color:#14F195;
+  border:1px solid rgba(20,241,149,0.2);
+}
+.btn-primary:hover{background:linear-gradient(135deg,rgba(20,241,149,0.25),rgba(20,241,149,0.15));}
+.btn svg{width:14px;height:14px;}
+.hero-actions-spacer{flex:1;}
+
+/* Stats Row */
+.stats-row{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:16px;
+  margin-bottom:24px;
+}
+.stat-card{
+  background:rgba(255,255,255,0.035);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:12px;
+  backdrop-filter:blur(12px);
+  padding:18px 20px;
+}
+.stat-card-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:10px;
+}
+.stat-card-label{
+  font-size:11px;color:#5a567a;font-weight:500;text-transform:uppercase;letter-spacing:0.5px;
+}
+.stat-card-change{
+  font-size:11px;font-weight:600;
+  display:flex;align-items:center;gap:2px;
+}
+.stat-card-change.up{color:#14F195;}
+.stat-card-change.down{color:#f43f5e;}
+.stat-card-value{
+  font-size:24px;font-weight:700;color:#fff;
+  margin-bottom:6px;
+}
+.stat-sparkline{
+  height:24px;
+  display:flex;align-items:flex-end;gap:2px;
+}
+.stat-sparkline-bar{
+  width:4px;border-radius:2px;
+  background:linear-gradient(to top,rgba(153,69,255,0.2),rgba(153,69,255,0.5));
+}
+
+/* Two Column Row */
+.two-col{
+  display:grid;
+  grid-template-columns:1.3fr 1fr;
+  gap:16px;
+  margin-bottom:24px;
+}
+.panel{
+  background:rgba(255,255,255,0.035);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:12px;
+  backdrop-filter:blur(12px);
+  padding:20px;
+}
+.panel-title{
+  font-size:13px;font-weight:700;color:#e2e0ea;
+  margin-bottom:16px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.panel-title-badge{
+  font-size:10px;color:#5a567a;font-weight:500;
+  background:rgba(255,255,255,0.04);
+  padding:3px 8px;border-radius:4px;
+}
+
+/* Protocols Grid */
+.protocols-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+}
+.protocol-card{
+  display:flex;align-items:center;gap:10px;
+  background:rgba(255,255,255,0.025);
+  border:1px solid rgba(139,92,246,0.08);
+  border-radius:10px;
+  padding:12px;
+  transition:border-color 0.2s;
+  cursor:pointer;
+}
+.protocol-card:hover{border-color:rgba(139,92,246,0.2);}
+.protocol-logo{
+  width:32px;height:32px;
+  border-radius:50%;
+  object-fit:cover;
+  flex-shrink:0;
+  background:#1a1930;
+}
+.protocol-info{flex:1;min-width:0;}
+.protocol-name{
+  font-size:12px;font-weight:600;color:#e2e0ea;
+  display:flex;align-items:center;gap:6px;
+}
+.protocol-tag{
+  font-size:9px;font-weight:600;
+  padding:1px 5px;border-radius:3px;
+  text-transform:uppercase;letter-spacing:0.3px;
+}
+.protocol-tag.dex{background:rgba(153,69,255,0.15);color:#c4b5fd;}
+.protocol-tag.perp{background:rgba(245,158,11,0.15);color:#fbbf24;}
+.protocol-tag.liq{background:rgba(20,241,149,0.12);color:#14F195;}
+.protocol-tag.wallet{background:rgba(99,102,241,0.15);color:#a5b4fc;}
+.protocol-tag.launch{background:rgba(244,63,94,0.15);color:#fb7185;}
+.protocol-tag.trade{background:rgba(0,209,255,0.15);color:#00D1FF;}
+.protocol-meta{
+  font-size:10px;color:#5a567a;
+  display:flex;gap:8px;margin-top:3px;
+}
+
+/* Leaderboard */
+.leaderboard{margin-bottom:20px;}
+.lb-row{
+  display:grid;
+  grid-template-columns:28px 1fr auto auto;
+  align-items:center;
+  gap:10px;
+  padding:8px 10px;
+  border-radius:8px;
+  font-size:12px;
+  transition:background 0.15s;
+}
+.lb-row:hover{background:rgba(255,255,255,0.02);}
+.lb-row.you{
+  background:rgba(153,69,255,0.08);
+  border:1px solid rgba(153,69,255,0.15);
+}
+.lb-rank{
+  font-weight:700;color:#5a567a;text-align:center;
+}
+.lb-row.you .lb-rank{color:#c4b5fd;}
+.lb-name{
+  font-weight:600;color:#b4afd0;
+}
+.lb-row.you .lb-name{color:#e2e0ea;}
+.lb-score{
+  font-weight:700;color:#c4b5fd;
+}
+.lb-change{
+  font-size:10px;font-weight:600;
+}
+.lb-change.up{color:#14F195;}
+.lb-change.down{color:#f43f5e;}
+
+/* Score Distribution */
+.score-dist{margin-top:4px;}
+.score-dist-title{
+  font-size:12px;font-weight:600;color:#b4afd0;
+  margin-bottom:12px;
+}
+.dist-row{
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:7px;
+}
+.dist-label{
+  font-size:10px;color:#5a567a;font-weight:500;
+  width:64px;white-space:nowrap;
+}
+.dist-bar-wrap{
+  flex:1;height:10px;
+  background:rgba(139,92,246,0.06);
+  border-radius:5px;
+  overflow:hidden;
+}
+.dist-bar{
+  height:100%;border-radius:5px;
+  background:rgba(139,92,246,0.25);
+  transition:width 0.8s ease;
+}
+.dist-bar.active{
+  background:linear-gradient(90deg,#9945FF,#14F195);
+  box-shadow:0 0 8px rgba(153,69,255,0.3);
+}
+.dist-pct{
+  font-size:10px;color:#5a567a;font-weight:600;
+  width:30px;text-align:right;
+}
+.dist-row.active .dist-label,
+.dist-row.active .dist-pct{color:#c4b5fd;}
+
+/* Activity Table */
+.activity-table-wrap{
+  background:rgba(255,255,255,0.035);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:12px;
+  backdrop-filter:blur(12px);
+  padding:20px;
+  margin-bottom:24px;
+}
+.activity-table{
+  width:100%;
+  border-collapse:collapse;
+}
+.activity-table th{
+  font-size:10px;font-weight:600;color:#5a567a;
+  text-transform:uppercase;letter-spacing:0.5px;
+  text-align:left;
+  padding:0 12px 12px;
+  border-bottom:1px solid rgba(139,92,246,0.08);
+}
+.activity-table td{
+  padding:10px 12px;
+  font-size:12px;
+  border-bottom:1px solid rgba(139,92,246,0.04);
+  color:#b4afd0;
+}
+.activity-table tr:last-child td{border-bottom:none;}
+.activity-table tr:hover td{background:rgba(255,255,255,0.015);}
+.activity-type{
+  display:flex;align-items:center;gap:6px;
+  font-weight:600;
+}
+.activity-dot{
+  width:6px;height:6px;border-radius:50%;
+  flex-shrink:0;
+}
+.activity-dot.swap{background:#9945FF;}
+.activity-dot.stake{background:#14F195;}
+.activity-dot.lp{background:#00D1FF;}
+.activity-dot.mint{background:#f59e0b;}
+.activity-dot.transfer{background:#f43f5e;}
+.activity-dot.vote{background:#8b5cf6;}
+.activity-dot.claim{background:#22d3ee;}
+.tx-hash{
+  font-family:monospace;
+  color:#5a567a;
+  font-size:11px;
+}
+.tx-hash:hover{color:#c4b5fd;text-decoration:underline;cursor:pointer;}
+
+/* Footer */
+.site-footer{
+  text-align:center;
+  padding:20px 24px 28px;
+  font-size:11px;
+  color:#3d395a;
+  border-top:1px solid rgba(139,92,246,0.06);
+}
+.site-footer span{margin:0 8px;}
+
+/* Page Label */
+.page-label{
+  position:fixed;
+  bottom:8px;right:12px;
+  font-size:10px;color:#2a2745;
+  z-index:9998;
+  pointer-events:none;
+}
+</style>
+</head>
+<body>
+
+<!-- Page Label -->
+<div class="page-label">Mockup 26 — Site: Profile Hero</div>
+
+<!-- Sidebar -->
+<nav class="sidebar">
+  <div class="sidebar-logo">S</div>
+  <div class="sidebar-nav">
+    <div class="sidebar-icon active" title="Dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    </div>
+    <div class="sidebar-icon" title="Search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </div>
+    <div class="sidebar-icon" title="Analytics">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    </div>
+    <div class="sidebar-icon" title="Leaderboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    </div>
+    <div class="sidebar-icon" title="Protocols">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+    </div>
+  </div>
+  <div class="sidebar-bottom">
+    <div class="sidebar-icon" title="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </div>
+  </div>
+</nav>
+
+<!-- Top Bar -->
+<header class="topbar">
+  <div class="topbar-brand">
+    <span class="topbar-brand-name">Solana Score</span>
+    <span class="topbar-brand-sub">by Slice Analytics</span>
+  </div>
+  <div class="topbar-search">
+    <span class="topbar-search-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </span>
+    <input type="text" value="7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU" readonly>
+  </div>
+  <div class="topbar-stats">
+    <div class="topbar-stat">
+      <span class="topbar-stat-label">SOL</span>
+      <span class="topbar-stat-value">$148.32</span>
+    </div>
+    <div class="topbar-stat">
+      <span class="topbar-stat-label">TPS</span>
+      <span class="topbar-stat-value">3,812</span>
+    </div>
+    <div class="topbar-mainnet">
+      <span class="topbar-mainnet-dot"></span>
+      Mainnet
+    </div>
+  </div>
+</header>
+
+<!-- Main Content -->
+<main class="main">
+  <div class="content">
+
+    <!-- Hero Section -->
+    <section class="hero">
+      <!-- SVG Gradient Defs -->
+      <svg width="0" height="0" style="position:absolute;">
+        <defs>
+          <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#9945FF"/>
+            <stop offset="50%" stop-color="#14F195"/>
+            <stop offset="100%" stop-color="#00D1FF"/>
+          </linearGradient>
+        </defs>
+      </svg>
+
+      <div class="hero-grid">
+        <!-- Left: Profile -->
+        <div class="hero-profile">
+          <div class="hero-pfp-wrap">
+            <img class="hero-pfp" src="0xgug-pfp.jpg" alt="0xGug PFP">
+            <div class="hero-pfp-ring"></div>
+          </div>
+          <div class="hero-info">
+            <h2>0xGug</h2>
+            <div class="hero-handle">
+              @0xGug
+              <span class="hero-verified">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .494.083.964.237 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.484zm-6.616-3.334l-4.334 6.5c-.145.217-.382.334-.625.334-.143 0-.288-.04-.416-.126l-.115-.094-2.415-2.415c-.293-.293-.293-.768 0-1.06s.768-.294 1.06 0l1.77 1.767 3.825-5.74c.23-.345.696-.436 1.04-.207.346.23.44.696.21 1.04z"/></svg>
+                X Connected
+              </span>
+            </div>
+            <div class="hero-wallet">7xKXtg...gAsU</div>
+            <div class="hero-last-active">Last active 2h ago</div>
+          </div>
+        </div>
+
+        <!-- Center: Score -->
+        <div class="hero-score">
+          <div class="score-ring-wrap">
+            <svg viewBox="0 0 160 160">
+              <circle class="score-ring-bg" cx="80" cy="80" r="70"/>
+              <circle class="score-ring-fill" cx="80" cy="80" r="70"/>
+            </svg>
+            <div class="score-value">
+              <span class="score-num">87</span>
+              <span class="score-denom">/ 100</span>
+            </div>
+          </div>
+          <div class="score-tier">
+            <span class="score-tier-icon">&#x1F48E;</span>
+            Diamond Tier
+          </div>
+          <div class="score-rank">#12,847</div>
+          <div class="score-percentile">Top 4%</div>
+        </div>
+
+        <!-- Right: Breakdown -->
+        <div class="hero-breakdown">
+          <div class="breakdown-item">
+            <span class="breakdown-label">Transaction Volume</span>
+            <div class="breakdown-bar-wrap"><div class="breakdown-bar" style="width:92%"></div></div>
+            <span class="breakdown-val">92</span>
+          </div>
+          <div class="breakdown-item">
+            <span class="breakdown-label">Protocol Diversity</span>
+            <div class="breakdown-bar-wrap"><div class="breakdown-bar" style="width:88%"></div></div>
+            <span class="breakdown-val">88</span>
+          </div>
+          <div class="breakdown-item">
+            <span class="breakdown-label">Account Age</span>
+            <div class="breakdown-bar-wrap"><div class="breakdown-bar" style="width:85%"></div></div>
+            <span class="breakdown-val">85</span>
+          </div>
+          <div class="breakdown-item">
+            <span class="breakdown-label">DeFi Activity</span>
+            <div class="breakdown-bar-wrap"><div class="breakdown-bar" style="width:90%"></div></div>
+            <span class="breakdown-val">90</span>
+          </div>
+          <div class="breakdown-item">
+            <span class="breakdown-label">NFT Engagement</span>
+            <div class="breakdown-bar-wrap"><div class="breakdown-bar" style="width:72%"></div></div>
+            <span class="breakdown-val">72</span>
+          </div>
+          <div class="breakdown-item">
+            <span class="breakdown-label">Governance</span>
+            <div class="breakdown-bar-wrap"><div class="breakdown-bar" style="width:65%"></div></div>
+            <span class="breakdown-val">65</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="hero-actions">
+        <button class="btn btn-ghost">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export
+        </button>
+        <button class="btn btn-twitter">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          Share on X
+        </button>
+        <div class="hero-actions-spacer"></div>
+        <button class="btn btn-primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          Track Wallet
+        </button>
+      </div>
+    </section>
+
+    <!-- Stats Row -->
+    <div class="stats-row">
+      <!-- Protocol Fees -->
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <span class="stat-card-label">Protocol Fees</span>
+          <span class="stat-card-change up">+18.2% <span style="font-size:9px;opacity:0.7">30d</span></span>
+        </div>
+        <div class="stat-card-value">$12,450</div>
+        <div class="stat-sparkline">
+          <div class="stat-sparkline-bar" style="height:30%"></div>
+          <div class="stat-sparkline-bar" style="height:45%"></div>
+          <div class="stat-sparkline-bar" style="height:35%"></div>
+          <div class="stat-sparkline-bar" style="height:55%"></div>
+          <div class="stat-sparkline-bar" style="height:40%"></div>
+          <div class="stat-sparkline-bar" style="height:65%"></div>
+          <div class="stat-sparkline-bar" style="height:50%"></div>
+          <div class="stat-sparkline-bar" style="height:70%"></div>
+          <div class="stat-sparkline-bar" style="height:60%"></div>
+          <div class="stat-sparkline-bar" style="height:80%"></div>
+          <div class="stat-sparkline-bar" style="height:75%"></div>
+          <div class="stat-sparkline-bar" style="height:90%"></div>
+          <div class="stat-sparkline-bar" style="height:85%"></div>
+          <div class="stat-sparkline-bar" style="height:100%"></div>
+        </div>
+      </div>
+      <!-- Network Fees -->
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <span class="stat-card-label">Network Fees</span>
+          <span class="stat-card-change up">+5.1%</span>
+        </div>
+        <div class="stat-card-value">2.3 SOL</div>
+        <div class="stat-sparkline">
+          <div class="stat-sparkline-bar" style="height:50%"></div>
+          <div class="stat-sparkline-bar" style="height:40%"></div>
+          <div class="stat-sparkline-bar" style="height:60%"></div>
+          <div class="stat-sparkline-bar" style="height:55%"></div>
+          <div class="stat-sparkline-bar" style="height:45%"></div>
+          <div class="stat-sparkline-bar" style="height:50%"></div>
+          <div class="stat-sparkline-bar" style="height:65%"></div>
+          <div class="stat-sparkline-bar" style="height:60%"></div>
+          <div class="stat-sparkline-bar" style="height:70%"></div>
+          <div class="stat-sparkline-bar" style="height:55%"></div>
+          <div class="stat-sparkline-bar" style="height:75%"></div>
+          <div class="stat-sparkline-bar" style="height:70%"></div>
+          <div class="stat-sparkline-bar" style="height:80%"></div>
+          <div class="stat-sparkline-bar" style="height:78%"></div>
+        </div>
+      </div>
+      <!-- Holdings -->
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <span class="stat-card-label">Holdings</span>
+          <span class="stat-card-change down">-3.4%</span>
+        </div>
+        <div class="stat-card-value">$45,200</div>
+        <div class="stat-sparkline">
+          <div class="stat-sparkline-bar" style="height:90%"></div>
+          <div class="stat-sparkline-bar" style="height:85%"></div>
+          <div class="stat-sparkline-bar" style="height:80%"></div>
+          <div class="stat-sparkline-bar" style="height:88%"></div>
+          <div class="stat-sparkline-bar" style="height:75%"></div>
+          <div class="stat-sparkline-bar" style="height:70%"></div>
+          <div class="stat-sparkline-bar" style="height:78%"></div>
+          <div class="stat-sparkline-bar" style="height:65%"></div>
+          <div class="stat-sparkline-bar" style="height:68%"></div>
+          <div class="stat-sparkline-bar" style="height:60%"></div>
+          <div class="stat-sparkline-bar" style="height:62%"></div>
+          <div class="stat-sparkline-bar" style="height:55%"></div>
+          <div class="stat-sparkline-bar" style="height:58%"></div>
+          <div class="stat-sparkline-bar" style="height:52%"></div>
+        </div>
+      </div>
+      <!-- Months Active -->
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <span class="stat-card-label">Months Active</span>
+          <span class="stat-card-change" style="color:#8b7fad;">Lifetime</span>
+        </div>
+        <div class="stat-card-value">18</div>
+        <div class="stat-sparkline">
+          <div class="stat-sparkline-bar" style="height:20%"></div>
+          <div class="stat-sparkline-bar" style="height:30%"></div>
+          <div class="stat-sparkline-bar" style="height:40%"></div>
+          <div class="stat-sparkline-bar" style="height:35%"></div>
+          <div class="stat-sparkline-bar" style="height:50%"></div>
+          <div class="stat-sparkline-bar" style="height:55%"></div>
+          <div class="stat-sparkline-bar" style="height:60%"></div>
+          <div class="stat-sparkline-bar" style="height:65%"></div>
+          <div class="stat-sparkline-bar" style="height:70%"></div>
+          <div class="stat-sparkline-bar" style="height:75%"></div>
+          <div class="stat-sparkline-bar" style="height:80%"></div>
+          <div class="stat-sparkline-bar" style="height:85%"></div>
+          <div class="stat-sparkline-bar" style="height:90%"></div>
+          <div class="stat-sparkline-bar" style="height:95%"></div>
+          <div class="stat-sparkline-bar" style="height:100%"></div>
+          <div class="stat-sparkline-bar" style="height:100%"></div>
+          <div class="stat-sparkline-bar" style="height:100%"></div>
+          <div class="stat-sparkline-bar" style="height:100%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Two Column Row -->
+    <div class="two-col">
+      <!-- LEFT: Protocols Grid -->
+      <div class="panel">
+        <div class="panel-title">
+          Protocols
+          <span class="panel-title-badge">8 Active</span>
+        </div>
+        <div class="protocols-grid">
+          <!-- Jupiter -->
+          <div class="protocol-card">
+            <img class="protocol-logo" src="../public/images/protocols/jupiter.svg" alt="Jupiter">
+            <div class="protocol-info">
+              <div class="protocol-name">Jupiter <span class="protocol-tag dex">DEX</span></div>
+              <div class="protocol-meta">
+                <span>342 TXNs</span>
+                <span>$28.4k vol</span>
+                <span>1h ago</span>
+              </div>
+            </div>
+          </div>
+          <!-- Raydium -->
+          <div class="protocol-card">
+            <img class="protocol-logo" src="../public/images/protocols/raydium.jpg" alt="Raydium">
+            <div class="protocol-info">
+              <div class="protocol-name">Raydium <span class="protocol-tag dex">DEX</span></div>
+              <div class="protocol-meta">
+                <span>218 TXNs</span>
+                <span>$15.2k vol</span>
+                <span>4h ago</span>
+              </div>
+            </div>
+          </div>
+          <!-- Meteora -->
+          <div class="protocol-card">
+            <img class="protocol-logo" src="../public/images/protocols/meteora.jpg" alt="Meteora">
+            <div class="protocol-info">
+              <div class="protocol-name">Meteora <span class="protocol-tag liq">LIQ</span></div>
+              <div class="protocol-meta">
+                <span>156 TXNs</span>
+                <span>$9.8k vol</span>
+                <span>6h ago</span>
+              </div>
+            </div>
+          </div>
+          <!-- Drift -->
+          <div class="protocol-card">
+            <img class="protocol-logo" src="../public/images/protocols/drift.png" alt="Drift">
+            <div class="protocol-info">
+              <div class="protocol-name">Drift <span class="protocol-tag perp">PERP</span></div>
+              <div class="protocol-meta">
+                <span>89 TXNs</span>
+                <span>$42.1k vol</span>
+                <span>2h ago</span>
+              </div>
+            </div>
+          </div>
+          <!-- Orca -->
+          <div class="protocol-card">
+            <img class="protocol-logo" src="../public/images/protocols/orca.jpg" alt="Orca">
+            <div class="protocol-info">
+              <div class="protocol-name">Orca <span class="protocol-tag dex">DEX</span></div>
+              <div class="protocol-meta">
+                <span>124 TXNs</span>
+                <span>$7.3k vol</span>
+                <span>1d ago</span>
+              </div>
+            </div>
+          </div>
+          <!-- Phantom -->
+          <div class="protocol-card">
+            <img class="protocol-logo" src="../public/images/protocols/phantom.jpg" alt="Phantom">
+            <div class="protocol-info">
+              <div class="protocol-name">Phantom <span class="protocol-tag wallet">WALLET</span></div>
+              <div class="protocol-meta">
+                <span>512 TXNs</span>
+                <span>$51.0k vol</span>
+                <span>2h ago</span>
+              </div>
+            </div>
+          </div>
+          <!-- Pump.fun -->
+          <div class="protocol-card">
+            <img class="protocol-logo" src="../public/images/protocols/pumpfun.png" alt="Pump.fun">
+            <div class="protocol-info">
+              <div class="protocol-name">Pump.fun <span class="protocol-tag launch">LAUNCH</span></div>
+              <div class="protocol-meta">
+                <span>67 TXNs</span>
+                <span>$3.1k vol</span>
+                <span>3d ago</span>
+              </div>
+            </div>
+          </div>
+          <!-- Axiom -->
+          <div class="protocol-card">
+            <img class="protocol-logo" src="../public/images/protocols/axiom.png" alt="Axiom">
+            <div class="protocol-info">
+              <div class="protocol-name">Axiom <span class="protocol-tag trade">TRADE</span></div>
+              <div class="protocol-meta">
+                <span>43 TXNs</span>
+                <span>$5.6k vol</span>
+                <span>12h ago</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Leaderboard + Score Distribution -->
+      <div class="panel">
+        <div class="panel-title">
+          Leaderboard
+          <span class="panel-title-badge">Global</span>
+        </div>
+        <div class="leaderboard">
+          <div class="lb-row">
+            <span class="lb-rank">1</span>
+            <span class="lb-name">toly.sol</span>
+            <span class="lb-score">99</span>
+            <span class="lb-change up">+2</span>
+          </div>
+          <div class="lb-row">
+            <span class="lb-rank">2</span>
+            <span class="lb-name">mert.sol</span>
+            <span class="lb-score">97</span>
+            <span class="lb-change up">+1</span>
+          </div>
+          <div class="lb-row">
+            <span class="lb-rank">3</span>
+            <span class="lb-name">raj.sol</span>
+            <span class="lb-score">96</span>
+            <span class="lb-change down">-1</span>
+          </div>
+          <div class="lb-row">
+            <span class="lb-rank">4</span>
+            <span class="lb-name">helius.sol</span>
+            <span class="lb-score">95</span>
+            <span class="lb-change">--</span>
+          </div>
+          <div class="lb-row">
+            <span class="lb-rank">5</span>
+            <span class="lb-name">blaze.sol</span>
+            <span class="lb-score">94</span>
+            <span class="lb-change up">+3</span>
+          </div>
+          <div class="lb-row you">
+            <span class="lb-rank">12,847</span>
+            <span class="lb-name">0xGug (You)</span>
+            <span class="lb-score">87</span>
+            <span class="lb-change up">+5</span>
+          </div>
+        </div>
+
+        <!-- Score Distribution -->
+        <div class="score-dist">
+          <div class="score-dist-title">Score Distribution</div>
+          <div class="dist-row">
+            <span class="dist-label">0 - 20 Bronze</span>
+            <div class="dist-bar-wrap"><div class="dist-bar" style="width:15%"></div></div>
+            <span class="dist-pct">8%</span>
+          </div>
+          <div class="dist-row">
+            <span class="dist-label">21 - 40 Silver</span>
+            <div class="dist-bar-wrap"><div class="dist-bar" style="width:28%"></div></div>
+            <span class="dist-pct">15%</span>
+          </div>
+          <div class="dist-row">
+            <span class="dist-label">41 - 60 Gold</span>
+            <div class="dist-bar-wrap"><div class="dist-bar" style="width:52%"></div></div>
+            <span class="dist-pct">28%</span>
+          </div>
+          <div class="dist-row">
+            <span class="dist-label">61 - 75 Plat</span>
+            <div class="dist-bar-wrap"><div class="dist-bar" style="width:74%"></div></div>
+            <span class="dist-pct">32%</span>
+          </div>
+          <div class="dist-row active">
+            <span class="dist-label">76 - 90 Diamond</span>
+            <div class="dist-bar-wrap"><div class="dist-bar active" style="width:25%"></div></div>
+            <span class="dist-pct">13%</span>
+          </div>
+          <div class="dist-row">
+            <span class="dist-label">91-100 Mythic</span>
+            <div class="dist-bar-wrap"><div class="dist-bar" style="width:8%"></div></div>
+            <span class="dist-pct">4%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="activity-table-wrap">
+      <div class="panel-title">
+        Recent Activity
+        <span class="panel-title-badge">Last 7 days</span>
+      </div>
+      <table class="activity-table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Protocol</th>
+            <th>TX Hash</th>
+            <th>Age</th>
+            <th style="text-align:right">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="activity-type"><span class="activity-dot swap"></span>Swap</span></td>
+            <td>Jupiter</td>
+            <td><span class="tx-hash">4sGj...xQ7m</span></td>
+            <td>1h ago</td>
+            <td style="text-align:right">2,450 USDC</td>
+          </tr>
+          <tr>
+            <td><span class="activity-type"><span class="activity-dot stake"></span>Stake</span></td>
+            <td>Marinade</td>
+            <td><span class="tx-hash">8kPn...wR3d</span></td>
+            <td>3h ago</td>
+            <td style="text-align:right">15.0 SOL</td>
+          </tr>
+          <tr>
+            <td><span class="activity-type"><span class="activity-dot lp"></span>Add LP</span></td>
+            <td>Meteora</td>
+            <td><span class="tx-hash">2vBx...mK8j</span></td>
+            <td>6h ago</td>
+            <td style="text-align:right">$4,200</td>
+          </tr>
+          <tr>
+            <td><span class="activity-type"><span class="activity-dot swap"></span>Swap</span></td>
+            <td>Raydium</td>
+            <td><span class="tx-hash">9fTz...nL4w</span></td>
+            <td>12h ago</td>
+            <td style="text-align:right">800 USDC</td>
+          </tr>
+          <tr>
+            <td><span class="activity-type"><span class="activity-dot mint"></span>Mint</span></td>
+            <td>Pump.fun</td>
+            <td><span class="tx-hash">3hYm...pQ6s</span></td>
+            <td>1d ago</td>
+            <td style="text-align:right">0.5 SOL</td>
+          </tr>
+          <tr>
+            <td><span class="activity-type"><span class="activity-dot transfer"></span>Transfer</span></td>
+            <td>Phantom</td>
+            <td><span class="tx-hash">7wRk...vD2n</span></td>
+            <td>2d ago</td>
+            <td style="text-align:right">25.0 SOL</td>
+          </tr>
+          <tr>
+            <td><span class="activity-type"><span class="activity-dot vote"></span>Vote</span></td>
+            <td>Realms</td>
+            <td><span class="tx-hash">5cNx...tH9b</span></td>
+            <td>3d ago</td>
+            <td style="text-align:right">--</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+      Slice Analytics <span>&middot;</span> Solana Score v2.4.1 <span>&middot;</span> Block 284,129,403 <span>&middot;</span> Epoch 652
+    </footer>
+
+  </div>
+</main>
+
+</body>
+</html>

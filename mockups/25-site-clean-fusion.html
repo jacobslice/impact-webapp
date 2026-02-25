@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solana Score — Wallet Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg-deep: #0c0b14;
+  --bg-main: #0f0e17;
+  --bg-card: #110f1d;
+  --sidebar-bg: #08080c;
+  --glass-bg: rgba(255,255,255,0.035);
+  --glass-bg-hover: rgba(255,255,255,0.06);
+  --glass-border: rgba(255,255,255,0.06);
+  --purple-border: rgba(139,92,246,0.15);
+  --purple-glow: rgba(139,92,246,0.25);
+  --sol-purple: #9945FF;
+  --sol-green: #14F195;
+  --sol-cyan: #00D1FF;
+  --text-primary: #f0eef6;
+  --text-secondary: rgba(240,238,246,0.55);
+  --text-tertiary: rgba(240,238,246,0.35);
+  --sidebar-w: 56px;
+  --topbar-h: 52px;
+}
+
+html { font-size: 13px; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* noise overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  position: fixed; left: 0; top: 0; bottom: 0;
+  width: var(--sidebar-w);
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--purple-border);
+  display: flex; flex-direction: column; align-items: center;
+  padding: 14px 0 12px;
+  z-index: 100;
+}
+
+.sidebar-logo {
+  width: 30px; height: 30px;
+  background: linear-gradient(135deg, var(--sol-purple), var(--sol-green));
+  border-radius: 8px;
+  margin-bottom: 24px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: 14px; color: #fff;
+  box-shadow: 0 0 18px rgba(153,69,255,0.3);
+}
+
+.sidebar-nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+
+.sidebar-icon {
+  width: 38px; height: 38px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--text-tertiary);
+  position: relative;
+}
+.sidebar-icon:hover {
+  background: rgba(255,255,255,0.05);
+  color: var(--text-secondary);
+}
+.sidebar-icon.active {
+  background: rgba(153,69,255,0.13);
+  color: var(--sol-purple);
+  box-shadow: 0 0 16px rgba(153,69,255,0.2);
+}
+.sidebar-icon.active::before {
+  content: '';
+  position: absolute; left: -9px; top: 50%; transform: translateY(-50%);
+  width: 3px; height: 18px; border-radius: 0 3px 3px 0;
+  background: var(--sol-purple);
+}
+
+.sidebar-icon svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+.sidebar-bottom { margin-top: auto; display: flex; flex-direction: column; gap: 4px; }
+
+/* ===== TOP BAR ===== */
+.topbar {
+  position: fixed; top: 0; left: var(--sidebar-w); right: 0;
+  height: var(--topbar-h);
+  background: rgba(15,14,23,0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--purple-border);
+  display: flex; align-items: center;
+  padding: 0 20px;
+  z-index: 90;
+  gap: 16px;
+}
+
+.topbar-brand {
+  display: flex; align-items: baseline; gap: 7px;
+  white-space: nowrap;
+}
+.topbar-brand h1 {
+  font-size: 15px; font-weight: 700;
+  background: linear-gradient(90deg, var(--sol-purple), var(--sol-cyan));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.topbar-brand span {
+  font-size: 10px; font-weight: 400; color: var(--text-tertiary);
+}
+
+.topbar-search {
+  flex: 1; max-width: 420px; position: relative;
+}
+.topbar-search input {
+  width: 100%;
+  height: 32px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--purple-border);
+  border-radius: 8px;
+  padding: 0 12px 0 34px;
+  color: var(--text-primary);
+  font-family: inherit; font-size: 11.5px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.topbar-search input::placeholder { color: var(--text-tertiary); }
+.topbar-search input:focus {
+  border-color: rgba(153,69,255,0.35);
+  box-shadow: 0 0 0 3px rgba(153,69,255,0.08);
+}
+.topbar-search svg {
+  position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+  width: 14px; height: 14px; stroke: var(--text-tertiary); fill: none; stroke-width: 2;
+}
+
+.topbar-metrics {
+  display: flex; align-items: center; gap: 18px; margin-left: auto;
+}
+.topbar-metric {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px;
+}
+.topbar-metric .label { color: var(--text-tertiary); font-weight: 400; }
+.topbar-metric .value { color: var(--text-primary); font-weight: 600; }
+
+.topbar-status {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 10.5px; font-weight: 500;
+  color: var(--sol-green);
+  background: rgba(20,241,149,0.07);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(20,241,149,0.12);
+}
+.topbar-status .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--sol-green);
+  box-shadow: 0 0 6px var(--sol-green);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ===== MAIN CONTENT ===== */
+.main {
+  margin-left: var(--sidebar-w);
+  margin-top: var(--topbar-h);
+  padding: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== GLASS CARD ===== */
+.card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 18px;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+.card:hover {
+  border-color: var(--purple-border);
+  box-shadow: 0 0 20px rgba(139,92,246,0.05);
+}
+
+.card-title {
+  font-size: 10.5px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  margin-bottom: 14px;
+}
+
+/* ===== WALLET HEADER ===== */
+.wallet-header {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 20px;
+  padding: 16px 18px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+}
+
+.wallet-avatar {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--sol-purple), var(--sol-green));
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 16px; color: #fff;
+  flex-shrink: 0;
+}
+
+.wallet-info { flex: 1; }
+.wallet-address {
+  font-size: 15px; font-weight: 700; color: var(--text-primary);
+  font-family: 'Inter', monospace;
+}
+.wallet-meta {
+  font-size: 11px; color: var(--text-tertiary); margin-top: 2px;
+}
+
+.wallet-actions {
+  display: flex; gap: 8px;
+}
+.btn {
+  height: 32px; padding: 0 14px;
+  border-radius: 8px; border: none;
+  font-family: inherit; font-size: 11px; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; gap: 5px;
+  transition: all 0.2s;
+}
+.btn-glass {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--purple-border);
+  color: var(--text-secondary);
+}
+.btn-glass:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(139,92,246,0.3);
+  color: var(--text-primary);
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--sol-purple), #7c3aed);
+  color: #fff;
+  box-shadow: 0 2px 12px rgba(153,69,255,0.25);
+}
+.btn-primary:hover {
+  box-shadow: 0 2px 20px rgba(153,69,255,0.4);
+  transform: translateY(-1px);
+}
+.btn-share-x {
+  background: #1d9bf0;
+  color: #fff;
+  box-shadow: 0 2px 12px rgba(29,155,240,0.3);
+}
+.btn-share-x:hover {
+  background: #1a8cd8;
+  box-shadow: 0 2px 20px rgba(29,155,240,0.45);
+  transform: translateY(-1px);
+}
+.btn svg { width: 13px; height: 13px; fill: currentColor; stroke: none; }
+.btn-glass svg { fill: none; stroke: currentColor; stroke-width: 2; }
+
+/* ===== TOP ROW GRID ===== */
+.top-row {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+/* === SCORE GAUGE CARD === */
+.score-card {
+  position: relative;
+  overflow: hidden;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 24px 18px 18px;
+}
+.score-card::before {
+  content: '';
+  position: absolute;
+  top: -40px; left: 50%; transform: translateX(-50%);
+  width: 260px; height: 200px;
+  background: radial-gradient(ellipse, rgba(153,69,255,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.gauge-wrap {
+  position: relative;
+  width: 220px; height: 130px;
+  margin-bottom: 8px;
+}
+.gauge-svg {
+  width: 220px; height: 130px;
+}
+
+.score-value {
+  position: absolute;
+  bottom: 4px; left: 50%; transform: translateX(-50%);
+  font-size: 42px; font-weight: 900;
+  background: linear-gradient(180deg, #fff 20%, rgba(255,255,255,0.7));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+}
+
+.score-tier {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: linear-gradient(135deg, rgba(153,69,255,0.15), rgba(20,241,149,0.1));
+  border: 1px solid rgba(153,69,255,0.2);
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 11px; font-weight: 700;
+  color: var(--sol-green);
+  margin-bottom: 16px;
+}
+.score-tier svg { width: 13px; height: 13px; fill: var(--sol-green); }
+
+.score-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+}
+.score-meta-item {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: 8px;
+  padding: 8px 10px;
+  text-align: center;
+}
+.score-meta-item .label {
+  font-size: 9.5px; color: var(--text-tertiary); font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.04em;
+  margin-bottom: 3px;
+}
+.score-meta-item .value {
+  font-size: 14px; font-weight: 700; color: var(--text-primary);
+}
+.score-meta-item .value.positive { color: var(--sol-green); }
+
+/* === RIGHT COLUMN === */
+.right-col { display: flex; flex-direction: column; gap: 18px; }
+
+/* Stats row */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.stat-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  padding: 14px;
+  transition: all 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::after {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(153,69,255,0.2), transparent);
+}
+.stat-card:hover {
+  border-color: var(--purple-border);
+  box-shadow: 0 0 16px rgba(139,92,246,0.06);
+}
+.stat-card .label {
+  font-size: 10px; color: var(--text-tertiary); font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+.stat-card .value {
+  font-size: 18px; font-weight: 800; color: var(--text-primary);
+}
+.stat-card .sub {
+  font-size: 10px; color: var(--sol-green); font-weight: 500; margin-top: 2px;
+}
+
+/* Score Breakdown */
+.breakdown-card { flex: 1; }
+.breakdown-list { display: flex; flex-direction: column; gap: 10px; }
+.breakdown-item {
+  display: flex; align-items: center; gap: 10px;
+}
+.breakdown-item .name {
+  width: 130px; font-size: 11px; font-weight: 500; color: var(--text-secondary);
+  flex-shrink: 0;
+}
+.breakdown-item .bar-bg {
+  flex: 1; height: 7px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.breakdown-item .bar-fill {
+  height: 100%; border-radius: 4px;
+  background: linear-gradient(90deg, var(--sol-purple), var(--sol-green));
+  transition: width 0.6s ease;
+}
+.breakdown-item .score {
+  width: 28px; text-align: right;
+  font-size: 12px; font-weight: 700; color: var(--text-primary);
+}
+
+/* ===== PROTOCOLS GRID ===== */
+.protocols-section { margin-bottom: 18px; }
+.protocols-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.protocol-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  padding: 14px;
+  display: flex; flex-direction: column; gap: 10px;
+  transition: all 0.25s;
+  cursor: pointer;
+}
+.protocol-card:hover {
+  border-color: var(--purple-border);
+  box-shadow: 0 0 20px rgba(139,92,246,0.06);
+  transform: translateY(-1px);
+}
+
+.protocol-top {
+  display: flex; align-items: center; gap: 10px;
+}
+.protocol-icon {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.05);
+}
+.protocol-icon img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+.protocol-name {
+  font-size: 12.5px; font-weight: 700; color: var(--text-primary);
+}
+.protocol-sector {
+  font-size: 9px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  padding: 2px 7px; border-radius: 4px;
+  display: inline-block; margin-top: 1px;
+}
+.sector-dex { background: rgba(153,69,255,0.12); color: #b88aff; }
+.sector-lsd { background: rgba(20,241,149,0.1); color: #14F195; }
+.sector-nft { background: rgba(0,209,255,0.1); color: #00D1FF; }
+.sector-perps { background: rgba(255,159,67,0.1); color: #ff9f43; }
+.sector-wallet { background: rgba(171,130,255,0.1); color: #ab82ff; }
+.sector-token { background: rgba(255,107,129,0.1); color: #ff6b81; }
+.sector-tools { background: rgba(255,200,55,0.1); color: #ffc837; }
+
+.protocol-stats {
+  display: flex; gap: 12px; flex-wrap: wrap;
+}
+.protocol-stat .label {
+  font-size: 9px; color: var(--text-tertiary); font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.03em;
+}
+.protocol-stat .value {
+  font-size: 12px; font-weight: 700; color: var(--text-primary);
+  margin-top: 1px;
+}
+
+/* ===== BOTTOM ROW ===== */
+.bottom-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+/* Activity Table */
+.activity-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.activity-table th {
+  text-align: left;
+  font-size: 9.5px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--text-tertiary);
+  padding: 0 8px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.activity-table td {
+  padding: 9px 8px;
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  border-bottom: 1px solid rgba(255,255,255,0.025);
+}
+.activity-table tr:hover td {
+  background: rgba(255,255,255,0.015);
+}
+.activity-table .type-badge {
+  display: inline-block;
+  padding: 2px 7px; border-radius: 4px;
+  font-size: 9.5px; font-weight: 600;
+  text-transform: uppercase;
+}
+.type-swap { background: rgba(153,69,255,0.12); color: #b88aff; }
+.type-stake { background: rgba(20,241,149,0.1); color: #14F195; }
+.type-lp { background: rgba(0,209,255,0.1); color: #00D1FF; }
+.type-nft { background: rgba(255,159,67,0.1); color: #ff9f43; }
+.type-transfer { background: rgba(255,107,129,0.1); color: #ff6b81; }
+
+.tx-hash {
+  font-family: 'Inter', monospace;
+  font-size: 10.5px;
+  color: var(--sol-purple);
+  opacity: 0.8;
+}
+.amount-positive { color: var(--sol-green); font-weight: 600; }
+.amount-negative { color: #ff6b81; font-weight: 600; }
+
+/* Leaderboard */
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 18px;
+}
+.leaderboard-table th {
+  text-align: left;
+  font-size: 9.5px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--text-tertiary);
+  padding: 0 8px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.leaderboard-table td {
+  padding: 8px;
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  border-bottom: 1px solid rgba(255,255,255,0.025);
+}
+.leaderboard-table tr:hover td {
+  background: rgba(255,255,255,0.015);
+}
+.leaderboard-table tr.you-row td {
+  background: rgba(153,69,255,0.08);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.leaderboard-table tr.you-row { position: relative; }
+.rank-num { font-weight: 800; color: var(--text-primary); }
+.rank-medal { font-size: 13px; }
+.you-badge {
+  display: inline-block;
+  padding: 1px 6px; border-radius: 4px;
+  font-size: 9px; font-weight: 700;
+  background: linear-gradient(135deg, var(--sol-purple), var(--sol-green));
+  color: #fff;
+  margin-left: 4px;
+}
+
+/* Score Distribution */
+.distribution-title {
+  font-size: 10.5px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  margin-bottom: 12px;
+}
+.dist-row {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 6px;
+}
+.dist-label {
+  width: 62px; font-size: 10px; font-weight: 500;
+  color: var(--text-tertiary); text-align: right;
+}
+.dist-bar-bg {
+  flex: 1; height: 14px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+.dist-bar-fill {
+  height: 100%; border-radius: 4px;
+  background: rgba(153,69,255,0.25);
+  transition: width 0.5s ease;
+}
+.dist-bar-fill.highlight {
+  background: linear-gradient(90deg, var(--sol-purple), var(--sol-green));
+  box-shadow: 0 0 8px rgba(153,69,255,0.3);
+}
+.dist-pct {
+  width: 32px; font-size: 10px; font-weight: 600;
+  color: var(--text-tertiary);
+}
+
+/* ===== FOOTER ===== */
+.footer {
+  text-align: center;
+  padding: 18px 0 12px;
+  color: var(--text-tertiary);
+  font-size: 10.5px;
+  border-top: 1px solid rgba(255,255,255,0.03);
+}
+.footer .info { margin-bottom: 4px; }
+.footer .chain-data {
+  font-size: 9.5px;
+  color: var(--text-tertiary);
+  opacity: 0.7;
+  margin-bottom: 10px;
+}
+.footer .mockup-label {
+  font-size: 9px;
+  color: var(--text-tertiary);
+  opacity: 0.4;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(153,69,255,0.2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(153,69,255,0.35); }
+
+/* ===== RESPONSIVE TWEAKS ===== */
+@media (max-width: 1200px) {
+  .top-row { grid-template-columns: 1fr; }
+  .protocols-grid { grid-template-columns: repeat(2, 1fr); }
+  .bottom-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== SIDEBAR ===== -->
+<nav class="sidebar">
+  <div class="sidebar-logo">S</div>
+  <div class="sidebar-nav">
+    <!-- Dashboard -->
+    <div class="sidebar-icon active" title="Dashboard">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+    </div>
+    <!-- Search -->
+    <div class="sidebar-icon" title="Search">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+    </div>
+    <!-- Analytics -->
+    <div class="sidebar-icon" title="Analytics">
+      <svg viewBox="0 0 24 24"><line x1="4" y1="20" x2="4" y2="10"/><line x1="10" y1="20" x2="10" y2="4"/><line x1="16" y1="20" x2="16" y2="14"/><line x1="22" y1="20" x2="22" y2="8"/></svg>
+    </div>
+    <!-- Leaderboard -->
+    <div class="sidebar-icon" title="Leaderboard">
+      <svg viewBox="0 0 24 24"><path d="M12 2L15 8.5 22 9.5 17 14.5 18 21.5 12 18 6 21.5 7 14.5 2 9.5 9 8.5Z"/></svg>
+    </div>
+    <!-- Protocols -->
+    <div class="sidebar-icon" title="Protocols">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+    </div>
+  </div>
+  <div class="sidebar-bottom">
+    <!-- Settings -->
+    <div class="sidebar-icon" title="Settings">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== TOP BAR ===== -->
+<header class="topbar">
+  <div class="topbar-brand">
+    <h1>Solana Score</h1>
+    <span>by Slice Analytics</span>
+  </div>
+
+  <div class="topbar-search">
+    <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+    <input type="text" placeholder="Search wallet address or .sol domain..." value="7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU">
+  </div>
+
+  <div class="topbar-metrics">
+    <div class="topbar-metric">
+      <span class="label">SOL</span>
+      <span class="value">$148.32</span>
+    </div>
+    <div class="topbar-metric">
+      <span class="label">TPS</span>
+      <span class="value">3,812</span>
+    </div>
+    <div class="topbar-status">
+      <span class="dot"></span>
+      Mainnet
+    </div>
+  </div>
+</header>
+
+<!-- ===== MAIN CONTENT ===== -->
+<main class="main">
+
+  <!-- WALLET HEADER -->
+  <div class="wallet-header">
+    <div class="wallet-avatar">7x</div>
+    <div class="wallet-info">
+      <div class="wallet-address">7xKXtg...gAsU</div>
+      <div class="wallet-meta">Last active 2h ago &middot; Created Jan 2024</div>
+    </div>
+    <div class="wallet-actions">
+      <button class="btn btn-glass">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export
+      </button>
+      <button class="btn btn-share-x">
+        <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        Share on X
+      </button>
+      <button class="btn btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Track
+      </button>
+    </div>
+  </div>
+
+  <!-- TOP ROW -->
+  <div class="top-row">
+
+    <!-- SCORE GAUGE CARD -->
+    <div class="card score-card">
+      <div class="card-title">Wallet Score</div>
+      <div class="gauge-wrap">
+        <svg class="gauge-svg" viewBox="0 0 220 130">
+          <defs>
+            <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#ff4444"/>
+              <stop offset="25%" stop-color="#ff9f43"/>
+              <stop offset="50%" stop-color="#ffd93d"/>
+              <stop offset="75%" stop-color="#14F195"/>
+              <stop offset="100%" stop-color="#00D1FF"/>
+            </linearGradient>
+            <linearGradient id="gaugeTrack" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="rgba(255,255,255,0.04)"/>
+              <stop offset="100%" stop-color="rgba(255,255,255,0.04)"/>
+            </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+            </filter>
+          </defs>
+          <!-- Track -->
+          <path d="M 20 120 A 90 90 0 0 1 200 120" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="12" stroke-linecap="round"/>
+          <!-- Colored arc (87/100 of semicircle) -->
+          <path d="M 20 120 A 90 90 0 0 1 200 120" fill="none" stroke="url(#gaugeGrad)" stroke-width="12" stroke-linecap="round"
+                stroke-dasharray="283" stroke-dashoffset="37" filter="url(#glow)"/>
+          <!-- Tick marks -->
+          <text x="14" y="128" fill="rgba(255,255,255,0.2)" font-size="9" font-family="Inter" font-weight="500">0</text>
+          <text x="104" y="16" fill="rgba(255,255,255,0.2)" font-size="9" font-family="Inter" font-weight="500">50</text>
+          <text x="194" y="128" fill="rgba(255,255,255,0.2)" font-size="9" font-family="Inter" font-weight="500">100</text>
+          <!-- Needle dot at 87/100 position -->
+          <!-- angle = 180 + (87/100)*180 = 336.6 degrees, r=90, cx=110, cy=120 -->
+          <circle cx="188" cy="68" r="5" fill="#00D1FF" filter="url(#glow)"/>
+          <circle cx="188" cy="68" r="2.5" fill="#fff"/>
+        </svg>
+        <div class="score-value">87</div>
+      </div>
+
+      <div class="score-tier">
+        <svg viewBox="0 0 24 24"><path d="M12 2L9 9H2l5.5 4.5L5 22l7-5 7 5-2.5-8.5L22 9h-7z"/></svg>
+        Diamond
+      </div>
+
+      <div class="score-meta-grid">
+        <div class="score-meta-item">
+          <div class="label">Percentile</div>
+          <div class="value">Top 4%</div>
+        </div>
+        <div class="score-meta-item">
+          <div class="label">Rank</div>
+          <div class="value">#12,847</div>
+        </div>
+        <div class="score-meta-item">
+          <div class="label">7d Change</div>
+          <div class="value positive">+3</div>
+        </div>
+        <div class="score-meta-item">
+          <div class="label">30d Change</div>
+          <div class="value positive">+8</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="right-col">
+
+      <!-- STATS ROW -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="label">Protocol Fees</div>
+          <div class="value">$12,450</div>
+          <div class="sub">+18% (30d)</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Network Fees</div>
+          <div class="value">2.3 SOL</div>
+          <div class="sub">~$341</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Holdings</div>
+          <div class="value">$45,200</div>
+          <div class="sub">+5.2% (24h)</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Months Active</div>
+          <div class="value">18</div>
+          <div class="sub">Since Jan '24</div>
+        </div>
+      </div>
+
+      <!-- SCORE BREAKDOWN -->
+      <div class="card breakdown-card">
+        <div class="card-title">Score Breakdown</div>
+        <div class="breakdown-list">
+          <div class="breakdown-item">
+            <span class="name">Transaction Volume</span>
+            <div class="bar-bg"><div class="bar-fill" style="width:92%"></div></div>
+            <span class="score">92</span>
+          </div>
+          <div class="breakdown-item">
+            <span class="name">Protocol Diversity</span>
+            <div class="bar-bg"><div class="bar-fill" style="width:88%"></div></div>
+            <span class="score">88</span>
+          </div>
+          <div class="breakdown-item">
+            <span class="name">Account Age</span>
+            <div class="bar-bg"><div class="bar-fill" style="width:85%"></div></div>
+            <span class="score">85</span>
+          </div>
+          <div class="breakdown-item">
+            <span class="name">DeFi Activity</span>
+            <div class="bar-bg"><div class="bar-fill" style="width:90%"></div></div>
+            <span class="score">90</span>
+          </div>
+          <div class="breakdown-item">
+            <span class="name">NFT Engagement</span>
+            <div class="bar-bg"><div class="bar-fill" style="width:72%"></div></div>
+            <span class="score">72</span>
+          </div>
+          <div class="breakdown-item">
+            <span class="name">Governance</span>
+            <div class="bar-bg"><div class="bar-fill" style="width:65%"></div></div>
+            <span class="score">65</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PROTOCOLS GRID -->
+  <div class="protocols-section">
+    <div class="card" style="padding: 18px;">
+      <div class="card-title">Active Protocols</div>
+      <div class="protocols-grid">
+
+        <div class="protocol-card">
+          <div class="protocol-top">
+            <div class="protocol-icon"><img src="../public/images/protocols/jupiter.svg" alt="Jupiter"></div>
+            <div>
+              <div class="protocol-name">Jupiter</div>
+              <span class="protocol-sector sector-dex">DEX Aggregator</span>
+            </div>
+          </div>
+          <div class="protocol-stats">
+            <div class="protocol-stat"><div class="label">TXNs</div><div class="value">1,284</div></div>
+            <div class="protocol-stat"><div class="label">Volume</div><div class="value">$89.4K</div></div>
+            <div class="protocol-stat"><div class="label">Last Active</div><div class="value">2h ago</div></div>
+          </div>
+        </div>
+
+        <div class="protocol-card">
+          <div class="protocol-top">
+            <div class="protocol-icon"><img src="../public/images/protocols/raydium.jpg" alt="Raydium"></div>
+            <div>
+              <div class="protocol-name">Raydium</div>
+              <span class="protocol-sector sector-dex">DEX / AMM</span>
+            </div>
+          </div>
+          <div class="protocol-stats">
+            <div class="protocol-stat"><div class="label">TXNs</div><div class="value">847</div></div>
+            <div class="protocol-stat"><div class="label">Volume</div><div class="value">$52.1K</div></div>
+            <div class="protocol-stat"><div class="label">Last Active</div><div class="value">5h ago</div></div>
+          </div>
+        </div>
+
+        <div class="protocol-card">
+          <div class="protocol-top">
+            <div class="protocol-icon"><img src="../public/images/protocols/meteora.jpg" alt="Meteora"></div>
+            <div>
+              <div class="protocol-name">Meteora</div>
+              <span class="protocol-sector sector-lsd">Liquidity</span>
+            </div>
+          </div>
+          <div class="protocol-stats">
+            <div class="protocol-stat"><div class="label">TXNs</div><div class="value">312</div></div>
+            <div class="protocol-stat"><div class="label">Volume</div><div class="value">$28.7K</div></div>
+            <div class="protocol-stat"><div class="label">Last Active</div><div class="value">1d ago</div></div>
+          </div>
+        </div>
+
+        <div class="protocol-card">
+          <div class="protocol-top">
+            <div class="protocol-icon"><img src="../public/images/protocols/drift.png" alt="Drift"></div>
+            <div>
+              <div class="protocol-name">Drift</div>
+              <span class="protocol-sector sector-perps">Perps / DEX</span>
+            </div>
+          </div>
+          <div class="protocol-stats">
+            <div class="protocol-stat"><div class="label">TXNs</div><div class="value">523</div></div>
+            <div class="protocol-stat"><div class="label">Volume</div><div class="value">$124.8K</div></div>
+            <div class="protocol-stat"><div class="label">Last Active</div><div class="value">12h ago</div></div>
+          </div>
+        </div>
+
+        <div class="protocol-card">
+          <div class="protocol-top">
+            <div class="protocol-icon"><img src="../public/images/protocols/orca.jpg" alt="Orca"></div>
+            <div>
+              <div class="protocol-name">Orca</div>
+              <span class="protocol-sector sector-dex">DEX / AMM</span>
+            </div>
+          </div>
+          <div class="protocol-stats">
+            <div class="protocol-stat"><div class="label">TXNs</div><div class="value">198</div></div>
+            <div class="protocol-stat"><div class="label">Volume</div><div class="value">$15.3K</div></div>
+            <div class="protocol-stat"><div class="label">Last Active</div><div class="value">3d ago</div></div>
+          </div>
+        </div>
+
+        <div class="protocol-card">
+          <div class="protocol-top">
+            <div class="protocol-icon"><img src="../public/images/protocols/phantom.jpg" alt="Phantom"></div>
+            <div>
+              <div class="protocol-name">Phantom</div>
+              <span class="protocol-sector sector-wallet">Wallet</span>
+            </div>
+          </div>
+          <div class="protocol-stats">
+            <div class="protocol-stat"><div class="label">TXNs</div><div class="value">2,401</div></div>
+            <div class="protocol-stat"><div class="label">Volume</div><div class="value">$210K</div></div>
+            <div class="protocol-stat"><div class="label">Last Active</div><div class="value">2h ago</div></div>
+          </div>
+        </div>
+
+        <div class="protocol-card">
+          <div class="protocol-top">
+            <div class="protocol-icon"><img src="../public/images/protocols/pumpfun.png" alt="Pump.fun"></div>
+            <div>
+              <div class="protocol-name">Pump.fun</div>
+              <span class="protocol-sector sector-token">Token Launch</span>
+            </div>
+          </div>
+          <div class="protocol-stats">
+            <div class="protocol-stat"><div class="label">TXNs</div><div class="value">76</div></div>
+            <div class="protocol-stat"><div class="label">Volume</div><div class="value">$4.2K</div></div>
+            <div class="protocol-stat"><div class="label">Last Active</div><div class="value">6d ago</div></div>
+          </div>
+        </div>
+
+        <div class="protocol-card">
+          <div class="protocol-top">
+            <div class="protocol-icon"><img src="../public/images/protocols/axiom.png" alt="Axiom"></div>
+            <div>
+              <div class="protocol-name">Axiom</div>
+              <span class="protocol-sector sector-tools">Trading Tools</span>
+            </div>
+          </div>
+          <div class="protocol-stats">
+            <div class="protocol-stat"><div class="label">TXNs</div><div class="value">340</div></div>
+            <div class="protocol-stat"><div class="label">Volume</div><div class="value">$31.5K</div></div>
+            <div class="protocol-stat"><div class="label">Last Active</div><div class="value">4h ago</div></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM ROW -->
+  <div class="bottom-row">
+
+    <!-- RECENT ACTIVITY -->
+    <div class="card">
+      <div class="card-title">Recent Activity</div>
+      <table class="activity-table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Protocol</th>
+            <th>TX Hash</th>
+            <th>Age</th>
+            <th style="text-align:right">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="type-badge type-swap">Swap</span></td>
+            <td>Jupiter</td>
+            <td class="tx-hash">3xK9..m2fP</td>
+            <td>2h ago</td>
+            <td style="text-align:right" class="amount-positive">+$1,240</td>
+          </tr>
+          <tr>
+            <td><span class="type-badge type-swap">Swap</span></td>
+            <td>Raydium</td>
+            <td class="tx-hash">8bR2..qN4v</td>
+            <td>5h ago</td>
+            <td style="text-align:right" class="amount-negative">-$830</td>
+          </tr>
+          <tr>
+            <td><span class="type-badge type-stake">Stake</span></td>
+            <td>Meteora</td>
+            <td class="tx-hash">Wd7x..ePk1</td>
+            <td>1d ago</td>
+            <td style="text-align:right" class="amount-negative">-$2,500</td>
+          </tr>
+          <tr>
+            <td><span class="type-badge type-lp">LP</span></td>
+            <td>Orca</td>
+            <td class="tx-hash">pQ5m..rT8z</td>
+            <td>1d ago</td>
+            <td style="text-align:right" class="amount-negative">-$4,100</td>
+          </tr>
+          <tr>
+            <td><span class="type-badge type-swap">Swap</span></td>
+            <td>Jupiter</td>
+            <td class="tx-hash">nH3k..vB9s</td>
+            <td>2d ago</td>
+            <td style="text-align:right" class="amount-positive">+$560</td>
+          </tr>
+          <tr>
+            <td><span class="type-badge type-transfer">Transfer</span></td>
+            <td>Phantom</td>
+            <td class="tx-hash">Lm8w..dF2y</td>
+            <td>3d ago</td>
+            <td style="text-align:right" class="amount-positive">+$3,200</td>
+          </tr>
+          <tr>
+            <td><span class="type-badge type-swap">Swap</span></td>
+            <td>Drift</td>
+            <td class="tx-hash">cV4j..aK7p</td>
+            <td>4d ago</td>
+            <td style="text-align:right" class="amount-negative">-$1,890</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- LEADERBOARD + DISTRIBUTION -->
+    <div class="card">
+      <div class="card-title">Leaderboard</div>
+      <table class="leaderboard-table">
+        <thead>
+          <tr>
+            <th style="width:40px">#</th>
+            <th>Wallet</th>
+            <th style="text-align:right">Score</th>
+            <th style="text-align:right">Tier</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="rank-medal">&#x1F947;</span></td>
+            <td style="font-family:Inter,monospace;font-size:11px">DeFi_W...hale</td>
+            <td style="text-align:right;font-weight:800;color:var(--sol-green)">99</td>
+            <td style="text-align:right;font-size:10px;color:var(--sol-cyan)">Legendary</td>
+          </tr>
+          <tr>
+            <td><span class="rank-medal">&#x1F948;</span></td>
+            <td style="font-family:Inter,monospace;font-size:11px">Sol_Ma...ster</td>
+            <td style="text-align:right;font-weight:800;color:var(--sol-green)">97</td>
+            <td style="text-align:right;font-size:10px;color:var(--sol-cyan)">Legendary</td>
+          </tr>
+          <tr>
+            <td><span class="rank-medal">&#x1F949;</span></td>
+            <td style="font-family:Inter,monospace;font-size:11px">0xAlp...ha42</td>
+            <td style="text-align:right;font-weight:800;color:var(--sol-green)">96</td>
+            <td style="text-align:right;font-size:10px;color:var(--sol-cyan)">Legendary</td>
+          </tr>
+          <tr>
+            <td><span class="rank-num">4</span></td>
+            <td style="font-family:Inter,monospace;font-size:11px">Nfty_C...olle</td>
+            <td style="text-align:right;font-weight:800;color:var(--text-primary)">95</td>
+            <td style="text-align:right;font-size:10px;color:#b88aff">Diamond</td>
+          </tr>
+          <tr>
+            <td><span class="rank-num">5</span></td>
+            <td style="font-family:Inter,monospace;font-size:11px">Jup_Ki...ng99</td>
+            <td style="text-align:right;font-weight:800;color:var(--text-primary)">94</td>
+            <td style="text-align:right;font-size:10px;color:#b88aff">Diamond</td>
+          </tr>
+          <tr class="you-row">
+            <td><span class="rank-num">12,847</span></td>
+            <td style="font-family:Inter,monospace;font-size:11px">7xKXt...gAsU <span class="you-badge">YOU</span></td>
+            <td style="text-align:right;font-weight:800;color:var(--sol-green)">87</td>
+            <td style="text-align:right;font-size:10px;color:#b88aff">Diamond</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="distribution-title">Score Distribution</div>
+      <div class="dist-row">
+        <span class="dist-label">90 - 100</span>
+        <div class="dist-bar-bg"><div class="dist-bar-fill" style="width:8%"></div></div>
+        <span class="dist-pct">3.2%</span>
+      </div>
+      <div class="dist-row">
+        <span class="dist-label">80 - 89</span>
+        <div class="dist-bar-bg"><div class="dist-bar-fill highlight" style="width:18%"></div></div>
+        <span class="dist-pct">7.1%</span>
+      </div>
+      <div class="dist-row">
+        <span class="dist-label">60 - 79</span>
+        <div class="dist-bar-bg"><div class="dist-bar-fill" style="width:35%"></div></div>
+        <span class="dist-pct">22.4%</span>
+      </div>
+      <div class="dist-row">
+        <span class="dist-label">40 - 59</span>
+        <div class="dist-bar-bg"><div class="dist-bar-fill" style="width:60%"></div></div>
+        <span class="dist-pct">31.8%</span>
+      </div>
+      <div class="dist-row">
+        <span class="dist-label">20 - 39</span>
+        <div class="dist-bar-bg"><div class="dist-bar-fill" style="width:48%"></div></div>
+        <span class="dist-pct">24.5%</span>
+      </div>
+      <div class="dist-row">
+        <span class="dist-label">0 - 19</span>
+        <div class="dist-bar-bg"><div class="dist-bar-fill" style="width:22%"></div></div>
+        <span class="dist-pct">11.0%</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="info">Slice Analytics &middot; Solana Score v2.4.1 &middot; Data refreshed every 60s</div>
+    <div class="chain-data">Block #284,912,847 &middot; Epoch 642 &middot; Slot 284,912,850</div>
+    <div class="mockup-label">Mockup 25 &mdash; Site: Clean Fusion</div>
+  </footer>
+
+</main>
+
+</body>
+</html>
