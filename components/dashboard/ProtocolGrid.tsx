@@ -2,7 +2,7 @@ import Image from "next/image";
 import { getProtocol } from "@/lib/protocols";
 
 interface ProtocolGridProps {
-  protocolsUsed: string;
+  protocolsUsed: string | null;
   feesPaid?: number;
 }
 
@@ -17,6 +17,8 @@ const SECTOR_BADGE_COLORS: Record<string, string> = {
 };
 
 export function ProtocolGrid({ protocolsUsed }: ProtocolGridProps) {
+  if (!protocolsUsed) return null;
+
   const protocols = protocolsUsed
     .split(",")
     .map((p) => p.trim())
