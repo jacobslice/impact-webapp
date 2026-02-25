@@ -11,6 +11,7 @@ import { ProtocolGrid } from "@/components/dashboard/ProtocolGrid";
 import { ScoreDistribution } from "@/components/dashboard/ScoreDistribution";
 import { LeaderboardTable } from "@/components/leaderboard/LeaderboardTable";
 import { ShareOnX } from "@/components/share/ShareOnX";
+import { WalletIdentity } from "@/components/social/TwitterConnect";
 import { MOCK_BREAKDOWN, MOCK_SCORE_DATA } from "@/lib/mock-data";
 import { getTier, truncateAddress, estimatePercentile, estimateRank } from "@/lib/types";
 import type { ScoreData } from "@/lib/types";
@@ -106,19 +107,11 @@ export default function DashboardPage() {
   return (
     <div>
       {/* Wallet header */}
-      <div className="glass-card flex items-center gap-3.5 p-4 mb-5">
-        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-[#9945FF] to-[#14F195] flex items-center justify-center text-white font-extrabold text-sm shrink-0">
-          {address.slice(0, 2)}
-        </div>
+      <div className="glass-card flex items-center p-4 mb-5">
         <div className="flex-1 min-w-0">
-          <div className="text-[15px] font-bold text-white/90 font-mono truncate">
-            {truncateAddress(address, 8)}
-          </div>
-          <div className="text-[11px] text-white/35">
-            Connected Wallet — Full Dashboard
-          </div>
+          <WalletIdentity address={address} truncatedAddress={truncateAddress(address, 8)} />
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2 shrink-0 ml-3">
           <ShareOnX address={address} score={scoreData.score} tier={tier.name} />
         </div>
       </div>

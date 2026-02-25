@@ -16,7 +16,7 @@ export function StatsCards({ data }: StatsCardsProps) {
       value: formatCurrency(data.current_holdings),
     },
     {
-      label: "Months Active",
+      label: "Months Active (Last 12)",
       value: String(data.months_active),
     },
     {

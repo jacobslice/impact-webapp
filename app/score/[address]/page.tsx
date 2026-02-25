@@ -169,15 +169,15 @@ export default function ScorePage({ params }: { params: Promise<{ address: strin
           </div>
         </div>
 
-        {/* Breakdown */}
-        <div className="glass-card p-5">
+        {/* Breakdown — blurred for non-connected users */}
+        <div className="glass-card p-5 relative overflow-hidden">
           <div className="text-[10.5px] font-semibold uppercase tracking-wider text-white/35 mb-4">
             Score Breakdown
           </div>
-          <ScoreBreakdownBars items={MOCK_BREAKDOWN} />
+          <ScoreBreakdownBars items={MOCK_BREAKDOWN} blurred />
 
-          {/* Quick stats */}
-          <div className="grid grid-cols-3 gap-3 mt-5 pt-5 border-t border-white/[0.04]">
+          {/* Quick stats (also blurred) */}
+          <div className="grid grid-cols-3 gap-3 mt-5 pt-5 border-t border-white/[0.04] blur-[6px] select-none pointer-events-none">
             <div>
               <div className="text-[9.5px] text-white/35 font-medium uppercase tracking-wider mb-1">
                 Protocol Fees
@@ -196,12 +196,23 @@ export default function ScorePage({ params }: { params: Promise<{ address: strin
             </div>
             <div>
               <div className="text-[9.5px] text-white/35 font-medium uppercase tracking-wider mb-1">
-                Months Active
+                Months Active (Last 12)
               </div>
               <div className="text-sm font-bold text-white/90">
                 {scoreData.months_active}
               </div>
             </div>
+          </div>
+
+          {/* Connect overlay */}
+          <div className="absolute inset-0 flex items-center justify-center z-10 bg-[#0c0b14]/40">
+            <button
+              onClick={() => router.push("/dashboard")}
+              className="h-10 px-5 rounded-lg text-sm font-semibold bg-gradient-to-r from-[#9945FF] to-[#7c3aed] text-white shadow-[0_2px_16px_rgba(153,69,255,0.35)] hover:shadow-[0_2px_24px_rgba(153,69,255,0.5)] hover:-translate-y-px transition-all flex items-center gap-2"
+            >
+              <Wallet className="w-4 h-4" />
+              Connect Wallet to View Full Score
+            </button>
           </div>
         </div>
       </div>

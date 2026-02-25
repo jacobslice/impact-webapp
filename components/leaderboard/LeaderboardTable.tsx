@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { MOCK_LEADERBOARD } from "@/lib/mock-data";
-import { truncateAddress } from "@/lib/types";
+import { getTier, truncateAddress } from "@/lib/types";
 
 interface LeaderboardTableProps {
   highlightWallet?: string;
@@ -42,6 +42,7 @@ export function LeaderboardTable({
         </thead>
         <tbody>
           {entries.map((entry) => {
+            const tier = getTier(entry.score);
             const isYou =
               highlightWallet &&
               entry.wallet.toLowerCase() === highlightWallet.toLowerCase();
@@ -69,8 +70,9 @@ export function LeaderboardTable({
                 <td className="py-2 px-2 text-right font-extrabold text-[#14F195] text-[11.5px]">
                   {entry.score.toFixed(2)}
                 </td>
-                <td className="py-2 px-2 text-right text-[10px] text-[#b88aff]">
-                  {entry.tier}
+                <td className={`py-2 px-2 text-right text-[10px] font-semibold ${tier.color}`}>
+                  <span className="mr-1">{tier.icon}</span>
+                  {tier.name}
                 </td>
               </tr>
             );

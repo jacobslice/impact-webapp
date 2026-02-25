@@ -28,9 +28,13 @@ export function Sidebar() {
       {/* Logo */}
       <Link
         href="/"
-        className="w-[30px] h-[30px] rounded-lg bg-gradient-to-br from-[#9945FF] to-[#14F195] flex items-center justify-center text-white font-black text-sm mb-6 shadow-[0_0_18px_rgba(153,69,255,0.3)] hover:shadow-[0_0_24px_rgba(153,69,255,0.5)] transition-shadow"
+        className="w-[30px] h-[30px] rounded-lg bg-gradient-to-br from-[#9945FF] to-[#14F195] flex items-center justify-center mb-6 shadow-[0_0_18px_rgba(153,69,255,0.3)] hover:shadow-[0_0_24px_rgba(153,69,255,0.5)] transition-shadow overflow-hidden"
       >
-        S
+        <svg width="20" height="20" viewBox="0 0 32 32" fill="none">
+          {/* Stylized "SS" monogram for Solana Score */}
+          <path d="M8 8 L16 8 C20 8 22 10 22 13 C22 16 20 17.5 17 17.5 L12 17.5 L22 24" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          <circle cx="24" cy="10" r="2" fill="white" opacity="0.7" />
+        </svg>
       </Link>
 
       {/* Nav Icons */}

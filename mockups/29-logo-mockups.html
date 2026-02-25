@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solana Score — Logo Concepts</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #0c0b14;
+            color: #e2e0ea;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            padding: 40px 48px 80px;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #9945FF, #14F195);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+
+        .subtitle {
+            color: #7a7890;
+            font-size: 14px;
+            margin-bottom: 48px;
+            max-width: 640px;
+            line-height: 1.6;
+        }
+
+        .concept-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+        }
+
+        .concept-card {
+            background: #13121e;
+            border: 1px solid #1e1d2e;
+            border-radius: 16px;
+            padding: 32px;
+            transition: border-color 0.3s;
+        }
+
+        .concept-card:hover {
+            border-color: #2e2d44;
+        }
+
+        .concept-number {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #9945FF;
+            margin-bottom: 4px;
+        }
+
+        .concept-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .concept-desc {
+            font-size: 12px;
+            color: #6a6880;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .size-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 28px;
+            margin-bottom: 20px;
+        }
+
+        .size-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .size-label {
+            font-size: 10px;
+            color: #4a4860;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .logo-standalone {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .section-label {
+            font-size: 10px;
+            color: #4a4860;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            margin-top: 8px;
+        }
+
+        .sidebar-preview {
+            display: flex;
+            align-items: flex-end;
+            gap: 28px;
+            margin-top: 4px;
+        }
+
+        .sidebar-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(153, 69, 255, 0.18), rgba(20, 241, 149, 0.10));
+            border: 1px solid rgba(153, 69, 255, 0.15);
+        }
+
+        .sidebar-container.size-30 {
+            width: 36px; height: 36px; border-radius: 8px;
+        }
+        .sidebar-container.size-48 {
+            width: 56px; height: 56px; border-radius: 10px;
+        }
+        .sidebar-container.size-80 {
+            width: 96px; height: 96px; border-radius: 14px;
+        }
+
+        .divider {
+            width: 100%;
+            height: 1px;
+            background: #1e1d2e;
+            margin: 16px 0;
+        }
+
+        /* Shared SVG defs */
+        .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+    </style>
+</head>
+<body>
+
+<!-- Shared SVG gradient definitions -->
+<svg width="0" height="0" style="position:absolute">
+    <defs>
+        <linearGradient id="grad-pg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#9945FF"/>
+            <stop offset="100%" stop-color="#14F195"/>
+        </linearGradient>
+        <linearGradient id="grad-pc" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#9945FF"/>
+            <stop offset="100%" stop-color="#00D1FF"/>
+        </linearGradient>
+        <linearGradient id="grad-cg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#00D1FF"/>
+            <stop offset="100%" stop-color="#14F195"/>
+        </linearGradient>
+        <linearGradient id="grad-full" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#9945FF"/>
+            <stop offset="50%" stop-color="#00D1FF"/>
+            <stop offset="100%" stop-color="#14F195"/>
+        </linearGradient>
+        <linearGradient id="grad-pg-v" x1="0%" y1="100%" x2="0%" y2="0%">
+            <stop offset="0%" stop-color="#9945FF"/>
+            <stop offset="100%" stop-color="#14F195"/>
+        </linearGradient>
+        <linearGradient id="grad-full-v" x1="0%" y1="100%" x2="0%" y2="0%">
+            <stop offset="0%" stop-color="#9945FF"/>
+            <stop offset="50%" stop-color="#00D1FF"/>
+            <stop offset="100%" stop-color="#14F195"/>
+        </linearGradient>
+    </defs>
+</svg>
+
+<h1>Solana Score — Logo Concepts</h1>
+<p class="subtitle">
+    8 distinct SVG-based logo/symbol options designed to work at 30x30px in the sidebar and scale up cleanly.
+    Each concept is shown standalone and inside the sidebar's rounded gradient container.
+</p>
+
+<div class="concept-grid">
+
+    <!-- ============================================================ -->
+    <!-- CONCEPT 1: Shield with Score Arc -->
+    <!-- ============================================================ -->
+    <div class="concept-card">
+        <div class="concept-number">Concept 01</div>
+        <div class="concept-name">Shield with Score Arc</div>
+        <div class="concept-desc">A shield silhouette with a circular gauge/arc inside — communicates protection &amp; scoring at once.</div>
+
+        <div class="section-label">Standalone</div>
+        <div class="size-row">
+            <div class="size-group">
+                <svg width="30" height="30" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Shield body -->
+                    <path d="M50 5 L90 22 L90 52 C90 72 72 90 50 97 C28 90 10 72 10 52 L10 22 Z" fill="url(#grad-pg)" opacity="0.15" stroke="url(#grad-pg)" stroke-width="4"/>
+                    <!-- Score arc background -->
+                    <circle cx="50" cy="52" r="22" fill="none" stroke="#1e1d2e" stroke-width="5" stroke-linecap="round"/>
+                    <!-- Score arc fill (~270 degrees) -->
+                    <circle cx="50" cy="52" r="22" fill="none" stroke="url(#grad-pg)" stroke-width="5" stroke-linecap="round"
+                        stroke-dasharray="104 138" stroke-dashoffset="-34.5" transform="rotate(-90 50 52)"/>
+                    <!-- Center dot -->
+                    <circle cx="50" cy="52" r="4" fill="#14F195"/>
+                </svg>
+                <span class="size-label">30px</span>
+            </div>
+            <div class="size-group">
+                <svg width="48" height="48" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M50 5 L90 22 L90 52 C90 72 72 90 50 97 C28 90 10 72 10 52 L10 22 Z" fill="url(#grad-pg)" opacity="0.15" stroke="url(#grad-pg)" stroke-width="3.5"/>
+                    <circle cx="50" cy="52" r="22" fill="none" stroke="#1e1d2e" stroke-width="4.5" stroke-linecap="round"/>
+                    <circle cx="50" cy="52" r="22" fill="none" stroke="url(#grad-pg)" stroke-width="4.5" stroke-linecap="round"
+                        stroke-dasharray="104 138" stroke-dashoffset="-34.5" transform="rotate(-90 50 52)"/>
+                    <circle cx="50" cy="52" r="3.5" fill="#14F195"/>
+                </svg>
+                <span class="size-label">48px</span>
+            </div>
+            <div class="size-group">
+                <svg width="80" height="80" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M50 5 L90 22 L90 52 C90 72 72 90 50 97 C28 90 10 72 10 52 L10 22 Z" fill="url(#grad-pg)" opacity="0.15" stroke="url(#grad-pg)" stroke-width="2.5"/>
+                    <circle cx="50" cy="52" r="22" fill="none" stroke="#1e1d2e" stroke-width="4" stroke-linecap="round"/>
+                    <circle cx="50" cy="52" r="22" fill="none" stroke="url(#grad-pg)" stroke-width="4" stroke-linecap="round"
+                        stroke-dasharray="104 138" stroke-dashoffset="-34.5" transform="rotate(-90 50 52)"/>
+                    <circle cx="50" cy="52" r="3" fill="#14F195"/>
+                </svg>
+                <span class="size-label">80px</span>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="section-label">In Sidebar Container</div>
+        <div class="sidebar-preview">
+            <div class="size-group">
+                <div class="sidebar-container size-30">
+                    <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
+                        <path d="M50 5 L90 22 L90 52 C90 72 72 90 50 97 C28 90 10 72 10 52 L10 22 Z" fill="url(#grad-pg)" opacity="0.15" stroke="url(#grad-pg)" stroke-width="4"/>
+                        <circle cx="50" cy="52" r="22" fill="none" stroke="#1e1d2e" stroke-width="5"/>
+                        <circle cx="50" cy="52" r="22" fill="none" stroke="url(#grad-pg)" stroke-width="5" stroke-linecap="round" stroke-dasharray="104 138" stroke-dashoffset="-34.5" transform="rotate(-90 50 52)"/>
+                        <circle cx="50" cy="52" r="4" fill="#14F195"/>
+                    </svg>
+                </div>
+                <span class="size-label">30px</span>
+            </div>
+            <div class="size-group">
+                <div class="sidebar-container size-48">
+                    <svg width="38" height="38" viewBox="0 0 100 100" fill="none">
+                        <path d="M50 5 L90 22 L90 52 C90 72 72 90 50 97 C28 90 10 72 10 52 L10 22 Z" fill="url(#grad-pg)" opacity="0.15" stroke="url(#grad-pg)" stroke-width="3.5"/>
+                        <circle cx="50" cy="52" r="22" fill="none" stroke="#1e1d2e" stroke-width="4.5"/>
+                        <circle cx="50" cy="52" r="22" fill="none" stroke="url(#grad-pg)" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="104 138" stroke-dashoffset="-34.5" transform="rotate(-90 50 52)"/>
+                        <circle cx="50" cy="52" r="3.5" fill="#14F195"/>
+                    </svg>
+                </div>
+                <span class="size-label">48px</span>
+            </div>
+            <div class="size-group">
+                <div class="sidebar-container size-80">
+                    <svg width="64" height="64" viewBox="0 0 100 100" fill="none">
+                        <path d="M50 5 L90 22 L90 52 C90 72 72 90 50 97 C28 90 10 72 10 52 L10 22 Z" fill="url(#grad-pg)" opacity="0.15" stroke="url(#grad-pg)" stroke-width="2.5"/>
+                        <circle cx="50" cy="52" r="22" fill="none" stroke="#1e1d2e" stroke-width="4"/>
+                        <circle cx="50" cy="52" r="22" fill="none" stroke="url(#grad-pg)" stroke-width="4" stroke-linecap="round" stroke-dasharray="104 138" stroke-dashoffset="-34.5" transform="rotate(-90 50 52)"/>
+                        <circle cx="50" cy="52" r="3" fill="#14F195"/>
+                    </svg>
+                </div>
+                <span class="size-label">80px</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- CONCEPT 2: Hexagonal Prism -->
+    <!-- ============================================================ -->
+    <div class="concept-card">
+        <div class="concept-number">Concept 02</div>
+        <div class="concept-name">Hexagonal Prism</div>
+        <div class="concept-desc">A hexagon with internal crystalline facets radiating from center — evokes blockchain structure and value.</div>
+
+        <div class="section-label">Standalone</div>
+        <div class="size-row">
+            <div class="size-group">
+                <svg width="30" height="30" viewBox="0 0 100 100" fill="none">
+                    <!-- Outer hex -->
+                    <polygon points="50,5 91,27.5 91,72.5 50,95 9,72.5 9,27.5" fill="url(#grad-pg)" opacity="0.12" stroke="url(#grad-pg)" stroke-width="3.5"/>
+                    <!-- Inner facets — 3 lines from center to alternating vertices -->
+                    <line x1="50" y1="50" x2="50" y2="5" stroke="url(#grad-pg)" stroke-width="2" opacity="0.5"/>
+                    <line x1="50" y1="50" x2="91" y2="72.5" stroke="url(#grad-cg)" stroke-width="2" opacity="0.5"/>
+                    <line x1="50" y1="50" x2="9" y2="72.5" stroke="url(#grad-pc)" stroke-width="2" opacity="0.5"/>
+                    <!-- Inner hex -->
+                    <polygon points="50,25 70.5,37.5 70.5,62.5 50,75 29.5,62.5 29.5,37.5" fill="none" stroke="url(#grad-full)" stroke-width="2.5"/>
+                    <!-- Center gem dot -->
+                    <circle cx="50" cy="50" r="5" fill="url(#grad-pg)"/>
+                </svg>
+                <span class="size-label">30px</span>
+            </div>
+            <div class="size-group">
+                <svg width="48" height="48" viewBox="0 0 100 100" fill="none">
+                    <polygon points="50,5 91,27.5 91,72.5 50,95 9,72.5 9,27.5" fill="url(#grad-pg)" opacity="0.12" stroke="url(#grad-pg)" stroke-width="3"/>
+                    <line x1="50" y1="50" x2="50" y2="5" stroke="url(#grad-pg)" stroke-width="1.5" opacity="0.5"/>
+                    <line x1="50" y1="50" x2="91" y2="72.5" stroke="url(#grad-cg)" stroke-width="1.5" opacity="0.5"/>
+                    <line x1="50" y1="50" x2="9" y2="72.5" stroke="url(#grad-pc)" stroke-width="1.5" opacity="0.5"/>
+                    <polygon points="50,25 70.5,37.5 70.5,62.5 50,75 29.5,62.5 29.5,37.5" fill="none" stroke="url(#grad-full)" stroke-width="2"/>
+                    <circle cx="50" cy="50" r="4.5" fill="url(#grad-pg)"/>
+                </svg>
+                <span class="size-label">48px</span>
+            </div>
+            <div class="size-group">
+                <svg width="80" height="80" viewBox="0 0 100 100" fill="none">
+                    <polygon points="50,5 91,27.5 91,72.5 50,95 9,72.5 9,27.5" fill="url(#grad-pg)" opacity="0.12" stroke="url(#grad-pg)" stroke-width="2"/>
+                    <line x1="50" y1="50" x2="50" y2="5" stroke="url(#grad-pg)" stroke-width="1.2" opacity="0.5"/>
+                    <line x1="50" y1="50" x2="91" y2="72.5" stroke="url(#grad-cg)" stroke-width="1.2" opacity="0.5"/>
+                    <line x1="50" y1="50" x2="9" y2="72.5" stroke="url(#grad-pc)" stroke-width="1.2" opacity="0.5"/>
+                    <polygon points="50,25 70.5,37.5 70.5,62.5 50,75 29.5,62.5 29.5,37.5" fill="none" stroke="url(#grad-full)" stroke-width="1.8"/>
+                    <circle cx="50" cy="50" r="4" fill="url(#grad-pg)"/>
+                </svg>
+                <span class="size-label">80px</span>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="section-label">In Sidebar Container</div>
+        <div class="sidebar-preview">
+            <div class="size-group">
+                <div class="sidebar-container size-30">
+                    <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
+                        <polygon points="50,5 91,27.5 91,72.5 50,95 9,72.5 9,27.5" fill="url(#grad-pg)" opacity="0.12" stroke="url(#grad-pg)" stroke-width="3.5"/>
+                        <line x1="50" y1="50" x2="50" y2="5" stroke="url(#grad-pg)" stroke-width="2" opacity="0.5"/>
+                        <line x1="50" y1="50" x2="91" y2="72.5" stroke="url(#grad-cg)" stroke-width="2" opacity="0.5"/>
+                        <line x1="50" y1="50" x2="9" y2="72.5" stroke="url(#grad-pc)" stroke-width="2" opacity="0.5"/>
+                        <polygon points="50,25 70.5,37.5 70.5,62.5 50,75 29.5,62.5 29.5,37.5" fill="none" stroke="url(#grad-full)" stroke-width="2.5"/>
+                        <circle cx="50" cy="50" r="5" fill="url(#grad-pg)"/>
+                    </svg>
+                </div>
+                <span class="size-label">30px</span>
+            </div>
+            <div class="size-group">
+                <div class="sidebar-container size-48">
+                    <svg width="38" height="38" viewBox="0 0 100 100" fill="none">
+                        <polygon points="50,5 91,27.5 91,72.5 50,95 9,72.5 9,27.5" fill="url(#grad-pg)" opacity="0.12" stroke="url(#grad-pg)" stroke-width="3"/>
+                        <line x1="50" y1="50" x2="50" y2="5" stroke="url(#grad-pg)" stroke-width="1.5" opacity="0.5"/>
+                        <line x1="50" y1="50" x2="91" y2="72.5" stroke="url(#grad-cg)" stroke-width="1.5" opacity="0.5"/>
+                        <line x1="50" y1="50" x2="9" y2="72.5" stroke="url(#grad-pc)" stroke-width="1.5" opacity="0.5"/>
+                        <polygon points="50,25 70.5,37.5 70.5,62.5 50,75 29.5,62.5 29.5,37.5" fill="none" stroke="url(#grad-full)" stroke-width="2"/>
+                        <circle cx="50" cy="50" r="4.5" fill="url(#grad-pg)"/>
+                    </svg>
+                </div>
+                <span class="size-label">48px</span>
+            </div>
+            <div class="size-group">
+                <div class="sidebar-container size-80">
+                    <svg width="64" height="64" viewBox="0 0 100 100" fill="none">
+                        <polygon points="50,5 91,27.5 91,72.5 50,95 9,72.5 9,27.5" fill="url(#grad-pg)" opacity="0.12" stroke="url(#grad-pg)" stroke-width="2"/>
+                        <line x1="50" y1="50" x2="50" y2="5" stroke="url(#grad-pg)" stroke-width="1.2" opacity="0.5"/>
+                        <line x1="50" y1="50" x2="91" y2="72.5" stroke="url(#grad-cg)" stroke-width="1.2" opacity="0.5"/>
+                        <line x1="50" y1="50" x2="9" y2="72.5" stroke="url(#grad-pc)" stroke-width="1.2" opacity="0.5"/>
+                        <polygon points="50,25 70.5,37.5 70.5,62.5 50,75 29.5,62.5 29.5,37.5" fill="none" stroke="url(#grad-full)" stroke-width="1.8"/>
+                        <circle cx="50" cy="50" r="4" fill="url(#grad-pg)"/>
+                    </svg>
+                </div>
+                <span class="size-label">80px</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- CONCEPT 3: Stacked Bars / Abstract S -->
+    <!-- ============================================================ -->
+    <div class="concept-card">
+        <div class="concept-number">Concept 03</div>
+        <div class="concept-name">Stacked Bars</div>
+        <div class="concept-desc">Three ascending bars at staggered angles forming an abstract "S" — represents score levels rising.</div>
+
+        <div class="section-label">Standalone</div>
+        <div class="size-row">
+            <div class="size-group">
+                <svg width="30" height="30" viewBox="0 0 100 100" fill="none">
+                    <!-- Bottom bar (short, left-aligned) -->
+                    <rect x="15" y="70" width="32" height="12" rx="6" fill="#9945FF"/>
+                    <!-- Middle bar (medium, right-aligned) -->
+                    <rect x="34" y="44" width="40" height="12" rx="6" fill="#00D1FF"/>
+                    <!-- Top bar (long, left-aligned) -->
+                    <rect x="53" y="18" width="32" height="12" rx="6" fill="#14F195"/>
+                    <!-- Connecting line (the S curve) -->
+                    <path d="M31 76 C31 76, 68 64, 54 50 C40 36, 69 24, 69 24" stroke="url(#grad-pg)" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.4"/>
+                </svg>
+                <span class="size-label">30px</span>
+            </div>
+            <div class="size-group">
+                <svg width="48" height="48" viewBox="0 0 100 100" fill="none">
+                    <rect x="15" y="70" width="32" height="12" rx="6" fill="#9945FF"/>
+                    <rect x="34" y="44" width="40" height="12" rx="6" fill="#00D1FF"/>
+                    <rect x="53" y="18" width="32" height="12" rx="6" fill="#14F195"/>
+                    <path d="M31 76 C31 76, 68 64, 54 50 C40 36, 69 24, 69 24" stroke="url(#grad-pg)" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.4"/>
+                </svg>
+                <span class="size-label">48px</span>
+            </div>
+            <div class="size-group">
+                <svg width="80" height="80" viewBox="0 0 100 100" fill="none">
+                    <rect x="15" y="70" width="32" height="12" rx="6" fill="#9945FF"/>
+                    <rect x="34" y="44" width="40" height="12" rx="6" fill="#00D1FF"/>
+                    <rect x="53" y="18" width="32" height="12" rx="6" fill="#14F195"/>
+                    <path d="M31 76 C31 76, 68 64, 54 50 C40 36, 69 24, 69 24" stroke="url(#grad-pg)" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.4"/>
+                </svg>
+                <span class="size-label">80px</span>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="section-label">In Sidebar Container</div>
+        <div class="sidebar-preview">
+            <div class="size-group">
+                <div class="sidebar-container size-30">
+                    <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
+                        <rect x="15" y="70" width="32" height="12" rx="6" fill="#9945FF"/>
+                        <rect x="34" y="44" width="40" height="12" rx="6" fill="#00D1FF"/>
+                        <rect x="53" y="18" width="32" height="12" rx="6" fill="#14F195"/>
+                        <path d="M31 76 C31 76, 68 64, 54 50 C40 36, 69 24, 69 24" stroke="url(#grad-pg)" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.4"/>
+                    </svg>
+                </div>
+                <span class="size-label">30px</span>
+            </div>
+            <div class="size-group">
+                <div class="sidebar-container size-48">
+                    <svg width="38" height="38" viewBox="0 0 100 100" fill="none">
+                        <rect x="15" y="70" width="32" height="12" rx="6" fill="#9945FF"/>
+                        <rect x="34" y="44" width="40" height="12" rx="6" fill="#00D1FF"/>
+                        <rect x="53" y="18" width="32" height="12" rx="6" fill="#14F195"/>
+                        <path d="M31 76 C31 76, 68 64, 54 50 C40 36, 69 24, 69 24" stroke="url(#grad-pg)" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.4"/>
+                    </svg>
+                </div>
+                <span class="size-label">48px</span>
+            </div>
+            <div class="size-group">
+                <div class="sidebar-container size-80">
+                    <svg width="64" height="64" viewBox="0 0 100 100" fill="none">
+                        <rect x="15" y="70" width="32" height="12" rx="6" fill="#9945FF"/>
+                        <rect x="34" y="44" width="40" height="12" rx="6" fill="#00D1FF"/>
+                        <rect x="53" y="18" width="32" height="12" rx="6" fill="#14F195"/>
+                        <path d="M31 76 C31 76, 68 64, 54 50 C40 36, 69 24, 69 24" stroke="url(#grad-pg)" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.4"/>
+                    </svg>
+                </div>
+                <span class="size-label">80px</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- CONCEPT 4: Orbit Rings -->
+    <!-- ============================================================ -->
+    <div class="concept-card">
+        <div class="concept-number">Concept 04</div>
+        <div class="concept-name">Orbit Rings</div>
+        <div class="concept-desc">A central node with two crossing elliptical orbits — represents network connectivity and blockchain nodes.</div>
+
+        <div class="section-label">Standalone</div>
+        <div class="size-row">
+            <div class="size-group">
+                <svg width="30" height="30" viewBox="0 0 100 100" fill="none">
+                    <!-- Orbit 1 (tilted right) -->
+                    <ellipse cx="50" cy="50" rx="40" ry="16" transform="rotate(-30 50 50)" stroke="#9945FF" stroke-width="3.5" opacity="0.7"/>
+                    <!-- Orbit 2 (tilted left) -->
+                    <ellipse cx="50" cy="50" rx="40" ry="16" transform="rotate(30 50 50)" stroke="#14F195" stroke-width="3.5" opacity="0.7"/>
+                    <!-- Center node -->
+                    <circle cx="50" cy="50" r="8" fill="url(#grad-pg)"/>
+                    <!-- Satellite dots -->
+                    <circle cx="18" cy="34" r="3.5" fill="#00D1FF"/>
+                    <circle cx="82" cy="66" r="3.5" fill="#14F195"/>
+                    <circle cx="82" cy="34" r="3.5" fill="#9945FF" opacity="0.7"/>
+                    <circle cx="18" cy="66" r="3.5" fill="#9945FF" opacity="0.7"/>
+                </svg>
+                <span class="size-label">30px</span>
+            </div>
+            <div class="size-group">
+                <svg width="48" height="48" viewBox="0 0 100 100" fill="none">
+                    <ellipse cx="50" cy="50" rx="40" ry="16" transform="rotate(-30 50 50)" stroke="#9945FF" stroke-width="3" opacity="0.7"/>
+                    <ellipse cx="50" cy="50" rx="40" ry="16" transform="rotate(30 50 50)" stroke="#14F195" stroke-width="3" opacity="0.7"/>
+                    <circle cx="50" cy="50" r="7" fill="url(#grad-pg)"/>
+                    <circle cx="18" cy="34" r="3" fill="#00D1FF"/>
+                    <circle cx="82" cy="66" r="3" fill="#14F195"/>
+                    <circle cx="82" cy="34" r="3" fill="#9945FF" opacity="0.7"/>
+                    <circle cx="18" cy="66" r="3" fill="#9945FF" opacity="0.7"/>
+                </svg>
+                <span class="size-label">48px</span>
+            </div>
+            <div class="size-group">
+                <svg width="80" height="80" viewBox="0 0 100 100" fill="none">
+                    <ellipse cx="50" cy="50" rx="40" ry="16" transform="rotate(-30 50 50)" stroke="#9945FF" stroke-width="2.2" opacity="0.7"/>
+                    <ellipse cx="50" cy="50" rx="40" ry="16" transform="rotate(30 50 50)" stroke="#14F195" stroke-width="2.2" opacity="0.7"/>
+                    <circle cx="50" cy="50" r="6.5" fill="url(#grad-pg)"/>
+                    <circle cx="18" cy="34" r="2.5" fill="#00D1FF"/>
+                    <circle cx="82" cy="66" r="2.5" fill="#14F195"/>
+                    <circle cx="82" cy="34" r="2.5" fill="#9945FF" opacity="0.7"/>
+                    <circle cx="18" cy="66" r="2.5" fill="#9945FF" opacity="0.7"/>
+                </svg>
+                <span class="size-label">80px</span>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="section-label">In Sidebar Container</div>
+        <div class="sidebar-preview">
+            <div class="size-group">
+                <div class="sidebar-container size-30">
+                    <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
+                        <ellipse cx="50" cy="50" rx="40" ry="16" transform="rotate(-30 50 50)" stroke="#9945FF" stroke-width="3.5" opacity="0.7"/>
+                        <ellipse cx="50" cy="50" rx="40" ry="16" transform="rotate(30 50 50)" stroke="#14F195" stroke-width="3.5" opacity="0.7"/>
+                        <circle cx="50" cy="50" r="8" fill="url(#grad-pg)"/>
+                        <circle cx="18" cy="34" r="3.5" fill="#00D1FF"/>
+                        <circle cx="82" cy="66" r="3.5" fill="#14F195"/>
+                    </svg>
+                </div>
+                <span class="size-label">30px</span>
+            </div>
+            <div class="size-group">
+                <div class="sidebar-container size-48">
+                    <svg width="38" height="38" viewBox="0 0 100 100" fill="none">
+                        <ellipse cx="50" cy="50" rx="40" ry="16" transform="rotate(-30 50 50)" stroke="#9945FF" stroke-width="3" opacity="0.7"/>
+                        <ellipse cx="50" cy="50" rx="40" ry="16" transform="rotate(30 50 50)" stroke="#14F195" stroke-width="3" opacity="0.7"/>
+                        <circle cx="50" cy="50" r="7" fill="url(#grad-pg)"/>
+                        <circle cx="18" cy="34" r="3" fill="#00D1FF"/>
+                        <circle cx="82" cy="66" r="3" fill="#14F195"/>
+                    </svg>
+                </div>
+                <span class="size-label">48px</span>
+            </div>
+            <div class="size-group">
+                <div class="sidebar-container size-80">
+                    <svg width="64" height="64" viewBox="0 0 100 100" fill="none">
+                        <ellipse cx="50" cy="50" rx="40" ry="16" transform="rotate(-30 50 50)" stroke="#9945FF" stroke-width="2.2" opacity="0.7"/>
+                        <ellipse cx="50" cy="50" rx="40" ry="16" transform="rotate(30 50 50)" stroke="#14F195" stroke-width="2.2" opacity="0.7"/>
+                        <circle cx="50" cy="50" r="6.5" fill="url(#grad-pg)"/>
+                        <circle cx="18" cy="34" r="2.5" fill="#00D1FF"/>
+                        <circle cx="82" cy="66" r="2.5" fill="#14F195"/>
+                    </svg>
+                </div>
+                <span class="size-label">80px</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- CONCEPT 5: Pie Slice -->
+    <!-- ============================================================ -->
+    <div class="concept-card">
+        <div class="concept-number">Concept 05</div>
+        <div class="concept-name">Pie Slice</div>
+        <div class="concept-desc">A circle with a wedge slice removed — nods to Slice Analytics parent brand while suggesting data analysis.</div>
+
+        <div class="section-label">Standalone</div>
+        <div class="size-row">
+            <div class="size-group">
+                <svg width="30" height="30" viewBox="0 0 100 100" fill="none">
+                    <!-- Main pie with slice cut out (~45 degree gap at top-right) -->
+                    <path d="M50 50 L50 10 A40 40 0 1 0 78.28 21.72 Z" fill="url(#grad-pg)" opacity="0.9"/>
+                    <!-- The slice piece, offset -->
+                    <path d="M56 44 L56 4 A40 40 0 0 1 84.28 15.72 Z" fill="url(#grad-cg)" opacity="0.6"/>
+                    <!-- Center dot -->
+                    <circle cx="50" cy="50" r="4" fill="#0c0b14"/>
+                </svg>
+                <span class="size-label">30px</span>
+            </div>
+            <div class="size-group">
+                <svg width="48" height="48" viewBox="0 0 100 100" fill="none">
+                    <path d="M50 50 L50 10 A40 40 0 1 0 78.28 21.72 Z" fill="url(#grad-pg)" opacity="0.9"/>
+                    <path d="M56 44 L56 4 A40 40 0 0 1 84.28 15.72 Z" fill="url(#grad-cg)" opacity="0.6"/>
+                    <circle cx="50" cy="50" r="3.5" fill="#0c0b14"/>
+                </svg>
+                <span class="size-label">48px</span>
+            </div>
+            <div class="size-group">
+                <svg width="80" height="80" viewBox="0 0 100 100" fill="none">
+                    <path d="M50 50 L50 10 A40 40 0 1 0 78.28 21.72 Z" fill="url(#grad-pg)" opacity="0.9"/>
+                    <path d="M56 44 L56 4 A40 40 0 0 1 84.28 15.72 Z" fill="url(#grad-cg)" opacity="0.6"/>
+                    <circle cx="50" cy="50" r="3" fill="#0c0b14"/>
+                </svg>
+                <span class="size-label">80px</span>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="section-label">In Sidebar Container</div>
+        <div class="sidebar-preview">
+            <div class="size-group">
+                <div class="sidebar-container size-30">
+                    <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
+                        <path d="M50 50 L50 10 A40 40 0 1 0 78.28 21.72 Z" fill="url(#grad-pg)" opacity="0.9"/>
+                        <path d="M56 44 L56 4 A40 40 0 0 1 84.28 15.72 Z" fill="url(#grad-cg)" opacity="0.6"/>
+                        <circle cx="50" cy="50" r="4" fill="#0c0b14"/>
+                    </svg>
+                </div>
+                <span class="size-label">30px</span>
+            </div>
+            <div class="size-group">
+                <div class="sidebar-container size-48">
+                    <svg width="38" height="38" viewBox="0 0 100 100" fill="none">
+                        <path d="M50 50 L50 10 A40 40 0 1 0 78.28 21.72 Z" fill="url(#grad-pg)" opacity="0.9"/>
+                        <path d="M56 44 L56 4 A40 40 0 0 1 84.28 15.72 Z" fill="url(#grad-cg)" opacity="0.6"/>
+                        <circle cx="50" cy="50" r="3.5" fill="#0c0b14"/>
+                    </svg>
+                </div>
+                <span class="size-label">48px</span>
+            </div>
+            <div class="size-group">
+                <div class="sidebar-container size-80">
+                    <svg width="64" height="64" viewBox="0 0 100 100" fill="none">
+                        <path d="M50 50 L50 10 A40 40 0 1 0 78.28 21.72 Z" fill="url(#grad-pg)" opacity="0.9"/>
+                        <path d="M56 44 L56 4 A40 40 0 0 1 84.28 15.72 Z" fill="url(#grad-cg)" opacity="0.6"/>
+                        <circle cx="50" cy="50" r="3" fill="#0c0b14"/>
+                    </svg>
+                </div>
+                <span class="size-label">80px</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- CONCEPT 6: Diamond / Gem Facet -->
+    <!-- ============================================================ -->
+    <div class="concept-card">
+        <div class="concept-number">Concept 06</div>
+        <div class="concept-name">Diamond / Gem Facet</div>
+        <div class="concept-desc">A top-down view of a cut diamond with internal facet lines — premium feel, suggests value and precision.</div>
+
+        <div class="section-label">Standalone</div>
+        <div class="size-row">
+            <div class="size-group">
+                <svg width="30" height="30" viewBox="0 0 100 100" fill="none">
+                    <!-- Outer diamond -->
+                    <polygon points="50,6 94,50 50,94 6,50" fill="url(#grad-pg)" opacity="0.15" stroke="url(#grad-pg)" stroke-width="3"/>
+                    <!-- Top facet -->
+                    <polygon points="50,6 72,28 50,38 28,28" fill="#9945FF" opacity="0.4"/>
+                    <!-- Right facet -->
+                    <polygon points="94,50 72,28 50,38 72,72" fill="url(#grad-pc)" opacity="0.35"/>
+                    <!-- Bottom facet -->
+                    <polygon points="50,94 72,72 50,38 28,72" fill="url(#grad-cg)" opacity="0.5"/>
+                    <!-- Left facet -->
+                    <polygon points="6,50 28,28 50,38 28,72" fill="#00D1FF" opacity="0.3"/>
+                    <!-- Inner lines -->
+                    <line x1="50" y1="38" x2="50" y2="6" stroke="url(#grad-pg)" stroke-width="1.5" opacity="0.5"/>
+                    <line x1="50" y1="38" x2="94" y2="50" stroke="url(#grad-pg)" stroke-width="1.5" opacity="0.3"/>
+                    <line x1="50" y1="38" x2="50" y2="94" stroke="url(#grad-pg)" stroke-width="1.5" opacity="0.3"/>
+                    <line x1="50" y1="38" x2="6" y2="50" stroke="url(#grad-pg)" stroke-width="1.5" opacity="0.3"/>
+                    <!-- Center highlight -->
+                    <circle cx="50" cy="38" r="3" fill="#fff" opacity="0.6"/>
+                </svg>
+                <span class="size-label">30px</span>
+            </div>
+            <div class="size-group">
+                <svg width="48" height="48" viewBox="0 0 100 100" fill="none">
+                    <polygon points="50,6 94,50 50,94 6,50" fill="url(#grad-pg)" opacity="0.15" stroke="url(#grad-pg)" stroke-width="2.5"/>
+                    <polygon points="50,6 72,28 50,38 28,28" fill="#9945FF" opacity="0.4"/>
+                    <polygon points="94,50 72,28 50,38 72,72" fill="url(#grad-pc)" opacity="0.35"/>
+                    <polygon points="50,94 72,72 50,38 28,72" fill="url(#grad-cg)" opacity="0.5"/>
+                    <polygon points="6,50 28,28 50,38 28,72" fill="#00D1FF" opacity="0.3"/>
+                    <line x1="50" y1="38" x2="50" y2="6" stroke="url(#grad-pg)" stroke-width="1.2" opacity="0.5"/>
+                    <line x1="50" y1="38" x2="94" y2="50" stroke="url(#grad-pg)" stroke-width="1.2" opacity="0.3"/>
+                    <line x1="50" y1="38" x2="50" y2="94" stroke="url(#grad-pg)" stroke-width="1.2" opacity="0.3"/>
+                    <line x1="50" y1="38" x2="6" y2="50" stroke="url(#grad-pg)" stroke-width="1.2" opacity="0.3"/>
+                    <circle cx="50" cy="38" r="2.5" fill="#fff" opacity="0.6"/>
+                </svg>
+                <span class="size-label">48px</span>
+            </div>
+            <div class="size-group">
+                <svg width="80" height="80" viewBox="0 0 100 100" fill="none">
+                    <polygon points="50,6 94,50 50,94 6,50" fill="url(#grad-pg)" opacity="0.15" stroke="url(#grad-pg)" stroke-width="1.8"/>
+                    <polygon points="50,6 72,28 50,38 28,28" fill="#9945FF" opacity="0.4"/>
+                    <polygon points="94,50 72,28 50,38 72,72" fill="url(#grad-pc)" opacity="0.35"/>
+                    <polygon points="50,94 72,72 50,38 28,72" fill="url(#grad-cg)" opacity="0.5"/>
+                    <polygon points="6,50 28,28 50,38 28,72" fill="#00D1FF" opacity="0.3"/>
+                    <line x1="50" y1="38" x2="50" y2="6" stroke="url(#grad-pg)" stroke-width="1" opacity="0.5"/>
+                    <line x1="50" y1="38" x2="94" y2="50" stroke="url(#grad-pg)" stroke-width="1" opacity="0.3"/>
+                    <line x1="50" y1="38" x2="50" y2="94" stroke="url(#grad-pg)" stroke-width="1" opacity="0.3"/>
+                    <line x1="50" y1="38" x2="6" y2="50" stroke="url(#grad-pg)" stroke-width="1" opacity="0.3"/>
+                    <circle cx="50" cy="38" r="2" fill="#fff" opacity="0.6"/>
+                </svg>
+                <span class="size-label">80px</span>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="section-label">In Sidebar Container</div>
+        <div class="sidebar-preview">
+            <div class="size-group">
+                <div class="sidebar-container size-30">
+                    <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
+                        <polygon points="50,6 94,50 50,94 6,50" fill="url(#grad-pg)" opacity="0.15" stroke="url(#grad-pg)" stroke-width="3"/>
+                        <polygon points="50,6 72,28 50,38 28,28" fill="#9945FF" opacity="0.4"/>
+                        <polygon points="94,50 72,28 50,38 72,72" fill="url(#grad-pc)" opacity="0.35"/>
+                        <polygon points="50,94 72,72 50,38 28,72" fill="url(#grad-cg)" opacity="0.5"/>
+                        <polygon points="6,50 28,28 50,38 28,72" fill="#00D1FF" opacity="0.3"/>
+                        <circle cx="50" cy="38" r="3" fill="#fff" opacity="0.6"/>
+                    </svg>
+                </div>
+                <span class="size-label">30px</span>
+            </div>
+            <div class="size-group">
+                <div class="sidebar-container size-48">
+                    <svg width="38" height="38" viewBox="0 0 100 100" fill="none">
+                        <polygon points="50,6 94,50 50,94 6,50" fill="url(#grad-pg)" opacity="0.15" stroke="url(#grad-pg)" stroke-width="2.5"/>
+                        <polygon points="50,6 72,28 50,38 28,28" fill="#9945FF" opacity="0.4"/>
+                        <polygon points="94,50 72,28 50,38 72,72" fill="url(#grad-pc)" opacity="0.35"/>
+                        <polygon points="50,94 72,72 50,38 28,72" fill="url(#grad-cg)" opacity="0.5"/>
+                        <polygon points="6,50 28,28 50,38 28,72" fill="#00D1FF" opacity="0.3"/>
+                        <circle cx="50" cy="38" r="2.5" fill="#fff" opacity="0.6"/>
+                    </svg>
+                </div>
+                <span class="size-label">48px</span>
+            </div>
+            <div class="size-group">
+                <div class="sidebar-container size-80">
+                    <svg width="64" height="64" viewBox="0 0 100 100" fill="none">
+                        <polygon points="50,6 94,50 50,94 6,50" fill="url(#grad-pg)" opacity="0.15" stroke="url(#grad-pg)" stroke-width="1.8"/>
+                        <polygon points="50,6 72,28 50,38 28,28" fill="#9945FF" opacity="0.4"/>
+                        <polygon points="94,50 72,28 50,38 72,72" fill="url(#grad-pc)" opacity="0.35"/>
+                        <polygon points="50,94 72,72 50,38 28,72" fill="url(#grad-cg)" opacity="0.5"/>
+                        <polygon points="6,50 28,28 50,38 28,72" fill="#00D1FF" opacity="0.3"/>
+                        <circle cx="50" cy="38" r="2" fill="#fff" opacity="0.6"/>
+                    </svg>
+                </div>
+                <span class="size-label">80px</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- CONCEPT 7: Pulse / Heartbeat Line -->
+    <!-- ============================================================ -->
+    <div class="concept-card">
+        <div class="concept-number">Concept 07</div>
+        <div class="concept-name">Pulse / Heartbeat</div>
+        <div class="concept-desc">A circle with an activity pulse line spiking upward inside — suggests live measurement, health scoring.</div>
+
+        <div class="section-label">Standalone</div>
+        <div class="size-row">
+            <div class="size-group">
+                <svg width="30" height="30" viewBox="0 0 100 100" fill="none">
+                    <!-- Outer circle -->
+                    <circle cx="50" cy="50" r="42" fill="url(#grad-pg)" opacity="0.1" stroke="url(#grad-pg)" stroke-width="3"/>
+                    <!-- Pulse line -->
+                    <polyline points="10,55 28,55 34,55 38,68 44,32 50,18 56,42 60,55 66,55 72,48 78,55 90,55"
+                        stroke="url(#grad-full)" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    <!-- Glow dot at peak -->
+                    <circle cx="50" cy="18" r="3.5" fill="#14F195" opacity="0.8"/>
+                    <circle cx="50" cy="18" r="7" fill="#14F195" opacity="0.15"/>
+                </svg>
+                <span class="size-label">30px</span>
+            </div>
+            <div class="size-group">
+                <svg width="48" height="48" viewBox="0 0 100 100" fill="none">
+                    <circle cx="50" cy="50" r="42" fill="url(#grad-pg)" opacity="0.1" stroke="url(#grad-pg)" stroke-width="2.5"/>
+                    <polyline points="10,55 28,55 34,55 38,68 44,32 50,18 56,42 60,55 66,55 72,48 78,55 90,55"
+                        stroke="url(#grad-full)" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="50" cy="18" r="3" fill="#14F195" opacity="0.8"/>
+                    <circle cx="50" cy="18" r="6" fill="#14F195" opacity="0.15"/>
+                </svg>
+                <span class="size-label">48px</span>
+            </div>
+            <div class="size-group">
+                <svg width="80" height="80" viewBox="0 0 100 100" fill="none">
+                    <circle cx="50" cy="50" r="42" fill="url(#grad-pg)" opacity="0.1" stroke="url(#grad-pg)" stroke-width="2"/>
+                    <polyline points="10,55 28,55 34,55 38,68 44,32 50,18 56,42 60,55 66,55 72,48 78,55 90,55"
+                        stroke="url(#grad-full)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="50" cy="18" r="2.5" fill="#14F195" opacity="0.8"/>
+                    <circle cx="50" cy="18" r="5" fill="#14F195" opacity="0.15"/>
+                </svg>
+                <span class="size-label">80px</span>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="section-label">In Sidebar Container</div>
+        <div class="sidebar-preview">
+            <div class="size-group">
+                <div class="sidebar-container size-30">
+                    <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
+                        <circle cx="50" cy="50" r="42" fill="url(#grad-pg)" opacity="0.1" stroke="url(#grad-pg)" stroke-width="3"/>
+                        <polyline points="10,55 28,55 34,55 38,68 44,32 50,18 56,42 60,55 66,55 72,48 78,55 90,55"
+                            stroke="url(#grad-full)" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="50" cy="18" r="3.5" fill="#14F195" opacity="0.8"/>
+                    </svg>
+                </div>
+                <span class="size-label">30px</span>
+            </div>
+            <div class="size-group">
+                <div class="sidebar-container size-48">
+                    <svg width="38" height="38" viewBox="0 0 100 100" fill="none">
+                        <circle cx="50" cy="50" r="42" fill="url(#grad-pg)" opacity="0.1" stroke="url(#grad-pg)" stroke-width="2.5"/>
+                        <polyline points="10,55 28,55 34,55 38,68 44,32 50,18 56,42 60,55 66,55 72,48 78,55 90,55"
+                            stroke="url(#grad-full)" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="50" cy="18" r="3" fill="#14F195" opacity="0.8"/>
+                    </svg>
+                </div>
+                <span class="size-label">48px</span>
+            </div>
+            <div class="size-group">
+                <div class="sidebar-container size-80">
+                    <svg width="64" height="64" viewBox="0 0 100 100" fill="none">
+                        <circle cx="50" cy="50" r="42" fill="url(#grad-pg)" opacity="0.1" stroke="url(#grad-pg)" stroke-width="2"/>
+                        <polyline points="10,55 28,55 34,55 38,68 44,32 50,18 56,42 60,55 66,55 72,48 78,55 90,55"
+                            stroke="url(#grad-full)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="50" cy="18" r="2.5" fill="#14F195" opacity="0.8"/>
+                    </svg>
+                </div>
+                <span class="size-label">80px</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- CONCEPT 8: Flame / Torch -->
+    <!-- ============================================================ -->
+    <div class="concept-card">
+        <div class="concept-number">Concept 08</div>
+        <div class="concept-name">Flame / Torch</div>
+        <div class="concept-desc">An abstract upward flame shape using the purple-to-green gradient — suggests momentum, energy, and growth.</div>
+
+        <div class="section-label">Standalone</div>
+        <div class="size-row">
+            <div class="size-group">
+                <svg width="30" height="30" viewBox="0 0 100 100" fill="none">
+                    <!-- Outer flame -->
+                    <path d="M50 4 C50 4, 22 32, 22 58 C22 74, 34 92, 50 92 C66 92, 78 74, 78 58 C78 32, 50 4, 50 4Z"
+                        fill="url(#grad-pg-v)" opacity="0.8"/>
+                    <!-- Inner flame (brighter, smaller) -->
+                    <path d="M50 28 C50 28, 34 46, 34 60 C34 70, 40 82, 50 82 C60 82, 66 70, 66 60 C66 46, 50 28, 50 28Z"
+                        fill="url(#grad-full-v)" opacity="0.7"/>
+                    <!-- Core highlight -->
+                    <ellipse cx="50" cy="68" rx="8" ry="10" fill="#14F195" opacity="0.5"/>
+                    <!-- Top spark -->
+                    <circle cx="50" cy="12" r="2.5" fill="#14F195" opacity="0.6"/>
+                </svg>
+                <span class="size-label">30px</span>
+            </div>
+            <div class="size-group">
+                <svg width="48" height="48" viewBox="0 0 100 100" fill="none">
+                    <path d="M50 4 C50 4, 22 32, 22 58 C22 74, 34 92, 50 92 C66 92, 78 74, 78 58 C78 32, 50 4, 50 4Z"
+                        fill="url(#grad-pg-v)" opacity="0.8"/>
+                    <path d="M50 28 C50 28, 34 46, 34 60 C34 70, 40 82, 50 82 C60 82, 66 70, 66 60 C66 46, 50 28, 50 28Z"
+                        fill="url(#grad-full-v)" opacity="0.7"/>
+                    <ellipse cx="50" cy="68" rx="8" ry="10" fill="#14F195" opacity="0.5"/>
+                    <circle cx="50" cy="12" r="2" fill="#14F195" opacity="0.6"/>
+                </svg>
+                <span class="size-label">48px</span>
+            </div>
+            <div class="size-group">
+                <svg width="80" height="80" viewBox="0 0 100 100" fill="none">
+                    <path d="M50 4 C50 4, 22 32, 22 58 C22 74, 34 92, 50 92 C66 92, 78 74, 78 58 C78 32, 50 4, 50 4Z"
+                        fill="url(#grad-pg-v)" opacity="0.8"/>
+                    <path d="M50 28 C50 28, 34 46, 34 60 C34 70, 40 82, 50 82 C60 82, 66 70, 66 60 C66 46, 50 28, 50 28Z"
+                        fill="url(#grad-full-v)" opacity="0.7"/>
+                    <ellipse cx="50" cy="68" rx="8" ry="10" fill="#14F195" opacity="0.5"/>
+                    <circle cx="50" cy="12" r="1.8" fill="#14F195" opacity="0.6"/>
+                </svg>
+                <span class="size-label">80px</span>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="section-label">In Sidebar Container</div>
+        <div class="sidebar-preview">
+            <div class="size-group">
+                <div class="sidebar-container size-30">
+                    <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
+                        <path d="M50 4 C50 4, 22 32, 22 58 C22 74, 34 92, 50 92 C66 92, 78 74, 78 58 C78 32, 50 4, 50 4Z"
+                            fill="url(#grad-pg-v)" opacity="0.8"/>
+                        <path d="M50 28 C50 28, 34 46, 34 60 C34 70, 40 82, 50 82 C60 82, 66 70, 66 60 C66 46, 50 28, 50 28Z"
+                            fill="url(#grad-full-v)" opacity="0.7"/>
+                        <ellipse cx="50" cy="68" rx="8" ry="10" fill="#14F195" opacity="0.5"/>
+                    </svg>
+                </div>
+                <span class="size-label">30px</span>
+            </div>
+            <div class="size-group">
+                <div class="sidebar-container size-48">
+                    <svg width="38" height="38" viewBox="0 0 100 100" fill="none">
+                        <path d="M50 4 C50 4, 22 32, 22 58 C22 74, 34 92, 50 92 C66 92, 78 74, 78 58 C78 32, 50 4, 50 4Z"
+                            fill="url(#grad-pg-v)" opacity="0.8"/>
+                        <path d="M50 28 C50 28, 34 46, 34 60 C34 70, 40 82, 50 82 C60 82, 66 70, 66 60 C66 46, 50 28, 50 28Z"
+                            fill="url(#grad-full-v)" opacity="0.7"/>
+                        <ellipse cx="50" cy="68" rx="8" ry="10" fill="#14F195" opacity="0.5"/>
+                    </svg>
+                </div>
+                <span class="size-label">48px</span>
+            </div>
+            <div class="size-group">
+                <div class="sidebar-container size-80">
+                    <svg width="64" height="64" viewBox="0 0 100 100" fill="none">
+                        <path d="M50 4 C50 4, 22 32, 22 58 C22 74, 34 92, 50 92 C66 92, 78 74, 78 58 C78 32, 50 4, 50 4Z"
+                            fill="url(#grad-pg-v)" opacity="0.8"/>
+                        <path d="M50 28 C50 28, 34 46, 34 60 C34 70, 40 82, 50 82 C60 82, 66 70, 66 60 C66 46, 50 28, 50 28Z"
+                            fill="url(#grad-full-v)" opacity="0.7"/>
+                        <ellipse cx="50" cy="68" rx="8" ry="10" fill="#14F195" opacity="0.5"/>
+                    </svg>
+                </div>
+                <span class="size-label">80px</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Comparison strip at the bottom -->
+<div style="margin-top: 56px; padding: 32px; background: #13121e; border: 1px solid #1e1d2e; border-radius: 16px;">
+    <div class="section-label" style="margin-top:0; margin-bottom: 20px;">Side-by-Side Comparison at 30px (Sidebar Size)</div>
+    <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
+
+        <div style="text-align:center;">
+            <div class="sidebar-container size-30" style="margin: 0 auto 6px;">
+                <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
+                    <path d="M50 5 L90 22 L90 52 C90 72 72 90 50 97 C28 90 10 72 10 52 L10 22 Z" fill="url(#grad-pg)" opacity="0.15" stroke="url(#grad-pg)" stroke-width="4"/>
+                    <circle cx="50" cy="52" r="22" fill="none" stroke="#1e1d2e" stroke-width="5"/>
+                    <circle cx="50" cy="52" r="22" fill="none" stroke="url(#grad-pg)" stroke-width="5" stroke-linecap="round" stroke-dasharray="104 138" stroke-dashoffset="-34.5" transform="rotate(-90 50 52)"/>
+                    <circle cx="50" cy="52" r="4" fill="#14F195"/>
+                </svg>
+            </div>
+            <span class="size-label">01</span>
+        </div>
+
+        <div style="text-align:center;">
+            <div class="sidebar-container size-30" style="margin: 0 auto 6px;">
+                <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
+                    <polygon points="50,5 91,27.5 91,72.5 50,95 9,72.5 9,27.5" fill="url(#grad-pg)" opacity="0.12" stroke="url(#grad-pg)" stroke-width="3.5"/>
+                    <line x1="50" y1="50" x2="50" y2="5" stroke="url(#grad-pg)" stroke-width="2" opacity="0.5"/>
+                    <line x1="50" y1="50" x2="91" y2="72.5" stroke="url(#grad-cg)" stroke-width="2" opacity="0.5"/>
+                    <line x1="50" y1="50" x2="9" y2="72.5" stroke="url(#grad-pc)" stroke-width="2" opacity="0.5"/>
+                    <polygon points="50,25 70.5,37.5 70.5,62.5 50,75 29.5,62.5 29.5,37.5" fill="none" stroke="url(#grad-full)" stroke-width="2.5"/>
+                    <circle cx="50" cy="50" r="5" fill="url(#grad-pg)"/>
+                </svg>
+            </div>
+            <span class="size-label">02</span>
+        </div>
+
+        <div style="text-align:center;">
+            <div class="sidebar-container size-30" style="margin: 0 auto 6px;">
+                <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
+                    <rect x="15" y="70" width="32" height="12" rx="6" fill="#9945FF"/>
+                    <rect x="34" y="44" width="40" height="12" rx="6" fill="#00D1FF"/>
+                    <rect x="53" y="18" width="32" height="12" rx="6" fill="#14F195"/>
+                    <path d="M31 76 C31 76, 68 64, 54 50 C40 36, 69 24, 69 24" stroke="url(#grad-pg)" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.4"/>
+                </svg>
+            </div>
+            <span class="size-label">03</span>
+        </div>
+
+        <div style="text-align:center;">
+            <div class="sidebar-container size-30" style="margin: 0 auto 6px;">
+                <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
+                    <ellipse cx="50" cy="50" rx="40" ry="16" transform="rotate(-30 50 50)" stroke="#9945FF" stroke-width="3.5" opacity="0.7"/>
+                    <ellipse cx="50" cy="50" rx="40" ry="16" transform="rotate(30 50 50)" stroke="#14F195" stroke-width="3.5" opacity="0.7"/>
+                    <circle cx="50" cy="50" r="8" fill="url(#grad-pg)"/>
+                    <circle cx="18" cy="34" r="3.5" fill="#00D1FF"/>
+                    <circle cx="82" cy="66" r="3.5" fill="#14F195"/>
+                </svg>
+            </div>
+            <span class="size-label">04</span>
+        </div>
+
+        <div style="text-align:center;">
+            <div class="sidebar-container size-30" style="margin: 0 auto 6px;">
+                <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
+                    <path d="M50 50 L50 10 A40 40 0 1 0 78.28 21.72 Z" fill="url(#grad-pg)" opacity="0.9"/>
+                    <path d="M56 44 L56 4 A40 40 0 0 1 84.28 15.72 Z" fill="url(#grad-cg)" opacity="0.6"/>
+                    <circle cx="50" cy="50" r="4" fill="#0c0b14"/>
+                </svg>
+            </div>
+            <span class="size-label">05</span>
+        </div>
+
+        <div style="text-align:center;">
+            <div class="sidebar-container size-30" style="margin: 0 auto 6px;">
+                <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
+                    <polygon points="50,6 94,50 50,94 6,50" fill="url(#grad-pg)" opacity="0.15" stroke="url(#grad-pg)" stroke-width="3"/>
+                    <polygon points="50,6 72,28 50,38 28,28" fill="#9945FF" opacity="0.4"/>
+                    <polygon points="94,50 72,28 50,38 72,72" fill="url(#grad-pc)" opacity="0.35"/>
+                    <polygon points="50,94 72,72 50,38 28,72" fill="url(#grad-cg)" opacity="0.5"/>
+                    <polygon points="6,50 28,28 50,38 28,72" fill="#00D1FF" opacity="0.3"/>
+                    <circle cx="50" cy="38" r="3" fill="#fff" opacity="0.6"/>
+                </svg>
+            </div>
+            <span class="size-label">06</span>
+        </div>
+
+        <div style="text-align:center;">
+            <div class="sidebar-container size-30" style="margin: 0 auto 6px;">
+                <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
+                    <circle cx="50" cy="50" r="42" fill="url(#grad-pg)" opacity="0.1" stroke="url(#grad-pg)" stroke-width="3"/>
+                    <polyline points="10,55 28,55 34,55 38,68 44,32 50,18 56,42 60,55 66,55 72,48 78,55 90,55"
+                        stroke="url(#grad-full)" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="50" cy="18" r="3.5" fill="#14F195" opacity="0.8"/>
+                </svg>
+            </div>
+            <span class="size-label">07</span>
+        </div>
+
+        <div style="text-align:center;">
+            <div class="sidebar-container size-30" style="margin: 0 auto 6px;">
+                <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
+                    <path d="M50 4 C50 4, 22 32, 22 58 C22 74, 34 92, 50 92 C66 92, 78 74, 78 58 C78 32, 50 4, 50 4Z"
+                        fill="url(#grad-pg-v)" opacity="0.8"/>
+                    <path d="M50 28 C50 28, 34 46, 34 60 C34 70, 40 82, 50 82 C60 82, 66 70, 66 60 C66 46, 50 28, 50 28Z"
+                        fill="url(#grad-full-v)" opacity="0.7"/>
+                    <ellipse cx="50" cy="68" rx="8" ry="10" fill="#14F195" opacity="0.5"/>
+                </svg>
+            </div>
+            <span class="size-label">08</span>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
