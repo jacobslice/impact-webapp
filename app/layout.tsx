@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { WalletProvider } from "@/components/providers/WalletProvider";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
@@ -25,20 +24,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <body className={`${inter.variable} ${inter.className} antialiased`}>
-        <ThemeProvider>
-          <WalletProvider>
-            <Sidebar />
-            <Topbar />
-            <main className="ml-14 mt-[52px] p-5 relative z-[1] min-h-[calc(100vh-52px)]">
-              <div className="max-w-[1300px] mx-auto">
-                {children}
-                <Footer />
-              </div>
-            </main>
-          </WalletProvider>
-        </ThemeProvider>
+        <WalletProvider>
+          <Sidebar />
+          <Topbar />
+          <main className="ml-14 mt-[52px] p-5 relative z-[1] min-h-[calc(100vh-52px)]">
+            <div className="max-w-[1300px] mx-auto">
+              {children}
+              <Footer />
+            </div>
+          </main>
+        </WalletProvider>
       </body>
     </html>
   );

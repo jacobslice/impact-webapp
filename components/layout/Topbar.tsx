@@ -2,14 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Sun, Moon } from "lucide-react";
-import { useTheme } from "next-themes";
+import { Search } from "lucide-react";
 import { WalletButton } from "@/components/wallet/WalletButton";
 
 export function Topbar() {
   const [searchValue, setSearchValue] = useState("");
   const router = useRouter();
-  const { theme, setTheme } = useTheme();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,20 +41,6 @@ export function Topbar() {
 
       {/* Right side */}
       <div className="flex items-center gap-3 ml-auto">
-        {/* Theme toggle */}
-        <button
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 border border-purple-500/15 text-white/55 hover:text-white/80 hover:bg-white/8 transition-all"
-          title="Toggle theme"
-        >
-          {theme === "dark" ? (
-            <Sun className="w-3.5 h-3.5" />
-          ) : (
-            <Moon className="w-3.5 h-3.5" />
-          )}
-        </button>
-
-        {/* Wallet connect */}
         <WalletButton />
       </div>
     </header>
