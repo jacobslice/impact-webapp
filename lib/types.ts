@@ -5,7 +5,7 @@ export interface ScoreData {
   network_fees_paid: number;
   current_holdings: number;
   protocol_count: number;
-  protocols_used: string | null;
+  protocols_used: string[] | string | null;
   months_active: number;
   is_sybil: string | null;
   jup_fees_paid: number;

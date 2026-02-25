@@ -3,6 +3,10 @@ import { NextRequest, NextResponse } from "next/server";
 const DUNE_API_KEY = process.env.DUNE_API_KEY;
 const QUERY_ID = "6576517";
 
+// In-memory cache to avoid redundant Dune API calls (credits are limited)
+const cache = new Map<string, { data: ScoreData; timestamp: number }>();
+const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+
 export interface ScoreData {
   wallet: string;
   score: number;
@@ -10,7 +14,7 @@ export interface ScoreData {
   network_fees_paid: number;
   current_holdings: number;
   protocol_count: number;
-  protocols_used: string;
+  protocols_used: string[] | string | null;
   months_active: number;
   is_sybil: string | null;
   jup_fees_paid: number;
@@ -45,9 +49,15 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  // Check cache first
+  const cached = cache.get(address);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return NextResponse.json({ data: cached.data });
+  }
+
   try {
     const filter = `wallet = '${address}'`;
-    const url = `https://api.dune.com/api/v1/query/${QUERY_ID}/results?filters=${encodeURIComponent(filter)}`;
+    const url = `https://api.dune.com/api/v1/query/${QUERY_ID}/results?filters=${encodeURIComponent(filter)}&limit=1`;
 
     const response = await fetch(url, {
       headers: {
@@ -74,6 +84,9 @@ export async function GET(request: NextRequest) {
     }
 
     const scoreData: ScoreData = data.result.rows[0];
+
+    // Cache the result
+    cache.set(address, { data: scoreData, timestamp: Date.now() });
 
     return NextResponse.json({ data: scoreData });
   } catch (error) {

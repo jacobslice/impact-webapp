@@ -2,7 +2,7 @@ import Image from "next/image";
 import { getProtocol } from "@/lib/protocols";
 
 interface ProtocolGridProps {
-  protocolsUsed: string | null;
+  protocolsUsed: string[] | string | null;
   feesPaid?: number;
 }
 
@@ -19,9 +19,12 @@ const SECTOR_BADGE_COLORS: Record<string, string> = {
 export function ProtocolGrid({ protocolsUsed }: ProtocolGridProps) {
   if (!protocolsUsed) return null;
 
-  const protocols = protocolsUsed
-    .split(",")
-    .map((p) => p.trim())
+  // Handle both array (from Dune API) and comma-separated string (from mock data)
+  const protocolNames = Array.isArray(protocolsUsed)
+    ? protocolsUsed
+    : protocolsUsed.split(",").map((p) => p.trim());
+
+  const protocols = protocolNames
     .filter(Boolean)
     .map((name) => getProtocol(name));
 
