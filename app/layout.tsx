@@ -1,21 +1,22 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { Inter } from "next/font/google";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { WalletProvider } from "@/components/providers/WalletProvider";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { Topbar } from "@/components/layout/Topbar";
+import { Footer } from "@/components/layout/Footer";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-inter",
 });
 
 export const metadata: Metadata = {
   title: "Solana Score | Check Your On-Chain Reputation",
-  description: "Check your Solana Score - a reputation metric that quantifies your value and organic activity on Solana. Powered by Slice Analytics.",
+  description:
+    "Check your Solana Score - a reputation metric measuring cross-protocol activity on Solana. Powered by Slice Analytics.",
 };
 
 export default function RootLayout({
@@ -24,11 +25,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <TooltipProvider delayDuration={100}>{children}</TooltipProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.variable} ${inter.className} antialiased`}>
+        <ThemeProvider>
+          <WalletProvider>
+            <Sidebar />
+            <Topbar />
+            <main className="ml-14 mt-[52px] p-5 relative z-[1] min-h-[calc(100vh-52px)]">
+              <div className="max-w-[1300px] mx-auto">
+                {children}
+                <Footer />
+              </div>
+            </main>
+          </WalletProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
