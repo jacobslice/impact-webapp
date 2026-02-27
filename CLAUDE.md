@@ -49,7 +49,7 @@ Wallet scoring platform for Solana. Users look up or connect their wallet to see
 - Slice Analytics brand logo in topbar (replaces grey text)
 - Dune "Powered by" logo in footer
 - Leaderboard has tier descriptions sidebar card
-- **Pending**: User needs to pick a logo from mockups/29-logo-mockups.html
+- **Logo**: Stacked Bars (Concept 03) — three ascending bars forming abstract "S" in purple/cyan/green. SVG at `public/images/solana-score-logo.svg`, inlined in Sidebar and Home hero
 
 ## Routes
 | Route | Description |

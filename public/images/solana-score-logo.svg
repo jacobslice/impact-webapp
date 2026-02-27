@@ -1,0 +1,16 @@
+<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Bottom bar (short, purple) -->
+  <rect x="15" y="70" width="32" height="12" rx="6" fill="#9945FF"/>
+  <!-- Middle bar (medium, cyan) -->
+  <rect x="34" y="44" width="40" height="12" rx="6" fill="#00D1FF"/>
+  <!-- Top bar (long, green) -->
+  <rect x="53" y="18" width="32" height="12" rx="6" fill="#14F195"/>
+  <!-- Connecting S curve -->
+  <path d="M31 76 C31 76, 68 64, 54 50 C40 36, 69 24, 69 24" stroke="url(#grad-pg)" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.4"/>
+  <defs>
+    <linearGradient id="grad-pg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#9945FF"/>
+      <stop offset="100%" stop-color="#14F195"/>
+    </linearGradient>
+  </defs>
+</svg>
