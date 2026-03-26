@@ -37,19 +37,47 @@ Wallet scoring platform for Solana. Users look up or connect their wallet to see
 - `mockups/29-logo-mockups.html` - 8 logo concepts for platform symbol (pending user selection)
 - `mockups/16-scorecard-twitter-personal.html` - Scorecard design for Twitter sharing
 
-## Current State (last updated: 2026-02-26)
+## Current State (last updated: 2026-03-26)
 - MVP fully implemented with Clean Fusion design, dark-only theme
 - Dune API connected with 10-min in-memory cache (key in .env.local)
 - `protocols_used` from Dune is an **array**, not a string — code handles both
 - 7-tier scoring system: Whale (95+), Power User (90+), Active User (80+), Average User (60+), Likely Human (40+), Potential Sybil (20+), Sybil (0+)
+- **Score breakdown reworked to 4 real bars**: Volume (40%), Protocol Diversity (30%), Activity (20%), Holdings (10%) — computed from actual Dune data via `computeBreakdown()`. NFT Engagement and Governance removed (no data).
+- **Sector scores added**: DEX/Spot, Launchpad, Aggregator, Perpetuals, Trading Tools — computed from `protocols_used` via `computeSectorScores()`. Uses `SECTOR_MAP` in `lib/types.ts`.
+- **Stat cards reworked**: Sybil Check (Pass/Fail), Network Fees (SOL), Wallet Age, Protocols Used
+- **Sybil badge**: Score lookup page shows Verified/Flagged badge based on `is_sybil` field
 - Twitter/X linking via localStorage — replaces profile bubble with PFP + handle when linked (uses unavatar.io for avatars)
 - "My Dashboard" button in Topbar when wallet connected
-- Score breakdown bars color-coded by value (green/cyan/yellow/red)
-- Simplified view (/score/[address]) has blurred breakdown with "Connect to view" CTA
+- Simplified view (/score/[address]) has blurred breakdown + sector scores with "Connect to view" CTA
 - Slice Analytics brand logo in topbar (replaces grey text)
 - Dune "Powered by" logo in footer
 - Leaderboard has tier descriptions sidebar card
 - **Logo**: Stacked Bars (Concept 03) — three ascending bars forming abstract "S" in purple/cyan/green. SVG at `public/images/solana-score-logo.svg`, inlined in Sidebar and Home hero
+
+## Active Sprint (March 26 - April 4, 2026)
+- **Notion workspace**: https://www.notion.so/sliceanalytics/ (Integration: "Claude", token in session)
+- **Sprint board**: Timeline DB under "Solana Score Webapp" page
+- **Feature review**: https://www.notion.so/Feature-Review-Decision-Matrix-32eb6328b16981bd879dee9520527f21
+- **Team**: Jacob (UI/UX, identity, infra, marketing) + Tom/DangyWing (API, x402, Dune/database)
+
+### Pending UI Decisions (mockups in /mockups/)
+- Sector score display: mockups/32-sector-protocols-combined.html (3 combined layouts with protocols)
+- Score bar color coding: mockups/31-color-coding-options.html (5 options — current red-on-low feels punishing)
+- Gauge 0/50/100 labels fixed (moved outside arc)
+
+### Pending Tasks - Jacob
+- Pick sector display layout + color coding approach, then implement
+- Replace wallet-adapter with Dynamic.xyz
+- Implement Twitter/X OAuth (replace localStorage)
+- Wire up .sol domain resolution (SNS)
+- Mobile-optimize layout
+- Set up Vercel Analytics
+
+### Pending Tasks - Tom
+- Add rank + percentile columns to Dune query
+- Break fees out by sector in Dune (or confirm client-side compute)
+- Build x402 middleware + payment verification
+- Expand leaderboard to top 50 + pagination
 
 ## Routes
 | Route | Description |
