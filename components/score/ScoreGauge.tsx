@@ -64,10 +64,10 @@ export function ScoreGauge({ score, size = "lg" }: ScoreGaugeProps) {
             filter="url(#gaugeGlow)"
             className="transition-all duration-1000 ease-out"
           />
-          {/* Tick marks */}
-          <text x="14" y="128" fill="rgba(255,255,255,0.2)" fontSize="9" fontFamily="Inter" fontWeight="500">0</text>
-          <text x="104" y="16" fill="rgba(255,255,255,0.2)" fontSize="9" fontFamily="Inter" fontWeight="500">50</text>
-          <text x="194" y="128" fill="rgba(255,255,255,0.2)" fontSize="9" fontFamily="Inter" fontWeight="500">100</text>
+          {/* Tick marks — positioned outside the arc */}
+          <text x="6" y="118" fill="rgba(255,255,255,0.2)" fontSize="9" fontFamily="Inter" fontWeight="500" textAnchor="middle">0</text>
+          <text x="110" y="10" fill="rgba(255,255,255,0.2)" fontSize="9" fontFamily="Inter" fontWeight="500" textAnchor="middle">50</text>
+          <text x="214" y="118" fill="rgba(255,255,255,0.2)" fontSize="9" fontFamily="Inter" fontWeight="500" textAnchor="middle">100</text>
         </svg>
         {/* Score value */}
         <div className="absolute bottom-1 left-1/2 -translate-x-1/2">

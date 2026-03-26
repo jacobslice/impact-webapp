@@ -19,9 +19,16 @@ export function ScoreBreakdownBars({ items, blurred = false }: ScoreBreakdownBar
         const { gradient, textColor } = getBarColor(item.score);
         return (
           <div key={item.name} className="flex items-center gap-2.5">
-            <span className="w-[130px] text-xs font-medium text-white/55 shrink-0">
-              {item.name}
-            </span>
+            <div className="w-[140px] shrink-0 flex items-baseline gap-1.5">
+              <span className="text-xs font-medium text-white/55">
+                {item.name}
+              </span>
+              {item.weight && (
+                <span className="text-[9px] text-white/25">
+                  {item.weight}
+                </span>
+              )}
+            </div>
             <div className="flex-1 h-2 bg-white/5 rounded overflow-hidden">
               <div
                 className={`h-full rounded bg-gradient-to-r ${gradient} transition-all duration-600 ease-out`}

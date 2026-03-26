@@ -4,12 +4,13 @@ import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { ScoreGauge } from "@/components/score/ScoreGauge";
 import { ScoreBreakdownBars } from "@/components/score/ScoreBreakdownBars";
+import { SectorScores } from "@/components/dashboard/SectorScores";
 import { ProtocolGrid } from "@/components/dashboard/ProtocolGrid";
 import { ShareOnX } from "@/components/share/ShareOnX";
-import { MOCK_BREAKDOWN, MOCK_SCORE_DATA } from "@/lib/mock-data";
-import { getTier, truncateAddress, formatCurrency, estimatePercentile, estimateRank } from "@/lib/types";
+import { MOCK_SCORE_DATA } from "@/lib/mock-data";
+import { getTier, truncateAddress, estimatePercentile, estimateRank, computeBreakdown, computeSectorScores } from "@/lib/types";
 import type { ScoreData } from "@/lib/types";
-import { Wallet, ArrowLeft } from "lucide-react";
+import { Wallet, ArrowLeft, Shield, ShieldX } from "lucide-react";
 
 export default function ScorePage({ params }: { params: Promise<{ address: string }> }) {
   const { address } = use(params);
@@ -101,6 +102,9 @@ export default function ScorePage({ params }: { params: Promise<{ address: strin
   const tier = getTier(scoreData.score);
   const percentile = estimatePercentile(scoreData.score);
   const rank = estimateRank(scoreData.score);
+  const breakdown = computeBreakdown(scoreData);
+  const sectors = computeSectorScores(scoreData);
+  const sybilPass = !scoreData.is_sybil;
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -119,8 +123,18 @@ export default function ScorePage({ params }: { params: Promise<{ address: strin
           {address.slice(0, 2)}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-[15px] font-bold text-white/90 font-mono truncate">
-            {truncateAddress(address, 8)}
+          <div className="flex items-center gap-2">
+            <span className="text-[15px] font-bold text-white/90 font-mono truncate">
+              {truncateAddress(address, 8)}
+            </span>
+            <span className={`flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+              sybilPass
+                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                : "bg-red-500/10 text-red-400 border border-red-500/20"
+            }`}>
+              {sybilPass ? <Shield className="w-2.5 h-2.5" /> : <ShieldX className="w-2.5 h-2.5" />}
+              {sybilPass ? "Verified" : "Flagged"}
+            </span>
           </div>
           <div className="text-[11px] text-white/35">
             Simplified View — Connect wallet for full dashboard
@@ -174,34 +188,14 @@ export default function ScorePage({ params }: { params: Promise<{ address: strin
           <div className="text-[10.5px] font-semibold uppercase tracking-wider text-white/35 mb-4">
             Score Breakdown
           </div>
-          <ScoreBreakdownBars items={MOCK_BREAKDOWN} blurred />
+          <ScoreBreakdownBars items={breakdown} blurred />
 
-          {/* Quick stats (also blurred) */}
-          <div className="grid grid-cols-3 gap-3 mt-5 pt-5 border-t border-white/[0.04] blur-[6px] select-none pointer-events-none">
-            <div>
-              <div className="text-[9.5px] text-white/35 font-medium uppercase tracking-wider mb-1">
-                Protocol Fees
-              </div>
-              <div className="text-sm font-bold text-white/90">
-                {formatCurrency(scoreData.protocol_fees_paid)}
-              </div>
+          {/* Sector scores (also blurred) */}
+          <div className="mt-5 pt-5 border-t border-white/[0.04]">
+            <div className="text-[10.5px] font-semibold uppercase tracking-wider text-white/35 mb-3">
+              Sector Activity
             </div>
-            <div>
-              <div className="text-[9.5px] text-white/35 font-medium uppercase tracking-wider mb-1">
-                Holdings
-              </div>
-              <div className="text-sm font-bold text-white/90">
-                {formatCurrency(scoreData.current_holdings)}
-              </div>
-            </div>
-            <div>
-              <div className="text-[9.5px] text-white/35 font-medium uppercase tracking-wider mb-1">
-                Months Active (Last 12)
-              </div>
-              <div className="text-sm font-bold text-white/90">
-                {scoreData.months_active}
-              </div>
-            </div>
+            <SectorScores sectors={sectors} blurred />
           </div>
 
           {/* Connect overlay */}

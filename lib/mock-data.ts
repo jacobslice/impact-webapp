@@ -17,12 +17,10 @@ export const MOCK_SCORE_DATA: ScoreData = {
 };
 
 export const MOCK_BREAKDOWN: ScoreBreakdownItem[] = [
-  { name: "Transaction Volume", score: 92, maxScore: 100 },
-  { name: "Protocol Diversity", score: 88, maxScore: 100 },
-  { name: "Account Age", score: 85, maxScore: 100 },
-  { name: "DeFi Activity", score: 90, maxScore: 100 },
-  { name: "NFT Engagement", score: 72, maxScore: 100 },
-  { name: "Governance", score: 65, maxScore: 100 },
+  { name: "Volume", score: 92, maxScore: 100, weight: "40%" },
+  { name: "Protocol Diversity", score: 88, maxScore: 100, weight: "30%" },
+  { name: "Activity", score: 85, maxScore: 100, weight: "20%" },
+  { name: "Holdings", score: 78, maxScore: 100, weight: "10%" },
 ];
 
 export const MOCK_LEADERBOARD = [

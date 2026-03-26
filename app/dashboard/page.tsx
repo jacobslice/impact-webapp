@@ -7,13 +7,14 @@ import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { ScoreGauge } from "@/components/score/ScoreGauge";
 import { ScoreBreakdownBars } from "@/components/score/ScoreBreakdownBars";
 import { StatsCards } from "@/components/dashboard/StatsCards";
+import { SectorScores } from "@/components/dashboard/SectorScores";
 import { ProtocolGrid } from "@/components/dashboard/ProtocolGrid";
 import { ScoreDistribution } from "@/components/dashboard/ScoreDistribution";
 import { LeaderboardTable } from "@/components/leaderboard/LeaderboardTable";
 import { ShareOnX } from "@/components/share/ShareOnX";
 import { WalletIdentity } from "@/components/social/TwitterConnect";
-import { MOCK_BREAKDOWN, MOCK_SCORE_DATA } from "@/lib/mock-data";
-import { getTier, truncateAddress, estimatePercentile, estimateRank } from "@/lib/types";
+import { MOCK_SCORE_DATA } from "@/lib/mock-data";
+import { getTier, truncateAddress, estimatePercentile, estimateRank, computeBreakdown, computeSectorScores } from "@/lib/types";
 import type { ScoreData } from "@/lib/types";
 import { Wallet } from "lucide-react";
 
@@ -103,6 +104,8 @@ export default function DashboardPage() {
   const tier = getTier(scoreData.score);
   const percentile = estimatePercentile(scoreData.score);
   const rank = estimateRank(scoreData.score);
+  const breakdown = computeBreakdown(scoreData);
+  const sectors = computeSectorScores(scoreData);
 
   return (
     <div>
@@ -154,9 +157,17 @@ export default function DashboardPage() {
             <div className="text-[10.5px] font-semibold uppercase tracking-wider text-white/35 mb-4">
               Score Breakdown
             </div>
-            <ScoreBreakdownBars items={MOCK_BREAKDOWN} />
+            <ScoreBreakdownBars items={breakdown} />
           </div>
         </div>
+      </div>
+
+      {/* Sector Scores */}
+      <div className="glass-card p-5 mb-5">
+        <div className="text-[10.5px] font-semibold uppercase tracking-wider text-white/35 mb-4">
+          Sector Activity
+        </div>
+        <SectorScores sectors={sectors} />
       </div>
 
       {/* Protocols */}

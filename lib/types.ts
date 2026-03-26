@@ -17,6 +17,112 @@ export interface ScoreBreakdownItem {
   name: string;
   score: number;
   maxScore: number;
+  weight?: string;
+}
+
+export interface SectorScore {
+  name: string;
+  score: number;
+  protocols: string[];
+  color: string;
+}
+
+export function computeBreakdown(data: ScoreData): ScoreBreakdownItem[] {
+  // Volume: 40% — normalize protocol_fees + network_fees
+  // Using log scale since fees range from 0 to $500K+
+  const totalFees = data.protocol_fees_paid + data.network_fees_paid;
+  const volumeScore = totalFees <= 0 ? 0 : Math.min(100, Math.round((Math.log10(totalFees + 1) / Math.log10(500000)) * 100));
+
+  // Protocol Diversity: 30% — max ~15 protocols
+  const diversityScore = Math.min(100, Math.round((data.protocol_count / 13) * 100));
+
+  // Activity: 20% — months_active out of 12
+  const activityScore = Math.min(100, Math.round((data.months_active / 12) * 100));
+
+  // Holdings: 10% — log scale, $100K+ is max
+  const holdingsScore = data.current_holdings <= 0 ? 0 : Math.min(100, Math.round((Math.log10(data.current_holdings + 1) / Math.log10(100000)) * 100));
+
+  return [
+    { name: "Volume", score: volumeScore, maxScore: 100, weight: "40%" },
+    { name: "Protocol Diversity", score: diversityScore, maxScore: 100, weight: "30%" },
+    { name: "Activity", score: activityScore, maxScore: 100, weight: "20%" },
+    { name: "Holdings", score: holdingsScore, maxScore: 100, weight: "10%" },
+  ];
+}
+
+export const SECTOR_MAP: Record<string, string> = {
+  "pumpswap": "DEX / Spot",
+  "raydium cpmm": "DEX / Spot",
+  "raydium amm": "DEX / Spot",
+  "raydium clmm": "DEX / Spot",
+  "raydium": "DEX / Spot",
+  "orca": "DEX / Spot",
+  "meteora damm v2": "DEX / Spot",
+  "meteora": "DEX / Spot",
+  "byreal clmm": "DEX / Spot",
+  "moonshot create": "Launchpad",
+  "launchlab": "Launchpad",
+  "pump.fun": "Launchpad",
+  "lets bonk": "Launchpad",
+  "bags": "Launchpad",
+  "believe": "Launchpad",
+  "jupiter ultra v6": "Aggregator",
+  "jupiter aggregator ultra (v6)": "Aggregator",
+  "jupiter aggregator limit order": "Aggregator",
+  "jupiter dca": "Aggregator",
+  "jupiter perps": "Perpetuals",
+  "jupiter perpetuals": "Perpetuals",
+  "drift perps": "Perpetuals",
+  "drift": "Perpetuals",
+  "axiom": "Trading Tools",
+  "moonshot.money": "Trading Tools",
+  "photon": "Trading Tools",
+};
+
+const SECTOR_PROTOCOL_COUNTS: Record<string, number> = {
+  "DEX / Spot": 7,
+  "Launchpad": 6,
+  "Aggregator": 3,
+  "Perpetuals": 2,
+  "Trading Tools": 3,
+};
+
+const SECTOR_COLORS: Record<string, string> = {
+  "DEX / Spot": "from-blue-500 to-cyan-400",
+  "Launchpad": "from-orange-500 to-amber-400",
+  "Aggregator": "from-purple-500 to-violet-400",
+  "Perpetuals": "from-red-500 to-rose-400",
+  "Trading Tools": "from-emerald-500 to-green-400",
+};
+
+export function computeSectorScores(data: ScoreData): SectorScore[] {
+  const protocols = Array.isArray(data.protocols_used)
+    ? data.protocols_used
+    : typeof data.protocols_used === "string"
+      ? data.protocols_used.split(",").map((p) => p.trim())
+      : [];
+
+  const sectorHits: Record<string, string[]> = {
+    "DEX / Spot": [],
+    "Launchpad": [],
+    "Aggregator": [],
+    "Perpetuals": [],
+    "Trading Tools": [],
+  };
+
+  for (const p of protocols) {
+    const sector = SECTOR_MAP[p.toLowerCase().trim()];
+    if (sector && sectorHits[sector]) {
+      sectorHits[sector].push(p);
+    }
+  }
+
+  return Object.entries(sectorHits).map(([name, hits]) => ({
+    name,
+    score: Math.min(100, Math.round((hits.length / SECTOR_PROTOCOL_COUNTS[name]) * 100)),
+    protocols: hits,
+    color: SECTOR_COLORS[name],
+  }));
 }
 
 export interface TierInfo {

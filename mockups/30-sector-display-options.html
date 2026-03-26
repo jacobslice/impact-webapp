@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sector Score Display - 5 Options</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0c0b14; color: #e8e8e8; font-family: 'Inter', sans-serif; padding: 40px; }
+  h1 { font-size: 28px; font-weight: 800; margin-bottom: 8px; background: linear-gradient(to right, #9945FF, #14F195); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  h2 { font-size: 20px; font-weight: 700; margin-bottom: 16px; color: rgba(255,255,255,0.9); }
+  .subtitle { color: rgba(255,255,255,0.4); font-size: 14px; margin-bottom: 40px; }
+  .option { margin-bottom: 60px; }
+  .option-label { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.35); background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 4px 10px; margin-bottom: 12px; }
+  .glass-card { background: rgba(255,255,255,0.035); border: 1px solid rgba(139,92,246,0.15); border-radius: 12px; backdrop-filter: blur(12px); padding: 20px; }
+  .section-label { font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.35); margin-bottom: 16px; }
+
+  /* Sector data */
+  :root {
+    --dex: #3b82f6;
+    --launch: #f97316;
+    --agg: #a855f7;
+    --perps: #ef4444;
+    --tools: #10b981;
+  }
+
+  /* ============ OPTION A1: RADAR CHART ============ */
+  .radar-wrap { display: flex; justify-content: center; align-items: center; padding: 20px 0; }
+  .radar-svg { width: 300px; height: 280px; }
+
+  /* ============ OPTION A2: STACKED RINGS ============ */
+  .rings-wrap { display: flex; justify-content: center; align-items: flex-end; gap: 40px; }
+  .rings-svg { width: 260px; height: 150px; }
+  .rings-legend { display: flex; flex-direction: column; gap: 8px; }
+  .rings-legend-item { display: flex; align-items: center; gap: 8px; font-size: 11px; color: rgba(255,255,255,0.6); }
+  .rings-legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .rings-legend-score { font-weight: 700; color: rgba(255,255,255,0.8); margin-left: auto; min-width: 24px; text-align: right; }
+
+  /* ============ OPTION A3: HORIZONTAL BARS ============ */
+  .hbar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .hbar-icon { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .hbar-info { flex: 1; min-width: 0; }
+  .hbar-name { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.7); margin-bottom: 4px; }
+  .hbar-track { height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; }
+  .hbar-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease-out; }
+  .hbar-protos { font-size: 9px; color: rgba(255,255,255,0.25); margin-top: 3px; }
+  .hbar-score { font-size: 14px; font-weight: 800; color: rgba(255,255,255,0.8); min-width: 30px; text-align: right; }
+
+  /* ============ OPTION A4: HEAT MAP ============ */
+  .heatmap { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  .heatmap-cell { border-radius: 10px; padding: 16px 12px; text-align: center; border: 1px solid rgba(255,255,255,0.05); min-height: 90px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px; }
+  .heatmap-name { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+  .heatmap-score { font-size: 22px; font-weight: 900; }
+
+  /* ============ OPTION A5: PILL BADGES ============ */
+  .pills { display: flex; flex-wrap: wrap; gap: 10px; }
+  .pill { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); }
+  .pill-dot { width: 6px; height: 6px; border-radius: 50%; }
+  .pill-name { font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.5); }
+  .pill-score { font-size: 12px; font-weight: 800; color: rgba(255,255,255,0.85); }
+  .pill-protos { display: flex; gap: 3px; margin-left: 4px; }
+  .pill-proto-dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(255,255,255,0.15); }
+  .pill-proto-dot.active { background: rgba(255,255,255,0.5); }
+</style>
+</head>
+<body>
+
+<h1>Sector Score Display Options</h1>
+<p class="subtitle">Pick the layout that best shows a user's activity across DEX, Launchpad, Aggregator, Perps, and Trading Tools sectors.</p>
+
+<!-- Sample data: DEX=72, Launchpad=45, Aggregator=88, Perps=30, Tools=55 -->
+
+<!-- ============ OPTION A1: RADAR CHART ============ -->
+<div class="option">
+  <div class="option-label">Option A1 — Radar Chart</div>
+  <div class="glass-card">
+    <div class="section-label">Sector Activity</div>
+    <div class="radar-wrap">
+      <svg class="radar-svg" viewBox="0 0 300 280">
+        <!-- Grid rings -->
+        <g transform="translate(150,145)">
+          <!-- Axis lines -->
+          <line x1="0" y1="0" x2="0" y2="-120" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+          <line x1="0" y1="0" x2="114" y2="-37" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+          <line x1="0" y1="0" x2="70" y2="97" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+          <line x1="0" y1="0" x2="-70" y2="97" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+          <line x1="0" y1="0" x2="-114" y2="-37" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+
+          <!-- Grid polygons (25%, 50%, 75%, 100%) -->
+          <polygon points="0,-30 28.5,-9.3 17.6,24.3 -17.6,24.3 -28.5,-9.3" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+          <polygon points="0,-60 57,-18.5 35.2,48.5 -35.2,48.5 -57,-18.5" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+          <polygon points="0,-90 85.6,-27.8 52.9,72.8 -52.9,72.8 -85.6,-27.8" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+          <polygon points="0,-120 114,-37 70.5,97 -70.5,97 -114,-37" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+
+          <!-- Data polygon: DEX=72, Launch=45, Agg=88, Perps=30, Tools=55 -->
+          <!-- Scaled: DEX: 0,-86.4  Agg: 100.3,-32.6  Perps: 21.2,29.1  Tools: -38.8,53.4  Launch: -51.3,-16.7 -->
+          <polygon
+            points="0,-86.4 100.3,-32.6 21.2,29.1 -38.8,53.4 -51.3,-16.7"
+            fill="rgba(153,69,255,0.15)"
+            stroke="url(#radarGrad)"
+            stroke-width="2.5"
+            stroke-linejoin="round"
+          />
+          <!-- Data dots -->
+          <circle cx="0" cy="-86.4" r="4" fill="#3b82f6"/>
+          <circle cx="100.3" cy="-32.6" r="4" fill="#a855f7"/>
+          <circle cx="21.2" cy="29.1" r="4" fill="#ef4444"/>
+          <circle cx="-38.8" cy="53.4" r="4" fill="#10b981"/>
+          <circle cx="-51.3" cy="-16.7" r="4" fill="#f97316"/>
+
+          <!-- Labels -->
+          <text x="0" y="-130" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="10" font-weight="600">DEX / Spot</text>
+          <text x="0" y="-140" text-anchor="middle" fill="#3b82f6" font-size="11" font-weight="800">72</text>
+
+          <text x="125" y="-35" text-anchor="start" fill="rgba(255,255,255,0.5)" font-size="10" font-weight="600">Aggregator</text>
+          <text x="125" y="-23" text-anchor="start" fill="#a855f7" font-size="11" font-weight="800">88</text>
+
+          <text x="80" y="112" text-anchor="start" fill="rgba(255,255,255,0.5)" font-size="10" font-weight="600">Perpetuals</text>
+          <text x="80" y="124" text-anchor="start" fill="#ef4444" font-size="11" font-weight="800">30</text>
+
+          <text x="-80" y="112" text-anchor="end" fill="rgba(255,255,255,0.5)" font-size="10" font-weight="600">Trading Tools</text>
+          <text x="-80" y="124" text-anchor="end" fill="#10b981" font-size="11" font-weight="800">55</text>
+
+          <text x="-125" y="-35" text-anchor="end" fill="rgba(255,255,255,0.5)" font-size="10" font-weight="600">Launchpad</text>
+          <text x="-125" y="-23" text-anchor="end" fill="#f97316" font-size="11" font-weight="800">45</text>
+        </g>
+        <defs>
+          <linearGradient id="radarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#9945FF"/>
+            <stop offset="100%" stop-color="#14F195"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- ============ OPTION A2: STACKED RINGS ============ -->
+<div class="option">
+  <div class="option-label">Option A2 — Stacked Rings</div>
+  <div class="glass-card">
+    <div class="section-label">Sector Activity</div>
+    <div class="rings-wrap">
+      <svg class="rings-svg" viewBox="0 0 260 150">
+        <defs>
+          <linearGradient id="ring1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#60a5fa"/></linearGradient>
+          <linearGradient id="ring2" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#f97316"/><stop offset="100%" stop-color="#fbbf24"/></linearGradient>
+          <linearGradient id="ring3" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#a855f7"/><stop offset="100%" stop-color="#c084fc"/></linearGradient>
+          <linearGradient id="ring4" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ef4444"/><stop offset="100%" stop-color="#f87171"/></linearGradient>
+          <linearGradient id="ring5" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#10b981"/><stop offset="100%" stop-color="#34d399"/></linearGradient>
+        </defs>
+        <!-- Ring tracks -->
+        <path d="M 20 135 A 110 110 0 0 1 240 135" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="10" stroke-linecap="round"/>
+        <path d="M 32 135 A 98 98 0 0 1 228 135" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="10" stroke-linecap="round"/>
+        <path d="M 44 135 A 86 86 0 0 1 216 135" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="10" stroke-linecap="round"/>
+        <path d="M 56 135 A 74 74 0 0 1 204 135" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="10" stroke-linecap="round"/>
+        <path d="M 68 135 A 62 62 0 0 1 192 135" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="10" stroke-linecap="round"/>
+        <!-- Filled arcs: Agg=88, DEX=72, Tools=55, Launch=45, Perps=30 -->
+        <!-- Outermost: Aggregator 88% -->
+        <path d="M 20 135 A 110 110 0 0 1 240 135" fill="none" stroke="url(#ring3)" stroke-width="10" stroke-linecap="round"
+          stroke-dasharray="345.6" stroke-dashoffset="41.5"/>
+        <!-- DEX 72% -->
+        <path d="M 32 135 A 98 98 0 0 1 228 135" fill="none" stroke="url(#ring1)" stroke-width="10" stroke-linecap="round"
+          stroke-dasharray="307.9" stroke-dashoffset="86.2"/>
+        <!-- Tools 55% -->
+        <path d="M 44 135 A 86 86 0 0 1 216 135" fill="none" stroke="url(#ring5)" stroke-width="10" stroke-linecap="round"
+          stroke-dasharray="270.2" stroke-dashoffset="121.6"/>
+        <!-- Launch 45% -->
+        <path d="M 56 135 A 74 74 0 0 1 204 135" fill="none" stroke="url(#ring2)" stroke-width="10" stroke-linecap="round"
+          stroke-dasharray="232.5" stroke-dashoffset="127.9"/>
+        <!-- Perps 30% -->
+        <path d="M 68 135 A 62 62 0 0 1 192 135" fill="none" stroke="url(#ring4)" stroke-width="10" stroke-linecap="round"
+          stroke-dasharray="194.8" stroke-dashoffset="136.3"/>
+      </svg>
+      <div class="rings-legend">
+        <div class="rings-legend-item"><div class="rings-legend-dot" style="background:#a855f7"></div>Aggregator<span class="rings-legend-score">88</span></div>
+        <div class="rings-legend-item"><div class="rings-legend-dot" style="background:#3b82f6"></div>DEX / Spot<span class="rings-legend-score">72</span></div>
+        <div class="rings-legend-item"><div class="rings-legend-dot" style="background:#10b981"></div>Trading Tools<span class="rings-legend-score">55</span></div>
+        <div class="rings-legend-item"><div class="rings-legend-dot" style="background:#f97316"></div>Launchpad<span class="rings-legend-score">45</span></div>
+        <div class="rings-legend-item"><div class="rings-legend-dot" style="background:#ef4444"></div>Perpetuals<span class="rings-legend-score">30</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ OPTION A3: HORIZONTAL BARS WITH ICONS ============ -->
+<div class="option">
+  <div class="option-label">Option A3 — Horizontal Bars with Icons</div>
+  <div class="glass-card">
+    <div class="section-label">Sector Activity</div>
+
+    <div class="hbar-row">
+      <div class="hbar-icon" style="background:rgba(168,85,247,0.15); color:#a855f7;">&#9830;</div>
+      <div class="hbar-info">
+        <div class="hbar-name">Aggregator</div>
+        <div class="hbar-track"><div class="hbar-fill" style="width:88%; background:linear-gradient(to right, #a855f7, #c084fc);"></div></div>
+        <div class="hbar-protos">Jupiter Ultra, DCA, Limit Order</div>
+      </div>
+      <div class="hbar-score">88</div>
+    </div>
+
+    <div class="hbar-row">
+      <div class="hbar-icon" style="background:rgba(59,130,246,0.15); color:#3b82f6;">&#8644;</div>
+      <div class="hbar-info">
+        <div class="hbar-name">DEX / Spot</div>
+        <div class="hbar-track"><div class="hbar-fill" style="width:72%; background:linear-gradient(to right, #3b82f6, #60a5fa);"></div></div>
+        <div class="hbar-protos">Raydium, Orca, Meteora</div>
+      </div>
+      <div class="hbar-score">72</div>
+    </div>
+
+    <div class="hbar-row">
+      <div class="hbar-icon" style="background:rgba(16,185,129,0.15); color:#10b981;">&#9881;</div>
+      <div class="hbar-info">
+        <div class="hbar-name">Trading Tools</div>
+        <div class="hbar-track"><div class="hbar-fill" style="width:55%; background:linear-gradient(to right, #10b981, #34d399);"></div></div>
+        <div class="hbar-protos">Axiom, Photon</div>
+      </div>
+      <div class="hbar-score">55</div>
+    </div>
+
+    <div class="hbar-row">
+      <div class="hbar-icon" style="background:rgba(249,115,22,0.15); color:#f97316;">&#9650;</div>
+      <div class="hbar-info">
+        <div class="hbar-name">Launchpad</div>
+        <div class="hbar-track"><div class="hbar-fill" style="width:45%; background:linear-gradient(to right, #f97316, #fbbf24);"></div></div>
+        <div class="hbar-protos">Pump.fun, Moonshot</div>
+      </div>
+      <div class="hbar-score">45</div>
+    </div>
+
+    <div class="hbar-row">
+      <div class="hbar-icon" style="background:rgba(239,68,68,0.15); color:#ef4444;">&#8693;</div>
+      <div class="hbar-info">
+        <div class="hbar-name">Perpetuals</div>
+        <div class="hbar-track"><div class="hbar-fill" style="width:30%; background:linear-gradient(to right, #ef4444, #f87171);"></div></div>
+        <div class="hbar-protos">Jupiter Perps</div>
+      </div>
+      <div class="hbar-score">30</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ OPTION A4: HEAT MAP GRID ============ -->
+<div class="option">
+  <div class="option-label">Option A4 — Heat Map Grid</div>
+  <div class="glass-card">
+    <div class="section-label">Sector Activity</div>
+    <div class="heatmap">
+      <div class="heatmap-cell" style="background: rgba(168,85,247,0.25); border-color: rgba(168,85,247,0.3);">
+        <div class="heatmap-name" style="color: rgba(168,85,247,0.7);">Aggregator</div>
+        <div class="heatmap-score" style="color: #c084fc;">88</div>
+      </div>
+      <div class="heatmap-cell" style="background: rgba(59,130,246,0.2); border-color: rgba(59,130,246,0.25);">
+        <div class="heatmap-name" style="color: rgba(59,130,246,0.7);">DEX / Spot</div>
+        <div class="heatmap-score" style="color: #60a5fa;">72</div>
+      </div>
+      <div class="heatmap-cell" style="background: rgba(16,185,129,0.14); border-color: rgba(16,185,129,0.2);">
+        <div class="heatmap-name" style="color: rgba(16,185,129,0.7);">Trading Tools</div>
+        <div class="heatmap-score" style="color: #34d399;">55</div>
+      </div>
+      <div class="heatmap-cell" style="background: rgba(249,115,22,0.12); border-color: rgba(249,115,22,0.18);">
+        <div class="heatmap-name" style="color: rgba(249,115,22,0.7);">Launchpad</div>
+        <div class="heatmap-score" style="color: #fb923c;">45</div>
+      </div>
+      <div class="heatmap-cell" style="background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.12);">
+        <div class="heatmap-name" style="color: rgba(239,68,68,0.6);">Perpetuals</div>
+        <div class="heatmap-score" style="color: #f87171;">30</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ OPTION A5: PILL BADGES ============ -->
+<div class="option">
+  <div class="option-label">Option A5 — Pill Badges</div>
+  <div class="glass-card">
+    <div class="section-label">Sector Activity</div>
+    <div class="pills">
+      <div class="pill" style="border-color: rgba(168,85,247,0.2); background: rgba(168,85,247,0.06);">
+        <div class="pill-dot" style="background: #a855f7;"></div>
+        <span class="pill-name">Aggregator</span>
+        <span class="pill-score">88</span>
+        <div class="pill-protos"><div class="pill-proto-dot active"></div><div class="pill-proto-dot active"></div><div class="pill-proto-dot active"></div></div>
+      </div>
+      <div class="pill" style="border-color: rgba(59,130,246,0.2); background: rgba(59,130,246,0.06);">
+        <div class="pill-dot" style="background: #3b82f6;"></div>
+        <span class="pill-name">DEX / Spot</span>
+        <span class="pill-score">72</span>
+        <div class="pill-protos"><div class="pill-proto-dot active"></div><div class="pill-proto-dot active"></div><div class="pill-proto-dot active"></div><div class="pill-proto-dot"></div><div class="pill-proto-dot"></div></div>
+      </div>
+      <div class="pill" style="border-color: rgba(16,185,129,0.2); background: rgba(16,185,129,0.06);">
+        <div class="pill-dot" style="background: #10b981;"></div>
+        <span class="pill-name">Trading Tools</span>
+        <span class="pill-score">55</span>
+        <div class="pill-protos"><div class="pill-proto-dot active"></div><div class="pill-proto-dot active"></div><div class="pill-proto-dot"></div></div>
+      </div>
+      <div class="pill" style="border-color: rgba(249,115,22,0.2); background: rgba(249,115,22,0.06);">
+        <div class="pill-dot" style="background: #f97316;"></div>
+        <span class="pill-name">Launchpad</span>
+        <span class="pill-score">45</span>
+        <div class="pill-protos"><div class="pill-proto-dot active"></div><div class="pill-proto-dot active"></div><div class="pill-proto-dot"></div><div class="pill-proto-dot"></div></div>
+      </div>
+      <div class="pill" style="border-color: rgba(239,68,68,0.15); background: rgba(239,68,68,0.04);">
+        <div class="pill-dot" style="background: #ef4444;"></div>
+        <span class="pill-name">Perpetuals</span>
+        <span class="pill-score">30</span>
+        <div class="pill-protos"><div class="pill-proto-dot active"></div><div class="pill-proto-dot"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
