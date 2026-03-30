@@ -3,24 +3,23 @@ import { Shield, ShieldX } from "lucide-react";
 
 interface StatsCardsProps {
   data: ScoreData;
+  blurred?: boolean;
 }
 
-export function StatsCards({ data }: StatsCardsProps) {
-  const sybilPass = !data.is_sybil;
+export function StatsCards({ data, blurred = false }: StatsCardsProps) {
+  const sybilPassed = data.is_sybil !== "true" && data.is_sybil !== "1";
 
   const stats = [
     {
       label: "Sybil Check",
-      value: sybilPass ? "Pass" : "Fail",
-      icon: sybilPass ? (
+      value: sybilPassed ? "Pass" : "Fail",
+      icon: sybilPassed ? (
         <Shield className="w-4 h-4 text-emerald-400" />
       ) : (
         <ShieldX className="w-4 h-4 text-red-400" />
       ),
-      valueColor: sybilPass ? "text-emerald-400" : "text-red-400",
-      borderColor: sybilPass
-        ? "via-emerald-500/30"
-        : "via-red-500/30",
+      valueColor: sybilPassed ? "text-emerald-400" : "text-red-400",
+      borderColor: sybilPassed ? "via-emerald-500/30" : "via-red-500/30",
     },
     {
       label: "Network Fees",
@@ -43,7 +42,7 @@ export function StatsCards({ data }: StatsCardsProps) {
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div className={`grid grid-cols-2 lg:grid-cols-4 gap-3 ${blurred ? "blur-[6px] select-none pointer-events-none" : ""}`}>
       {stats.map((stat) => (
         <div
           key={stat.label}

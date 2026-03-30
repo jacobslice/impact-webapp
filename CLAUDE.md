@@ -37,7 +37,7 @@ Wallet scoring platform for Solana. Users look up or connect their wallet to see
 - `mockups/29-logo-mockups.html` - 8 logo concepts for platform symbol (pending user selection)
 - `mockups/16-scorecard-twitter-personal.html` - Scorecard design for Twitter sharing
 
-## Current State (last updated: 2026-03-26)
+## Current State (last updated: 2026-03-30)
 - MVP fully implemented with Clean Fusion design, dark-only theme
 - Dune API connected with 10-min in-memory cache (key in .env.local)
 - `protocols_used` from Dune is an **array**, not a string — code handles both
@@ -66,9 +66,9 @@ Wallet scoring platform for Solana. Users look up or connect their wallet to see
 - Gauge 0/50/100 labels fixed (moved outside arc)
 
 ### Pending Tasks - Jacob
-- Pick sector display layout + color coding approach, then implement
+- ~~Pick sector display layout + color coding approach, then implement~~ ✅ Done (2026-03-30) — sector bars + breakdown implemented
 - Replace wallet-adapter with Dynamic.xyz
-- Implement Twitter/X OAuth (replace localStorage)
+- Implement Twitter/X OAuth (replace localStorage) — OAuth scaffolding started in `lib/twitter-auth.ts` + `app/api/auth/`
 - Wire up .sol domain resolution (SNS)
 - Mobile-optimize layout
 - Set up Vercel Analytics

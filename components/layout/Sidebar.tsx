@@ -30,6 +30,7 @@ export function Sidebar() {
         href="/"
         className="w-[30px] h-[30px] rounded-lg bg-gradient-to-br from-[#9945FF] to-[#14F195] flex items-center justify-center mb-6 shadow-[0_0_18px_rgba(153,69,255,0.3)] hover:shadow-[0_0_24px_rgba(153,69,255,0.5)] transition-shadow overflow-hidden"
       >
+        {/* Stacked bars logo (Concept 03) with S-curve */}
         <svg width="20" height="20" viewBox="0 0 100 100" fill="none">
           <rect x="15" y="70" width="32" height="12" rx="6" fill="white"/>
           <rect x="34" y="44" width="40" height="12" rx="6" fill="white" opacity="0.85"/>

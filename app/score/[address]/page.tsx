@@ -104,7 +104,7 @@ export default function ScorePage({ params }: { params: Promise<{ address: strin
   const rank = estimateRank(scoreData.score);
   const breakdown = computeBreakdown(scoreData);
   const sectors = computeSectorScores(scoreData);
-  const sybilPass = !scoreData.is_sybil;
+  const sybilPassed = scoreData.is_sybil !== "true" && scoreData.is_sybil !== "1";
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -128,12 +128,12 @@ export default function ScorePage({ params }: { params: Promise<{ address: strin
               {truncateAddress(address, 8)}
             </span>
             <span className={`flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-              sybilPass
+              sybilPassed
                 ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                 : "bg-red-500/10 text-red-400 border border-red-500/20"
             }`}>
-              {sybilPass ? <Shield className="w-2.5 h-2.5" /> : <ShieldX className="w-2.5 h-2.5" />}
-              {sybilPass ? "Verified" : "Flagged"}
+              {sybilPassed ? <Shield className="w-2.5 h-2.5" /> : <ShieldX className="w-2.5 h-2.5" />}
+              {sybilPassed ? "Verified" : "Flagged"}
             </span>
           </div>
           <div className="text-[11px] text-white/35">
