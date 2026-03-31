@@ -239,6 +239,7 @@ function reducer(state: GameState, action: Action): GameState {
         lastChanges: [{ label: "SOL", before: beforeSol.toFixed(1), after: afterSol.toFixed(1), delta: `-${lost}`, type: "bad" }],
         events: [...state.events, `Trusted SBF. Lost ${lost} SOL.`],
         phase: "event",
+        // After this event, Continue → NEXT_STEP will handle the trail
       };
     }
     case "SBF_WALK":
@@ -255,51 +256,41 @@ function reducer(state: GameState, action: Action): GameState {
       const nextStepIdx = state.trailStep + 1;
       const newSupplies = { ...state.supplies };
       const changes: StatChange[] = [];
+      const newParty = [...state.party];
+      let newHealth = state.health;
 
-      // Consume 1 food per step
-      const foodBefore = newSupplies.Food || 0;
-      newSupplies.Food = Math.max(0, foodBefore - 1);
-      if (foodBefore > 0) changes.push({ label: "Food", before: foodBefore, after: newSupplies.Food, delta: "-1", type: "bad" });
+      // Player death check
+      if (newHealth <= 0) {
+        return { ...state, phase: "score_tombstones", events: [...state.events, "You collapsed on the trail. Your party carried on without you... briefly."] };
+      }
 
       // Loss conditions
-      if (newSupplies.Food <= 0 && state.health <= 20) {
-        return { ...state, supplies: newSupplies, lastChanges: changes, phase: "score_tombstones", events: [...state.events, "Ran out of Big Macs. Party turned on each other."] };
-      }
-      if ((newSupplies.Bulls || 0) <= 0 && state.profession?.name !== "Crypto Poor" && foodBefore <= 0) {
-        return { ...state, supplies: newSupplies, lastChanges: changes, phase: "score_tombstones", events: [...state.events, "All bulls dead, no food. Stranded."] };
+      if ((newSupplies.Food || 0) <= 0 && newHealth <= 20) {
+        return { ...state, phase: "score_tombstones", events: [...state.events, "Ran out of Big Macs. Party turned on each other."] };
       }
 
+      // Route to travel animation for landmark/hunt steps
       if (!step || step === "hunt") {
-        // Go to hunt via travel animation
-        return { ...state, supplies: newSupplies, trailStep: nextStepIdx, lastChanges: changes, phase: "travel" };
+        return { ...state, supplies: newSupplies, trailStep: nextStepIdx, lastChanges: [], phase: "travel" };
       }
-
       if (step === "landmark") {
-        const lm = state.landmarks[0]; // always use first (only) landmark
+        const lm = state.landmarks[0];
         if (lm) {
-          return {
-            ...state, supplies: newSupplies, trailStep: nextStepIdx,
-            currentLandmark: 0, currentLandmarkData: lm,
-            lastChanges: changes, phase: "travel",
-          };
+          return { ...state, supplies: newSupplies, trailStep: nextStepIdx, currentLandmark: 0, currentLandmarkData: lm, lastChanges: [], phase: "travel" };
         }
-        // No landmark available, skip to next step
-        return { ...state, supplies: newSupplies, trailStep: nextStepIdx + 1, lastChanges: changes, phase: "travel" };
+        return { ...state, supplies: newSupplies, trailStep: nextStepIdx + 1, lastChanges: [], phase: "travel" };
       }
 
-      // Random event (event1 or event2)
-      // First event is biased toward catastrophic to guarantee a showcase KOL death
+      // ===== RANDOM EVENT (event1 or event2) =====
       const isFirstEvent = state.trailStep === 0;
       const pool = isFirstEvent
         ? RANDOM_EVENTS.filter(e => e.effect === "catastrophic")
         : RANDOM_EVENTS;
       const evt = pool[Math.floor(Math.random() * pool.length)];
-      const newParty = [...state.party];
-      let newHealth = state.health; // Player's HP
       let newSol = state.sol;
       let text = evt.text;
 
-      // --- CATASTROPHIC: one specific member dies ---
+      // --- CATASTROPHIC: one member dies with a reason ---
       if (evt.effect === "catastrophic") {
         if (text.includes("PARTY_MEMBER") && newParty.length > 0) {
           const alive = newParty.filter(m => m.alive);
@@ -315,19 +306,21 @@ function reducer(state: GameState, action: Action): GameState {
             changes.push({ label: `@${victim.handle}`, before: `${oldHp} HP`, after: "DEAD ☠️", delta: "KILLED", type: "bad" });
           }
         }
-        // Player takes damage too
+        // Everyone takes shock damage
         const oldH = newHealth;
-        newHealth = Math.max(0, newHealth - 25);
-        changes.push({ label: "Your HP", before: oldH, after: newHealth, delta: "-25", type: "bad" });
+        newHealth = Math.max(0, newHealth - 20);
+        for (const m of newParty) { if (m.alive) { m.hp = Math.max(1, m.hp - 15); } }
+        changes.push({ label: "Party HP", before: oldH, after: newHealth, delta: "-20 (shock)", type: "bad" });
         const oldS = newSol;
         newSol = Math.max(0, newSol - 3);
         if (oldS !== newSol) changes.push({ label: "SOL", before: oldS.toFixed(1), after: newSol.toFixed(1), delta: `-${(oldS - newSol).toFixed(1)}`, type: "bad" });
+        // Food spoiled from the chaos
         const oldFood = newSupplies.Food || 0;
         newSupplies.Food = Math.max(0, oldFood - 2);
-        if (oldFood !== newSupplies.Food) changes.push({ label: "Food", before: oldFood, after: newSupplies.Food, delta: `-${oldFood - newSupplies.Food}`, type: "bad" });
+        if (oldFood !== newSupplies.Food) changes.push({ label: "Food", before: oldFood, after: newSupplies.Food, delta: `-${oldFood - newSupplies.Food} (spoiled)`, type: "bad" });
       }
 
-      // --- BAD: damage spread across party + player ---
+      // --- BAD: primary victim + party-wide minor damage ---
       if (evt.effect === "bad") {
         if (text.includes("PARTY_MEMBER") && newParty.length > 0) {
           const alive = newParty.filter(m => m.alive);
@@ -344,64 +337,50 @@ function reducer(state: GameState, action: Action): GameState {
             }
           }
         }
-        // Player and other alive members take minor damage
+        // Everyone takes minor damage from the setback
         const oldH = newHealth;
         newHealth = Math.max(0, newHealth - 10);
-        changes.push({ label: "Your HP", before: oldH, after: newHealth, delta: "-10", type: "bad" });
-        // Random alive member also takes splash damage
-        const otherAlive = newParty.filter(m => m.alive && !text.includes(m.handle));
-        if (otherAlive.length > 0 && Math.random() < 0.4) {
-          const splashVictim = otherAlive[Math.floor(Math.random() * otherAlive.length)];
-          const oldSHp = splashVictim.hp;
-          splashVictim.hp = Math.max(0, splashVictim.hp - 10);
-          if (splashVictim.hp <= 0) {
-            splashVictim.alive = false;
-            changes.push({ label: `@${splashVictim.handle}`, before: `${oldSHp} HP`, after: "DEAD ☠️", delta: `-${oldSHp}`, type: "bad" });
-          } else {
-            changes.push({ label: `@${splashVictim.handle} HP`, before: oldSHp, after: splashVictim.hp, delta: "-10", type: "bad" });
-          }
-        }
+        for (const m of newParty) { if (m.alive) { m.hp = Math.max(1, m.hp - 5); } }
+        changes.push({ label: "Party HP", before: oldH, after: newHealth, delta: "-10 (setback)", type: "bad" });
         const oldS = newSol;
         newSol = Math.max(0, newSol - 1);
         if (oldS !== newSol) changes.push({ label: "SOL", before: oldS.toFixed(1), after: newSol.toFixed(1), delta: "-1.0", type: "bad" });
       }
 
-      // --- GOOD: heal everyone ---
+      // --- GOOD: heal + medicine auto-used if available ---
       if (evt.effect === "good") {
         const oldH = newHealth;
-        newHealth = Math.min(100, newHealth + 10);
-        changes.push({ label: "Your HP", before: oldH, after: newHealth, delta: "+10", type: "good" });
+        let healAmount = 10;
+        // Auto-use medicine for bonus healing
+        if ((newSupplies.Medicine || 0) > 0) {
+          newSupplies.Medicine = (newSupplies.Medicine || 0) - 1;
+          healAmount = 25;
+          text += " Used 1 medicine for extra healing.";
+          changes.push({ label: "Medicine", before: (newSupplies.Medicine + 1), after: newSupplies.Medicine, delta: "-1 (used)", type: "neutral" });
+        }
+        newHealth = Math.min(100, newHealth + healAmount);
+        for (const m of newParty) { if (m.alive) { m.hp = Math.min(100, m.hp + 15); } }
+        changes.push({ label: "Party HP", before: oldH, after: newHealth, delta: `+${healAmount}`, type: "good" });
         const oldS = newSol;
         newSol += 5;
         changes.push({ label: "SOL", before: oldS.toFixed(1), after: newSol.toFixed(1), delta: "+5.0", type: "good" });
-        // Heal alive party members
-        for (const m of newParty) {
-          if (m.alive && m.hp < 100) {
-            const oldMHp = m.hp;
-            m.hp = Math.min(100, m.hp + 15);
-            changes.push({ label: `@${m.handle} HP`, before: oldMHp, after: m.hp, delta: `+${m.hp - oldMHp}`, type: "good" });
-          }
-        }
       }
 
-      // --- NEUTRAL: time passes, minor food/hp cost ---
+      // --- NEUTRAL: time passes, everyone fatigued, food consumed ---
       if (evt.effect === "neutral") {
-        // Time passes = food consumed
         const oldFood = newSupplies.Food || 0;
         newSupplies.Food = Math.max(0, oldFood - 1);
         if (oldFood > 0) changes.push({ label: "Food", before: oldFood, after: newSupplies.Food, delta: "-1 (time passed)", type: "bad" });
-        // Everyone gets a little tired
         const oldH = newHealth;
         newHealth = Math.max(0, newHealth - 5);
-        changes.push({ label: "Your HP", before: oldH, after: newHealth, delta: "-5 (fatigue)", type: "bad" });
-        // Random party member loses a bit of HP from the journey
-        const alive = newParty.filter(m => m.alive);
-        if (alive.length > 0 && Math.random() < 0.5) {
-          const tired = alive[Math.floor(Math.random() * alive.length)];
-          const oldTHp = tired.hp;
-          tired.hp = Math.max(1, tired.hp - 8);
-          changes.push({ label: `@${tired.handle} HP`, before: oldTHp, after: tired.hp, delta: "-8 (fatigue)", type: "bad" });
-        }
+        for (const m of newParty) { if (m.alive) { m.hp = Math.max(1, m.hp - 5); } }
+        changes.push({ label: "Party HP", before: oldH, after: newHealth, delta: "-5 (fatigue)", type: "bad" });
+      }
+
+      // Player death from this event
+      if (newHealth <= 0) {
+        changes.push({ label: "YOU", before: "alive", after: "DEAD", delta: "☠️", type: "bad" });
+        text += " You didn't make it.";
       }
 
       return {
@@ -433,12 +412,15 @@ function reducer(state: GameState, action: Action): GameState {
       };
     }
     case "START_HUNT": {
-      const targets = Array.from({ length: 5 }, (_, i) => {
+      // More targets, faster pop times, shorter windows = harder
+      const targets = Array.from({ length: 8 }, (_, i) => {
         const t = HUNT_TARGETS[Math.floor(Math.random() * HUNT_TARGETS.length)];
         return {
           sprite: t.sprite, name: t.name, points: t.points,
           x: -50, y: 60 + Math.random() * 30,
-          alive: true, id: i, popTime: 1000 + i * 2000 + Math.random() * 1000, visible: false,
+          alive: true, id: i,
+          popTime: 500 + i * 1100 + Math.random() * 600, // staggered, faster
+          visible: false,
         };
       });
       return { ...state, huntTargets: targets, huntScore: 0, huntBullets: 5, phase: "hunt" };
@@ -545,10 +527,11 @@ function StatusBar({ state }: { state: GameState }) {
   const bars = (val: number, max: number, w = 10) => "█".repeat(Math.round((val / max) * w)) + "░".repeat(w - Math.round((val / max) * w));
   return (
     <div className="border border-[#33ff33]/20 p-3 text-xs space-y-1 mb-4">
+      {state.profession && (
+        <div className="text-[#33ff33]/40 mb-1">{state.profession.name} | SOL: {state.sol.toFixed(1)} | Score: {state.gameScore}</div>
+      )}
       <div className="flex justify-between flex-wrap gap-2">
         <span>You: {bars(state.health, 100)} {state.health} HP</span>
-        <span>SOL: {state.sol.toFixed(1)}</span>
-        <span>Score: {state.gameScore}</span>
       </div>
       <div className="flex gap-4 flex-wrap">
         <span>🐂 {state.supplies.Bulls || 0}</span>
@@ -577,6 +560,9 @@ export default function TrailPage() {
   const [addressInput, setAddressInput] = useState("");
   const [playerInput, setPlayerInput] = useState("");
   const [huntTimer, setHuntTimer] = useState(10);
+  const huntStartRef = useRef<number>(0);
+  const huntPausedAtRef = useRef<number>(0);
+  const huntPausedTotalRef = useRef<number>(0);
 
   // Keyboard: ESC to skip, ENTER to continue
   useEffect(() => {
@@ -646,40 +632,57 @@ export default function TrailPage() {
     return () => clearTimeout(timeout);
   }, [state.phase]);
 
-  // Hunt timer
+  // Hunt animation tick — forces re-render for smooth target movement
+  const [, setHuntTick] = useState(0);
   useEffect(() => {
     if (state.phase !== "hunt") return;
-    setHuntTimer(10);
-    const interval = setInterval(() => {
-      setHuntTimer(prev => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          dispatch({ type: "END_HUNT" });
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
+    const raf = setInterval(() => setHuntTick(t => t + 1), 100);
+    return () => clearInterval(raf);
   }, [state.phase]);
 
-  // Duck Hunt: pop up targets
+  // Hunt timer — pauses during hunt_miss (Trump popup)
   useEffect(() => {
-    if (state.phase !== "hunt") return;
-    const timeouts = state.huntTargets.map((t, i) =>
-      setTimeout(() => {
-        dispatch({ type: "SET_PHASE", phase: "hunt" }); // trigger re-render
-        // Mutate target visibility directly (handled in render via time check)
-      }, t.popTime)
-    );
-    return () => timeouts.forEach(clearTimeout);
+    if (state.phase === "hunt" && huntStartRef.current === 0) {
+      huntStartRef.current = Date.now();
+      huntPausedTotalRef.current = 0;
+      setHuntTimer(10);
+    }
+    // Pause when entering hunt_miss
+    if (state.phase === "hunt_miss" && huntPausedAtRef.current === 0) {
+      huntPausedAtRef.current = Date.now();
+    }
+    // Resume when returning to hunt from hunt_miss
+    if (state.phase === "hunt" && huntPausedAtRef.current > 0) {
+      huntPausedTotalRef.current += Date.now() - huntPausedAtRef.current;
+      huntPausedAtRef.current = 0;
+    }
+    if (state.phase !== "hunt" && state.phase !== "hunt_miss") {
+      huntStartRef.current = 0;
+      huntPausedAtRef.current = 0;
+      huntPausedTotalRef.current = 0;
+      return;
+    }
+    if (state.phase !== "hunt") return; // don't tick during hunt_miss
+    const interval = setInterval(() => {
+      const activeTime = Date.now() - huntStartRef.current - huntPausedTotalRef.current;
+      const elapsed = Math.floor(activeTime / 1000);
+      const remaining = Math.max(0, 10 - elapsed);
+      setHuntTimer(remaining);
+      if (remaining <= 0) {
+        clearInterval(interval);
+        dispatch({ type: "END_HUNT" });
+      }
+    }, 200);
+    return () => clearInterval(interval);
   }, [state.phase]);
 
   // Score phase auto-advance
   useEffect(() => {
     if (state.phase === "score_tombstones") {
       sfxDeath();
-      const timeout = setTimeout(() => dispatch({ type: "SCORE_NEXT_PHASE" }), 3000);
+      const deadCount = state.party.filter(m => !m.alive).length;
+      const delay = Math.max(3000, deadCount * 1500 + 1500); // scale with deaths
+      const timeout = setTimeout(() => dispatch({ type: "SCORE_NEXT_PHASE" }), delay);
       return () => clearTimeout(timeout);
     }
     if (state.phase === "score_tally") {
@@ -873,10 +876,9 @@ export default function TrailPage() {
   }
 
   // ================ PARTY SETUP ================
-  if (state.phase === "party") {
-    const partyReady = state.party.length > 0;
-    // Auto-assign KOLs on first render
-    if (state.party.length === 0) {
+  // Auto-assign KOLs when entering party phase (outside render)
+  useEffect(() => {
+    if (state.phase === "party" && state.party.length === 0) {
       const kols = getRandomKOLs(3);
       const members: PartyMember[] = kols.map(k => ({
         handle: k.handle,
@@ -887,7 +889,9 @@ export default function TrailPage() {
       }));
       dispatch({ type: "SET_PARTY", party: members });
     }
+  }, [state.phase, state.party.length]);
 
+  if (state.phase === "party") {
     return (
       <CRTWrapper onSkip={skip}>
         <div className="space-y-6 py-8">
@@ -952,11 +956,18 @@ export default function TrailPage() {
     );
   }
 
+  // SBF dialogue advance guard — prevents double-fire from re-renders
+  const sbfAdvancedRef = useRef<number>(-1);
+  const handleSbfLineDone = useCallback((lineIndex: number) => {
+    if (lineIndex >= SBF_DIALOGUE.length - 1) return; // last line, don't auto-advance
+    if (sbfAdvancedRef.current >= lineIndex) return; // already advanced this line
+    sbfAdvancedRef.current = lineIndex;
+    setTimeout(() => dispatch({ type: "SBF_NEXT_LINE" }), 800);
+  }, []);
+
   // ================ SBF JAIL ================
   if (state.phase === "sbf") {
-    const currentLine = SBF_DIALOGUE[state.sbfLine] || "";
     const isLastLine = state.sbfLine >= SBF_DIALOGUE.length - 1;
-    const showChoices = isLastLine;
 
     return (
       <CRTWrapper onSkip={skip}>
@@ -975,11 +986,7 @@ export default function TrailPage() {
                     <TypedText
                       text={line}
                       speed={25}
-                      onDone={() => {
-                        if (!isLastLine) {
-                          setTimeout(() => dispatch({ type: "SBF_NEXT_LINE" }), 800);
-                        }
-                      }}
+                      onDone={() => handleSbfLineDone(i)}
                       className="text-sm"
                     />
                   ) : (
@@ -990,7 +997,7 @@ export default function TrailPage() {
             </div>
           </div>
 
-          {showChoices && (
+          {isLastLine && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -1134,11 +1141,11 @@ export default function TrailPage() {
             <div className="absolute bottom-0 w-full h-12 bg-[#0a2a0a]" />
 
             {state.huntTargets.filter(t => t.alive).map((t) => {
-              // Duck Hunt pop-up: targets appear from bottom at their popTime
-              const elapsed = huntTimer <= 0 ? 10000 : (10 - huntTimer) * 1000;
+              // Duck Hunt pop-up: targets appear based on active (non-paused) time
+              const elapsed = huntStartRef.current > 0 ? Date.now() - huntStartRef.current - huntPausedTotalRef.current : 0;
               if (elapsed < t.popTime) return null;
               const popElapsed = elapsed - t.popTime;
-              const popDuration = 2500;
+              const popDuration = 1800; // shorter window = harder
               if (popElapsed > popDuration) return null;
               const popProgress = popElapsed / popDuration;
               // Pop up then back down
@@ -1147,7 +1154,10 @@ export default function TrailPage() {
               else if (popProgress < 0.8) yOffset = 0;
               else yOffset = ((popProgress - 0.8) / 0.2) * 100;
 
-              const xPos = 10 + (t.id * 18) % 80;
+              // Targets move horizontally using sine wave
+              const baseX = 10 + (t.id * 18) % 70;
+              const wobble = Math.sin(popElapsed / 200 + t.id * 2) * 8;
+              const xPos = Math.max(5, Math.min(85, baseX + wobble));
 
               return (
                 <motion.div
@@ -1188,10 +1198,18 @@ export default function TrailPage() {
     );
   }
 
+  // Play miss sound when entering hunt_miss phase
+  const missQuoteRef = useRef("");
+  useEffect(() => {
+    if (state.phase === "hunt_miss") {
+      sfxMiss();
+      missQuoteRef.current = TRUMP_MISS_QUOTES[Math.floor(Math.random() * TRUMP_MISS_QUOTES.length)];
+    }
+  }, [state.phase]);
+
   // ================ HUNT MISS — TRUMP ================
   if (state.phase === "hunt_miss") {
-    sfxMiss();
-    const quote = TRUMP_MISS_QUOTES[Math.floor(Math.random() * TRUMP_MISS_QUOTES.length)];
+    const quote = missQuoteRef.current || TRUMP_MISS_QUOTES[0];
     return (
       <CRTWrapper showSkip={false}>
         <div className="text-center py-8 space-y-4">
@@ -1240,15 +1258,17 @@ export default function TrailPage() {
               </div>
             </>
           ) : (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center text-lg"
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ type: "spring", bounce: 0.4 }}
+              className="text-center space-y-3"
             >
-              Everyone survived! Incredible.
-            </motion.p>
+              <div className="text-3xl">🎉</div>
+              <p className="text-lg text-[#33ff33]">THE ENTIRE PARTY SURVIVED</p>
+              <p className="text-sm text-[#33ff33]/50">Against all odds, everyone made it to Oregon alive. This has literally never happened before. (It probably has. But let them have this.)</p>
+            </motion.div>
           )}
-          {dead.length > 0 && setTimeout(() => {}, 0) && null}
         </div>
       </CRTWrapper>
     );
@@ -1349,7 +1369,9 @@ export default function TrailPage() {
             ) : (
               <>
                 <div className="text-4xl font-bold text-[#ff4444]">???</div>
-                <p className="text-sm text-[#ff4444]/60 mt-2">No score found. Go use some protocols!</p>
+                <p className="text-sm text-[#ff4444]/60 mt-2">Your wallet has no score yet.</p>
+                <p className="text-xs text-[#33ff33]/40 mt-1">Use Solana protocols to build your reputation, then come back and play with real data.</p>
+                <p className="text-sm text-[#33ff33]/60 mt-3">Trail Game Score: <span className="text-[#33ff33] font-bold">{Math.round((state.gameScore) * (state.profession?.multiplier || 1))}</span></p>
               </>
             )}
           </motion.div>

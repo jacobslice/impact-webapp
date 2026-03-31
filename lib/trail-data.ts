@@ -84,10 +84,10 @@ export const KOLS: KOL[] = [
   {
     handle: "toly", // Toly (Anatoly Yakovenko)
     uniqueDeaths: [
-      "@toly — Solana went down again. This time the holders took their revenge.",
-      "@toly tried to process 65,000 trail decisions per second. Crashed and couldn't restart.",
-      "@toly said the trail would have 400ms finality. It had 400ms until fatal.",
-      "@toly pushed a network update mid-journey. It bricked the wagon.",
+      "@toly — Solana went down again. The holders finally took their revenge. They staked him to the ground. Permanently.",
+      "@toly tried to process 65,000 trail decisions per second. The wagon's CPU overheated and exploded. He was inside.",
+      "@toly said the trail would have 400ms finality. A boulder finalized his journey in 400ms. Flat.",
+      "@toly pushed a network update mid-journey. It bricked the wagon GPS. He wandered into a ravine and fell 200 feet.",
     ],
   },
   {
@@ -477,18 +477,18 @@ export interface RandomEvent {
 
 export const RANDOM_EVENTS: RandomEvent[] = [
   // Catastrophic - DEATH EVENTS
-  { text: "PARTY_MEMBER got rugged on a memecoin. The shock was fatal.", effect: "catastrophic" },
-  { text: "PARTY_MEMBER has dysentery. Shouldn't have eaten that gas station sushi at the Solana hackathon.", effect: "catastrophic" },
-  { text: "PARTY_MEMBER clicked a 'free mint' link. Wallet drained. They didn't survive the loss.", effect: "catastrophic" },
-  { text: "PARTY_MEMBER went all-in on a 100x leveraged perp. Liquidated. Literally.", effect: "catastrophic" },
-  { text: "PARTY_MEMBER shared their seed phrase in a Discord DM with 'Phantom Support.' RIP.", effect: "catastrophic" },
-  { text: "PARTY_MEMBER got exit scammed by a KOL's promoted token. Lost everything.", effect: "catastrophic" },
-  { text: "A bridge exploit drained PARTY_MEMBER's wallet. They walked into the desert.", effect: "catastrophic" },
-  { text: "PARTY_MEMBER tried to catch a falling knife. The knife won.", effect: "catastrophic" },
-  { text: "PARTY_MEMBER was pump and dumped by a celebrity token. The emotional damage was fatal.", effect: "catastrophic" },
-  { text: "RFK Jr. showed up and replaced all your medicine with raw milk and deer antler velvet. PARTY_MEMBER got a brain worm. It was fatal.", effect: "catastrophic" },
-  { text: "PARTY_MEMBER tried the carnivore-only trail diet. Got scurvy. In 2026. Died of something medieval.", effect: "catastrophic" },
-  { text: "PARTY_MEMBER bought 'blockchain-verified supplements' from a guy in a van. They were just horse paste. The horse paste won.", effect: "catastrophic" },
+  { text: "PARTY_MEMBER got rugged on a memecoin. The shock triggered a heart attack. They collapsed face-first into their laptop.", effect: "catastrophic" },
+  { text: "PARTY_MEMBER has dysentery. Ate gas station sushi at a Solana hackathon. Died on the trail 47 minutes later. It was not dignified.", effect: "catastrophic" },
+  { text: "PARTY_MEMBER clicked a 'free mint' link. Wallet drained. They tried to chase the scammer into the wilderness. A bear got them first.", effect: "catastrophic" },
+  { text: "PARTY_MEMBER went all-in on a 100x leveraged perp. Liquidated. The margin call was so violent it knocked them off a cliff. Literally.", effect: "catastrophic" },
+  { text: "PARTY_MEMBER shared their seed phrase in a Discord DM with 'Phantom Support.' The scammer stole their supplies. They starved 2 days later.", effect: "catastrophic" },
+  { text: "PARTY_MEMBER got exit scammed by a KOL's promoted token. Lost everything. Tried to drink river water to survive. The river was toxic.", effect: "catastrophic" },
+  { text: "A bridge exploit drained PARTY_MEMBER's wallet. They walked into the desert to 'clear their head.' The desert did not clear their head. It cleared them.", effect: "catastrophic" },
+  { text: "PARTY_MEMBER tried to catch a falling knife (a token called $KNIFE). Cut their hand open on a real knife. Bled out. Ironic.", effect: "catastrophic" },
+  { text: "PARTY_MEMBER was pump and dumped by a celebrity token. The emotional damage caused them to wander off the trail at night. Fell into a canyon.", effect: "catastrophic" },
+  { text: "RFK Jr. showed up and replaced all medicine with raw milk and deer antler velvet. PARTY_MEMBER got a brain worm. The worm won.", effect: "catastrophic" },
+  { text: "PARTY_MEMBER tried the carnivore-only trail diet. Got scurvy. In 2026. Teeth fell out. Then everything else fell out. Died of something medieval.", effect: "catastrophic" },
+  { text: "PARTY_MEMBER bought 'blockchain-verified supplements' from a guy in a van. Turned out to be horse paste. They foamed at the mouth for 3 hours. Didn't make it.", effect: "catastrophic" },
   // Bad
   { text: "Failed transaction. Lost 2 SOL in gas fees. Solana said 400ms but it felt like 400 years.", effect: "bad" },
   { text: "Your Phantom wallet won't connect. You restart 17 times. Wasted a day.", effect: "bad" },
