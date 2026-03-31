@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isSolDomain, resolveSolDomain } from "@/lib/sol-domain";
 
 const DUNE_API_KEY = process.env.DUNE_API_KEY;
 const QUERY_ID = "6576517";
@@ -33,9 +34,22 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  // Resolve .sol domains to wallet addresses
+  let resolvedAddress = address;
+  if (isSolDomain(address)) {
+    const resolved = await resolveSolDomain(address);
+    if (!resolved) {
+      return NextResponse.json(
+        { error: "Could not resolve .sol domain", notFound: true },
+        { status: 404 }
+      );
+    }
+    resolvedAddress = resolved;
+  }
+
   // Basic Solana address validation (base58, 32-44 chars)
   const solanaAddressRegex = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
-  if (!solanaAddressRegex.test(address)) {
+  if (!solanaAddressRegex.test(resolvedAddress)) {
     return NextResponse.json(
       { error: "Invalid Solana address format" },
       { status: 400 }
@@ -50,13 +64,13 @@ export async function GET(request: NextRequest) {
   }
 
   // Check cache first
-  const cached = cache.get(address);
+  const cached = cache.get(resolvedAddress);
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
     return NextResponse.json({ data: cached.data });
   }
 
   try {
-    const filter = `wallet = '${address}'`;
+    const filter = `wallet = '${resolvedAddress}'`;
     const url = `https://api.dune.com/api/v1/query/${QUERY_ID}/results?filters=${encodeURIComponent(filter)}&limit=1`;
 
     const response = await fetch(url, {
@@ -86,7 +100,7 @@ export async function GET(request: NextRequest) {
     const scoreData: ScoreData = data.result.rows[0];
 
     // Cache the result
-    cache.set(address, { data: scoreData, timestamp: Date.now() });
+    cache.set(resolvedAddress, { data: scoreData, timestamp: Date.now() });
 
     return NextResponse.json({ data: scoreData });
   } catch (error) {

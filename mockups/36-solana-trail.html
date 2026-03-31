@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1200, height=800, initial-scale=1.0">
+<title>Solana Trail — Wallet Score Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --green-bright: #33ff33;
+    --green-mid: #00cc00;
+    --green-dim: #009900;
+    --green-dark: #004400;
+    --green-darker: #002200;
+    --bg: #0a0a0a;
+    --bg-green: #001a00;
+    --scanline: rgba(0, 0, 0, 0.12);
+  }
+
+  body {
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: 'VT323', 'Courier New', monospace;
+    overflow: hidden;
+  }
+
+  /* CRT Monitor Frame */
+  .crt-frame {
+    width: 1200px;
+    height: 800px;
+    background: #1a1a1a;
+    border-radius: 30px;
+    padding: 20px;
+    box-shadow:
+      0 0 60px rgba(0, 40, 0, 0.4),
+      inset 0 0 30px rgba(0, 0, 0, 0.8);
+    position: relative;
+  }
+
+  /* CRT Screen */
+  .crt-screen {
+    width: 100%;
+    height: 100%;
+    background: var(--bg-green);
+    border-radius: 18px;
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+      inset 0 0 80px rgba(0, 20, 0, 0.9),
+      0 0 20px rgba(51, 255, 51, 0.1);
+  }
+
+  /* Scanlines */
+  .crt-screen::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      var(--scanline) 2px,
+      var(--scanline) 4px
+    );
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  /* Vignette / CRT curvature */
+  .crt-screen::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(
+      ellipse at center,
+      transparent 60%,
+      rgba(0, 0, 0, 0.5) 100%
+    );
+    pointer-events: none;
+    z-index: 101;
+  }
+
+  /* Screen flicker */
+  @keyframes flicker {
+    0% { opacity: 0.97; }
+    5% { opacity: 0.95; }
+    10% { opacity: 0.98; }
+    15% { opacity: 0.96; }
+    20% { opacity: 0.97; }
+    100% { opacity: 0.97; }
+  }
+
+  .screen-content {
+    position: relative;
+    z-index: 10;
+    padding: 16px 28px;
+    height: 100%;
+    overflow-y: auto;
+    animation: flicker 4s infinite;
+    color: var(--green-bright);
+    font-size: 18px;
+    line-height: 1.4;
+    scrollbar-width: none;
+  }
+  .screen-content::-webkit-scrollbar { display: none; }
+
+  /* Phosphor glow on all text */
+  .screen-content, .screen-content * {
+    text-shadow:
+      0 0 5px rgba(51, 255, 51, 0.6),
+      0 0 10px rgba(51, 255, 51, 0.3),
+      0 0 20px rgba(51, 255, 51, 0.15);
+  }
+
+  /* ===== PIXEL ART SCENE ===== */
+  .pixel-scene {
+    position: relative;
+    width: 100%;
+    height: 160px;
+    background: var(--bg-green);
+    margin-bottom: 8px;
+    overflow: hidden;
+    image-rendering: pixelated;
+  }
+
+  /* Stars */
+  .stars {
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 50px;
+  }
+  .star {
+    position: absolute;
+    width: 2px; height: 2px;
+    background: var(--green-dim);
+  }
+
+  /* Mountains */
+  .mountain {
+    position: absolute;
+    width: 0; height: 0;
+    border-style: solid;
+  }
+  .mountain-1 {
+    bottom: 60px; left: 60px;
+    border-width: 0 70px 60px 70px;
+    border-color: transparent transparent var(--green-dark) transparent;
+  }
+  .mountain-2 {
+    bottom: 60px; left: 200px;
+    border-width: 0 100px 80px 100px;
+    border-color: transparent transparent #003300 transparent;
+  }
+  .mountain-3 {
+    bottom: 60px; left: 450px;
+    border-width: 0 60px 50px 60px;
+    border-color: transparent transparent var(--green-dark) transparent;
+  }
+  .mountain-4 {
+    bottom: 60px; right: 100px;
+    border-width: 0 90px 70px 90px;
+    border-color: transparent transparent #003300 transparent;
+  }
+  .mountain-5 {
+    bottom: 60px; right: 300px;
+    border-width: 0 55px 45px 55px;
+    border-color: transparent transparent var(--green-dark) transparent;
+  }
+  /* Snow caps */
+  .mountain-cap {
+    position: absolute;
+    width: 0; height: 0;
+    border-style: solid;
+  }
+  .cap-2 {
+    bottom: 120px; left: 280px;
+    border-width: 0 20px 18px 20px;
+    border-color: transparent transparent var(--green-mid) transparent;
+  }
+  .cap-4 {
+    bottom: 110px; right: 170px;
+    border-width: 0 16px 14px 16px;
+    border-color: transparent transparent var(--green-mid) transparent;
+  }
+
+  /* Ground / Trail */
+  .ground {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 60px;
+    background: #002200;
+    border-top: 2px solid var(--green-dim);
+  }
+
+  /* Trail path */
+  .trail-path {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--green-dim);
+  }
+  .trail-path::before {
+    content: '';
+    position: absolute;
+    bottom: -3px; left: 0; right: 0;
+    height: 2px;
+    background: repeating-linear-gradient(
+      90deg, var(--green-dim) 0px, var(--green-dim) 8px, transparent 8px, transparent 16px
+    );
+  }
+
+  /* River */
+  .river {
+    position: absolute;
+    bottom: 0;
+    left: 55%;
+    width: 60px;
+    height: 60px;
+    overflow: hidden;
+  }
+  .river-water {
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+      0deg,
+      var(--green-dark) 0px,
+      var(--green-dark) 3px,
+      #003300 3px,
+      #003300 6px
+    );
+    animation: river-flow 1s linear infinite;
+  }
+  @keyframes river-flow {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(6px); }
+  }
+
+  /* Trees */
+  .tree {
+    position: absolute;
+    bottom: 52px;
+  }
+  .tree-top {
+    width: 0; height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 14px solid var(--green-mid);
+    margin-bottom: -2px;
+  }
+  .tree-trunk {
+    width: 4px; height: 8px;
+    background: var(--green-dark);
+    margin: 0 auto;
+  }
+
+  /* Wagon - pixel art using box-shadow */
+  .wagon-container {
+    position: absolute;
+    bottom: 26px;
+    left: 25%;
+    animation: wagon-bounce 1.5s ease-in-out infinite;
+  }
+  @keyframes wagon-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+  }
+
+  .wagon-body {
+    position: relative;
+    width: 48px;
+    height: 20px;
+    background: var(--green-mid);
+    border: 2px solid var(--green-bright);
+  }
+  /* Wagon canopy */
+  .wagon-canopy {
+    position: absolute;
+    top: -16px; left: 4px;
+    width: 40px; height: 16px;
+    border: 2px solid var(--green-bright);
+    border-bottom: none;
+    border-radius: 20px 20px 0 0;
+    background: var(--green-dark);
+  }
+  /* Wagon wheels */
+  .wagon-wheel {
+    position: absolute;
+    bottom: -10px;
+    width: 12px; height: 12px;
+    border: 2px solid var(--green-bright);
+    border-radius: 50%;
+    background: transparent;
+  }
+  .wagon-wheel.left { left: 4px; }
+  .wagon-wheel.right { right: 4px; }
+  .wagon-wheel::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 2px; height: 2px;
+    background: var(--green-bright);
+    transform: translate(-50%, -50%);
+  }
+
+  /* Oxen */
+  .ox {
+    position: absolute;
+    left: -30px;
+    bottom: 2px;
+    width: 20px;
+    height: 12px;
+    background: var(--green-dim);
+    border: 1px solid var(--green-mid);
+  }
+  .ox::before {
+    content: '';
+    position: absolute;
+    right: -8px; top: -2px;
+    width: 8px; height: 8px;
+    background: var(--green-dim);
+    border: 1px solid var(--green-mid);
+  }
+  .ox-legs {
+    position: absolute;
+    bottom: -6px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 2px;
+  }
+  .ox-leg {
+    width: 3px; height: 6px;
+    background: var(--green-dim);
+  }
+
+  /* Solana Sun */
+  .sol-sun {
+    position: absolute;
+    top: 12px;
+    right: 80px;
+    width: 24px; height: 24px;
+    background: var(--green-bright);
+    border-radius: 50%;
+    box-shadow: 0 0 12px var(--green-mid), 0 0 24px var(--green-dark);
+  }
+
+  /* ===== TEXT SECTIONS ===== */
+  .divider {
+    color: var(--green-mid);
+    letter-spacing: 2px;
+    margin: 6px 0;
+    white-space: pre;
+    font-size: 18px;
+  }
+
+  .title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 16px;
+    text-align: center;
+    color: var(--green-bright);
+    letter-spacing: 3px;
+    margin: 4px 0;
+    text-shadow:
+      0 0 10px rgba(51, 255, 51, 0.8),
+      0 0 20px rgba(51, 255, 51, 0.4);
+  }
+
+  .subtitle {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    text-align: center;
+    color: var(--green-dim);
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+  }
+
+  .status-grid {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 2px 12px;
+    padding: 4px 40px;
+    font-size: 20px;
+  }
+  .status-label {
+    color: var(--green-dim);
+    text-align: right;
+  }
+  .status-value {
+    color: var(--green-bright);
+  }
+  .status-value.highlight {
+    color: var(--green-bright);
+    text-shadow:
+      0 0 8px rgba(51, 255, 51, 0.9),
+      0 0 16px rgba(51, 255, 51, 0.5);
+  }
+
+  /* Supplies bars */
+  .supplies-section {
+    padding: 4px 40px;
+  }
+  .supply-row {
+    display: flex;
+    align-items: center;
+    margin: 3px 0;
+    font-size: 18px;
+  }
+  .supply-name {
+    width: 300px;
+    color: var(--green-dim);
+    flex-shrink: 0;
+  }
+  .supply-bar {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .bar-track {
+    display: inline-block;
+    font-family: 'VT323', monospace;
+    letter-spacing: 1px;
+    font-size: 20px;
+  }
+  .bar-filled { color: var(--green-bright); }
+  .bar-empty { color: var(--green-dark); }
+  .supply-score {
+    color: var(--green-mid);
+    width: 70px;
+    text-align: right;
+  }
+
+  /* Landmarks */
+  .landmarks-section {
+    padding: 4px 40px;
+  }
+  .landmark-row {
+    display: flex;
+    align-items: center;
+    margin: 2px 0;
+    font-size: 18px;
+  }
+  .landmark-icon {
+    width: 24px;
+    color: var(--green-mid);
+    text-align: center;
+  }
+  .landmark-name {
+    width: 220px;
+    color: var(--green-dim);
+  }
+  .landmark-bar {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .landmark-score {
+    width: 70px;
+    text-align: right;
+    color: var(--green-mid);
+  }
+  .landmark-status {
+    width: 120px;
+    text-align: right;
+    font-size: 16px;
+  }
+  .status-good { color: var(--green-bright); }
+  .status-mid { color: var(--green-dim); }
+  .status-low { color: var(--green-dark); }
+
+  /* Event log */
+  .event-log {
+    padding: 4px 40px;
+    font-size: 17px;
+  }
+  .event-entry {
+    margin: 3px 0;
+    color: var(--green-mid);
+    padding-left: 16px;
+    position: relative;
+  }
+  .event-entry::before {
+    content: '>';
+    position: absolute;
+    left: 0;
+    color: var(--green-dim);
+  }
+  .event-entry.good { color: var(--green-bright); }
+  .event-entry.warn { color: var(--green-dim); }
+  .event-entry.alert {
+    color: var(--green-bright);
+    text-shadow: 0 0 8px rgba(51, 255, 51, 0.8);
+  }
+
+  /* Protocols line */
+  .protocols-line {
+    padding: 2px 40px;
+    font-size: 16px;
+    color: var(--green-dark);
+  }
+  .protocols-line span {
+    color: var(--green-dim);
+  }
+
+  /* Blinking cursor */
+  .cursor-line {
+    padding: 8px 40px;
+    font-size: 20px;
+    color: var(--green-mid);
+  }
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+  .blink-cursor {
+    display: inline-block;
+    animation: blink 1s step-end infinite;
+    color: var(--green-bright);
+  }
+
+  /* Section label */
+  .section-label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    color: var(--green-dim);
+    padding: 6px 40px 2px;
+    letter-spacing: 2px;
+  }
+
+  /* Small divider */
+  .sm-divider {
+    padding: 0 40px;
+    color: var(--green-dark);
+    font-size: 18px;
+  }
+</style>
+</head>
+<body>
+
+<div class="crt-frame">
+  <div class="crt-screen">
+    <div class="screen-content">
+
+      <!-- PIXEL ART SCENE -->
+      <div class="pixel-scene">
+        <!-- Stars -->
+        <div class="stars">
+          <div class="star" style="top:8px;left:40px"></div>
+          <div class="star" style="top:15px;left:150px"></div>
+          <div class="star" style="top:5px;left:280px"></div>
+          <div class="star" style="top:20px;left:400px"></div>
+          <div class="star" style="top:10px;left:520px"></div>
+          <div class="star" style="top:18px;left:650px"></div>
+          <div class="star" style="top:7px;left:780px"></div>
+          <div class="star" style="top:22px;left:900px"></div>
+          <div class="star" style="top:12px;left:1020px"></div>
+          <div class="star" style="top:4px;left:700px"></div>
+          <div class="star" style="top:25px;left:550px"></div>
+          <div class="star" style="top:14px;left:350px"></div>
+        </div>
+
+        <!-- Solana Sun -->
+        <div class="sol-sun"></div>
+
+        <!-- Mountains -->
+        <div class="mountain mountain-1"></div>
+        <div class="mountain mountain-2"></div>
+        <div class="mountain mountain-3"></div>
+        <div class="mountain mountain-4"></div>
+        <div class="mountain mountain-5"></div>
+        <div class="mountain-cap cap-2"></div>
+        <div class="mountain-cap cap-4"></div>
+
+        <!-- Trees -->
+        <div class="tree" style="left:30px">
+          <div class="tree-top"></div>
+          <div class="tree-trunk"></div>
+        </div>
+        <div class="tree" style="left:160px">
+          <div class="tree-top"></div>
+          <div class="tree-trunk"></div>
+        </div>
+        <div class="tree" style="left:420px">
+          <div class="tree-top"></div>
+          <div class="tree-trunk"></div>
+        </div>
+        <div class="tree" style="left:680px">
+          <div class="tree-top"></div>
+          <div class="tree-trunk"></div>
+        </div>
+        <div class="tree" style="left:850px">
+          <div class="tree-top"></div>
+          <div class="tree-trunk"></div>
+        </div>
+        <div class="tree" style="left:1000px">
+          <div class="tree-top"></div>
+          <div class="tree-trunk"></div>
+        </div>
+
+        <!-- Ground -->
+        <div class="ground">
+          <div class="trail-path"></div>
+        </div>
+
+        <!-- River -->
+        <div class="river">
+          <div class="river-water"></div>
+        </div>
+
+        <!-- Wagon -->
+        <div class="wagon-container">
+          <div style="position:relative">
+            <!-- Ox -->
+            <div class="ox">
+              <div class="ox-legs">
+                <div class="ox-leg"></div>
+                <div class="ox-leg"></div>
+                <div class="ox-leg"></div>
+              </div>
+            </div>
+            <!-- Wagon body -->
+            <div class="wagon-body">
+              <div class="wagon-canopy"></div>
+              <div class="wagon-wheel left"></div>
+              <div class="wagon-wheel right"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TITLE -->
+      <div class="title">SOLANA TRAIL</div>
+      <div class="subtitle">A BLOCKCHAIN JOURNEY</div>
+
+      <!-- STATUS REPORT -->
+      <div class="divider">&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;</div>
+
+      <div class="section-label">STATUS REPORT</div>
+
+      <div class="status-grid">
+        <span class="status-label">Wallet:</span>
+        <span class="status-value">7xKX...gAsU</span>
+
+        <span class="status-label">Score:</span>
+        <span class="status-value highlight">87 / 100</span>
+
+        <span class="status-label">Tier:</span>
+        <span class="status-value highlight">Power User</span>
+
+        <span class="status-label">Health:</span>
+        <span class="status-value" style="color:#33ff33">EXCELLENT &nbsp;(Sybil Check: CLEAN)</span>
+
+        <span class="status-label">Miles Traveled:</span>
+        <span class="status-value">18 months on-chain</span>
+
+        <span class="status-label">Protocols Discovered:</span>
+        <span class="status-value">8</span>
+
+        <span class="status-label">Network Fees Paid:</span>
+        <span class="status-value">2.30 SOL</span>
+      </div>
+
+      <div class="divider">&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;</div>
+
+      <!-- SUPPLIES -->
+      <div class="section-label">SUPPLIES</div>
+
+      <div class="supplies-section">
+        <div class="supply-row">
+          <span class="supply-name">Ammunition (Volume):</span>
+          <span class="supply-bar">
+            <span class="bar-track"><span class="bar-filled">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span><span class="bar-empty">&#9608;&#9608;</span></span>
+          </span>
+          <span class="supply-score">92/100</span>
+        </div>
+        <div class="supply-row">
+          <span class="supply-name">Food (Diversity):</span>
+          <span class="supply-bar">
+            <span class="bar-track"><span class="bar-filled">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span><span class="bar-empty">&#9608;&#9608;&#9608;</span></span>
+          </span>
+          <span class="supply-score">88/100</span>
+        </div>
+        <div class="supply-row">
+          <span class="supply-name">Clothing (Activity):</span>
+          <span class="supply-bar">
+            <span class="bar-track"><span class="bar-filled">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span><span class="bar-empty">&#9608;&#9608;&#9608;&#9608;</span></span>
+          </span>
+          <span class="supply-score">85/100</span>
+        </div>
+        <div class="supply-row">
+          <span class="supply-name">Spare Parts (Holdings):</span>
+          <span class="supply-bar">
+            <span class="bar-track"><span class="bar-filled">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span><span class="bar-empty">&#9608;&#9608;&#9608;&#9608;&#9608;</span></span>
+          </span>
+          <span class="supply-score">78/100</span>
+        </div>
+      </div>
+
+      <div class="sm-divider">&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;</div>
+
+      <!-- TRAIL LANDMARKS -->
+      <div class="section-label">TRAIL LANDMARKS DISCOVERED</div>
+
+      <div class="landmarks-section">
+        <div class="landmark-row">
+          <span class="landmark-icon">~</span>
+          <span class="landmark-name">DEX River Crossing</span>
+          <span class="landmark-bar">
+            <span class="bar-track"><span class="bar-filled">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span><span class="bar-empty">&#9608;&#9608;&#9608;&#9608;</span></span>
+          </span>
+          <span class="landmark-score">72/100</span>
+          <span class="landmark-status status-good">FORDED</span>
+        </div>
+        <div class="landmark-row">
+          <span class="landmark-icon">^</span>
+          <span class="landmark-name">Launchpad Pass</span>
+          <span class="landmark-bar">
+            <span class="bar-track"><span class="bar-filled">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span><span class="bar-empty">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span></span>
+          </span>
+          <span class="landmark-score">45/100</span>
+          <span class="landmark-status status-low">CAUTION</span>
+        </div>
+        <div class="landmark-row">
+          <span class="landmark-icon">&#9650;</span>
+          <span class="landmark-name">Aggregator Mountains</span>
+          <span class="landmark-bar">
+            <span class="bar-track"><span class="bar-filled">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span><span class="bar-empty">&#9608;&#9608;&#9608;</span></span>
+          </span>
+          <span class="landmark-score">88/100</span>
+          <span class="landmark-status status-good">CONQUERED</span>
+        </div>
+        <div class="landmark-row">
+          <span class="landmark-icon">&#9876;</span>
+          <span class="landmark-name">Perpetuals Frontier</span>
+          <span class="landmark-bar">
+            <span class="bar-track"><span class="bar-filled">&#9608;&#9608;&#9608;&#9608;</span><span class="bar-empty">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span></span>
+          </span>
+          <span class="landmark-score">30/100</span>
+          <span class="landmark-status status-low">UNEXPLORED</span>
+        </div>
+        <div class="landmark-row">
+          <span class="landmark-icon">&#9881;</span>
+          <span class="landmark-name">Trading Tools Outpost</span>
+          <span class="landmark-bar">
+            <span class="bar-track"><span class="bar-filled">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span><span class="bar-empty">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span></span>
+          </span>
+          <span class="landmark-score">55/100</span>
+          <span class="landmark-status status-mid">VISITED</span>
+        </div>
+      </div>
+
+      <div class="sm-divider">&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;</div>
+
+      <!-- TRAIL LOG -->
+      <div class="section-label">TRAIL LOG</div>
+
+      <div class="event-log">
+        <div class="event-entry good">You have successfully forded the DEX river. (Score: 72)</div>
+        <div class="event-entry good">Your party discovered the Aggregator mountains! (Score: 88)</div>
+        <div class="event-entry alert">A sybil tried to steal your supplies... Bot detection activated! Sybil eliminated.</div>
+        <div class="event-entry">You traded with Jupiter Ultra at the trading post.</div>
+        <div class="event-entry">Raydium and Orca provided fresh supplies along the route.</div>
+        <div class="event-entry warn">Launchpad Pass ahead &#8212; proceed with caution. (Score: 45)</div>
+        <div class="event-entry">Meteora, Axiom, Photon, and Pump.fun joined your wagon party.</div>
+        <div class="event-entry good">Jupiter DCA set up automatic supply runs for your journey.</div>
+      </div>
+
+      <!-- PROTOCOLS -->
+      <div class="protocols-line">
+        Trading Posts Visited: <span>Jupiter Ultra &bull; Jupiter DCA &bull; Raydium &bull; Orca &bull; Meteora &bull; Axiom &bull; Photon &bull; Pump.fun</span>
+      </div>
+
+      <!-- CURSOR -->
+      <div class="cursor-line">
+        Press SPACE to continue...<span class="blink-cursor">&#9608;</span>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // Space bar handler for fun
+  document.addEventListener('keydown', function(e) {
+    if (e.code === 'Space') {
+      e.preventDefault();
+      const log = document.querySelector('.event-log');
+      const newEntry = document.createElement('div');
+      newEntry.className = 'event-entry good';
+      const messages = [
+        'You pressed onward! The trail continues...',
+        'Your oxen are well-rested. Morale is high!',
+        'A fellow traveler shares news of a new protocol ahead.',
+        'The weather is clear. Perfect day for on-chain activity.',
+        'You found 0.01 SOL on the trail!',
+        'Your reputation precedes you. Power Users are respected here.',
+        'You have reached a new milestone. Score updated!',
+        'A wild airdrop appeared! ...but it was just dust.',
+      ];
+      newEntry.textContent = messages[Math.floor(Math.random() * messages.length)];
+      log.appendChild(newEntry);
+      newEntry.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  });
+</script>
+
+</body>
+</html>

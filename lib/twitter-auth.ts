@@ -3,9 +3,9 @@ import { cookies } from "next/headers";
 const TWITTER_CLIENT_ID = process.env.TWITTER_CLIENT_ID!;
 const TWITTER_CLIENT_SECRET = process.env.TWITTER_CLIENT_SECRET!;
 
-const TWITTER_AUTH_URL = "https://twitter.com/i/oauth2/authorize";
-const TWITTER_TOKEN_URL = "https://api.twitter.com/2/oauth2/token";
-const TWITTER_USER_URL = "https://api.twitter.com/2/users/me";
+const TWITTER_AUTH_URL = "https://x.com/i/oauth2/authorize";
+const TWITTER_TOKEN_URL = "https://api.x.com/2/oauth2/token";
+const TWITTER_USER_URL = "https://api.x.com/2/users/me";
 
 const COOKIE_SESSION = "twitter_session";
 const COOKIE_VERIFIER = "twitter_code_verifier";

@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1200, height=800">
+<title>Solana Desktop - Windows 98</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --win-bg: #c0c0c0;
+    --win-dark: #808080;
+    --win-darker: #404040;
+    --win-light: #dfdfdf;
+    --win-white: #ffffff;
+    --win-blue: #000080;
+    --win-blue-light: #1084d0;
+    --win-black: #000000;
+    --win-field: #ffffff;
+    --win-field-border-dark: #808080;
+    --win-field-border-light: #dfdfdf;
+    --progress-blue: #000080;
+    --progress-teal: #008080;
+  }
+
+  body {
+    font-family: Inter, 'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif;
+    font-size: 11px;
+    background: #008080;
+    width: 1200px;
+    height: 800px;
+    overflow: hidden;
+    cursor: default;
+    user-select: none;
+    position: relative;
+  }
+
+  /* 3D border helpers */
+  .border-outset {
+    border: 2px solid;
+    border-color: var(--win-white) var(--win-darker) var(--win-darker) var(--win-white);
+  }
+  .border-inset {
+    border: 2px solid;
+    border-color: var(--win-darker) var(--win-white) var(--win-white) var(--win-darker);
+  }
+  .border-outset-thin {
+    border: 1px solid;
+    border-color: var(--win-white) var(--win-dark) var(--win-dark) var(--win-white);
+  }
+  .border-inset-thin {
+    border: 1px solid;
+    border-color: var(--win-dark) var(--win-white) var(--win-white) var(--win-dark);
+  }
+  .field-border {
+    border: 2px solid;
+    border-color: var(--win-dark) var(--win-white) var(--win-white) var(--win-dark);
+    background: var(--win-field);
+  }
+
+  /* ===== DESKTOP ===== */
+  .desktop {
+    width: 100%;
+    height: calc(100% - 28px);
+    position: relative;
+  }
+
+  /* Desktop Icons */
+  .desktop-icon {
+    position: absolute;
+    width: 70px;
+    text-align: center;
+    cursor: pointer;
+    padding: 4px;
+    border: 1px solid transparent;
+  }
+  .desktop-icon:hover {
+    background: rgba(0,0,128,0.15);
+  }
+  .desktop-icon .icon-img {
+    width: 32px;
+    height: 32px;
+    margin: 0 auto 3px;
+    image-rendering: pixelated;
+  }
+  .desktop-icon .icon-label {
+    color: #ffffff;
+    font-size: 11px;
+    text-shadow: 1px 1px 1px #000;
+    line-height: 1.2;
+    word-wrap: break-word;
+  }
+
+  /* Pixel art icons via CSS */
+  .icon-myscore {
+    background: linear-gradient(135deg, #9945FF 0%, #14F195 100%);
+    border: 2px solid #fff;
+    border-radius: 2px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; color: #fff;
+  }
+  .icon-leaderboard {
+    background: #217346;
+    border: 2px solid #fff;
+    border-radius: 1px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700; color: #fff;
+    flex-direction: column; line-height: 1;
+  }
+  .icon-norton {
+    background: #ffd700;
+    border: 2px solid #000;
+    border-radius: 2px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .icon-recycle {
+    background: transparent;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+  }
+
+  /* ===== WINDOWS ===== */
+  .window {
+    position: absolute;
+    background: var(--win-bg);
+    border: 2px solid;
+    border-color: var(--win-white) var(--win-black) var(--win-black) var(--win-white);
+    box-shadow: inset 1px 1px 0 var(--win-light), inset -1px -1px 0 var(--win-dark);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .title-bar {
+    background: linear-gradient(90deg, var(--win-blue), var(--win-blue-light));
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 3px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 20px;
+    flex-shrink: 0;
+  }
+  .title-bar-text {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .title-bar-text .title-icon {
+    width: 14px; height: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+    flex-shrink: 0;
+  }
+  .title-bar-controls {
+    display: flex;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+  .title-bar-controls button {
+    width: 16px;
+    height: 14px;
+    background: var(--win-bg);
+    border: 2px solid;
+    border-color: var(--win-white) var(--win-darker) var(--win-darker) var(--win-white);
+    font-size: 8px;
+    font-family: Inter, sans-serif;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    color: #000;
+  }
+  .title-bar-controls button:active {
+    border-color: var(--win-darker) var(--win-white) var(--win-white) var(--win-darker);
+  }
+
+  .window-body {
+    padding: 8px;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ===== TABS ===== */
+  .tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: -2px;
+    position: relative;
+    z-index: 2;
+    padding-left: 4px;
+  }
+  .tab {
+    padding: 3px 12px 4px;
+    background: var(--win-bg);
+    border: 2px solid;
+    border-color: var(--win-white) var(--win-darker) transparent var(--win-white);
+    border-radius: 3px 3px 0 0;
+    font-size: 11px;
+    cursor: pointer;
+    position: relative;
+    top: 2px;
+    font-family: Inter, 'MS Sans Serif', sans-serif;
+  }
+  .tab.active {
+    top: 0;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--win-bg);
+    font-weight: 600;
+    z-index: 3;
+  }
+  .tab-content {
+    border: 2px solid;
+    border-color: var(--win-white) var(--win-darker) var(--win-darker) var(--win-white);
+    background: var(--win-bg);
+    padding: 12px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ===== PROGRESS BAR (Win98) ===== */
+  .win-progress {
+    height: 16px;
+    border: 2px solid;
+    border-color: var(--win-dark) var(--win-white) var(--win-white) var(--win-dark);
+    background: var(--win-field);
+    position: relative;
+    overflow: hidden;
+  }
+  .win-progress .fill {
+    height: 100%;
+    background: var(--progress-blue);
+    display: flex;
+  }
+  .win-progress .fill .block {
+    width: 8px;
+    height: 100%;
+    background: var(--progress-blue);
+    margin-right: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ===== GROUP BOX ===== */
+  .group-box {
+    border: 2px solid;
+    border-color: var(--win-dark) var(--win-white) var(--win-white) var(--win-dark);
+    padding: 12px 10px 10px;
+    margin: 6px 0;
+    position: relative;
+  }
+  .group-box .group-label {
+    position: absolute;
+    top: -7px;
+    left: 8px;
+    background: var(--win-bg);
+    padding: 0 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  /* ===== LIST VIEW ===== */
+  .list-view {
+    border: 2px solid;
+    border-color: var(--win-dark) var(--win-white) var(--win-white) var(--win-dark);
+    background: #fff;
+  }
+  .list-header {
+    display: flex;
+    background: var(--win-bg);
+    border-bottom: 1px solid var(--win-dark);
+  }
+  .list-header .col {
+    padding: 2px 6px;
+    font-size: 11px;
+    font-weight: 600;
+    border-right: 2px solid;
+    border-right-color: var(--win-dark);
+    border-left: 1px solid var(--win-white);
+  }
+  .list-row {
+    display: flex;
+    border-bottom: 1px solid #eee;
+    font-size: 11px;
+  }
+  .list-row:nth-child(even) { background: #f5f5f5; }
+  .list-row .col {
+    padding: 2px 6px;
+    border-right: 1px solid #eee;
+  }
+  .list-row .col .status-active {
+    color: #008000;
+    font-weight: 600;
+  }
+
+  /* ===== BUTTONS ===== */
+  .win-btn {
+    padding: 3px 16px;
+    background: var(--win-bg);
+    border: 2px solid;
+    border-color: var(--win-white) var(--win-darker) var(--win-darker) var(--win-white);
+    box-shadow: inset 1px 1px 0 var(--win-light), inset -1px -1px 0 var(--win-dark);
+    font-size: 11px;
+    font-family: Inter, 'MS Sans Serif', sans-serif;
+    cursor: pointer;
+  }
+  .win-btn:active {
+    border-color: var(--win-darker) var(--win-white) var(--win-white) var(--win-darker);
+    box-shadow: inset 1px 1px 0 var(--win-dark);
+  }
+  .win-btn-default {
+    outline: 1px dotted #000;
+    outline-offset: -4px;
+  }
+
+  /* ===== TASKBAR ===== */
+  .taskbar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 28px;
+    background: var(--win-bg);
+    border-top: 2px solid;
+    border-top-color: var(--win-white);
+    display: flex;
+    align-items: center;
+    padding: 2px 2px;
+    z-index: 100;
+  }
+  .start-btn {
+    height: 22px;
+    padding: 1px 6px;
+    background: var(--win-bg);
+    border: 2px solid;
+    border-color: var(--win-white) var(--win-darker) var(--win-darker) var(--win-white);
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: Inter, 'MS Sans Serif', sans-serif;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .start-btn:active {
+    border-color: var(--win-darker) var(--win-white) var(--win-white) var(--win-darker);
+  }
+  .start-flag {
+    width: 16px; height: 16px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .start-flag-grid {
+    display: grid;
+    grid-template-columns: 6px 6px;
+    grid-template-rows: 6px 6px;
+    gap: 1px;
+  }
+  .start-flag-grid div:nth-child(1) { background: #ff0000; }
+  .start-flag-grid div:nth-child(2) { background: #0000ff; }
+  .start-flag-grid div:nth-child(3) { background: #00aa00; }
+  .start-flag-grid div:nth-child(4) { background: #ffff00; }
+
+  .taskbar-divider {
+    width: 2px;
+    height: 20px;
+    margin: 0 3px;
+    border-left: 1px solid var(--win-dark);
+    border-right: 1px solid var(--win-white);
+  }
+
+  .taskbar-window-btn {
+    height: 22px;
+    padding: 1px 8px;
+    background: var(--win-bg);
+    border: 2px solid;
+    font-size: 11px;
+    font-family: Inter, 'MS Sans Serif', sans-serif;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    max-width: 160px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .taskbar-window-btn.active {
+    border-color: var(--win-darker) var(--win-white) var(--win-white) var(--win-darker);
+    box-shadow: inset 1px 1px 2px rgba(0,0,0,0.3);
+    background: #b0b0b0;
+  }
+  .taskbar-window-btn:not(.active) {
+    border-color: var(--win-white) var(--win-darker) var(--win-darker) var(--win-white);
+  }
+
+  .taskbar-tray {
+    margin-left: auto;
+    height: 22px;
+    border: 2px solid;
+    border-color: var(--win-dark) var(--win-white) var(--win-white) var(--win-dark);
+    padding: 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+  .tray-icon {
+    width: 14px; height: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+  }
+
+  /* ===== SPECIFIC LAYOUT ===== */
+  .score-big {
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--win-blue);
+    line-height: 1;
+  }
+  .tier-badge {
+    display: inline-block;
+    background: #000080;
+    color: #fff;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    border: 2px solid;
+    border-color: var(--win-white) var(--win-darker) var(--win-darker) var(--win-white);
+  }
+  .norton-clean {
+    color: #008000;
+    font-weight: 700;
+  }
+
+  .stat-row {
+    display: flex;
+    align-items: center;
+    margin: 4px 0;
+    gap: 6px;
+  }
+  .stat-label {
+    font-size: 11px;
+    width: 90px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .stat-field {
+    border: 2px solid;
+    border-color: var(--win-dark) var(--win-white) var(--win-white) var(--win-dark);
+    background: #fff;
+    padding: 1px 4px;
+    font-size: 11px;
+    flex: 1;
+    font-family: Inter, 'MS Sans Serif', sans-serif;
+  }
+
+  .progress-row {
+    display: flex;
+    align-items: center;
+    margin: 8px 0;
+    gap: 8px;
+  }
+  .progress-label {
+    width: 120px;
+    font-size: 11px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .progress-wrapper {
+    flex: 1;
+  }
+  .progress-value {
+    width: 30px;
+    font-size: 11px;
+    text-align: right;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  /* Norton scanner window */
+  .norton-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .norton-logo {
+    width: 28px; height: 28px;
+    background: #ffd700;
+    border: 2px solid #000;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 700;
+  }
+  .scan-line {
+    font-size: 11px;
+    margin: 3px 0;
+    font-family: 'Courier New', monospace;
+    color: #000;
+  }
+  .scan-line.checking { color: #808080; }
+  .scan-line.done { color: #008000; font-weight: 600; }
+  .scan-result {
+    margin-top: 8px;
+    padding: 6px;
+    background: #fff;
+    border: 2px solid;
+    border-color: var(--win-dark) var(--win-white) var(--win-white) var(--win-dark);
+    text-align: center;
+  }
+  .scan-result .big-check {
+    font-size: 24px;
+    color: #008000;
+  }
+
+  /* Tab panel display */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* Scan animation */
+  @keyframes scanBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  .scan-active {
+    animation: scanBlink 0.8s ease-in-out infinite;
+  }
+  .scan-bar {
+    height: 16px;
+    border: 2px solid;
+    border-color: var(--win-dark) var(--win-white) var(--win-white) var(--win-dark);
+    background: #fff;
+    margin: 6px 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .scan-bar-fill {
+    height: 100%;
+    width: 100%;
+    background: repeating-linear-gradient(
+      90deg,
+      #008000 0px, #008000 8px,
+      transparent 8px, transparent 10px
+    );
+    animation: fillScan 2s ease-out forwards;
+  }
+  @keyframes fillScan {
+    0% { width: 0%; }
+    100% { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== DESKTOP ===== -->
+<div class="desktop">
+
+  <!-- Desktop Icons -->
+  <div class="desktop-icon" style="top: 16px; left: 16px;">
+    <div class="icon-img icon-myscore">87</div>
+    <div class="icon-label">My Score</div>
+  </div>
+  <div class="desktop-icon" style="top: 100px; left: 16px;">
+    <div class="icon-img icon-leaderboard"><span style="font-size:7px;">XLS</span></div>
+    <div class="icon-label">Leaderboard.xls</div>
+  </div>
+  <div class="desktop-icon" style="top: 184px; left: 16px;">
+    <div class="icon-img icon-norton">&#x1f6e1;</div>
+    <div class="icon-label">Norton Sybil Scan</div>
+  </div>
+  <div class="desktop-icon" style="top: 268px; left: 16px;">
+    <div class="icon-img icon-recycle">&#128465;</div>
+    <div class="icon-label">Recycle Bin</div>
+  </div>
+
+  <!-- ===== MAIN WINDOW: My Score Properties ===== -->
+  <div class="window" style="top: 30px; left: 120px; width: 540px; height: 490px;">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <div class="title-icon" style="background: linear-gradient(135deg, #9945FF, #14F195); width:14px;height:14px;border-radius:2px;"></div>
+        My Score - Properties
+      </div>
+      <div class="title-bar-controls">
+        <button>&#8211;</button>
+        <button>&#9633;</button>
+        <button>&#10005;</button>
+      </div>
+    </div>
+    <div class="window-body">
+      <!-- Tabs -->
+      <div class="tabs">
+        <div class="tab active" onclick="showTab(0)">General</div>
+        <div class="tab" onclick="showTab(1)">Score Breakdown</div>
+        <div class="tab" onclick="showTab(2)">Sector Activity</div>
+        <div class="tab" onclick="showTab(3)">Protocols</div>
+      </div>
+
+      <!-- Tab Panels -->
+      <div class="tab-content" style="height: 390px; overflow: hidden;">
+
+        <!-- GENERAL TAB -->
+        <div class="tab-panel active" id="tab0">
+          <div style="display: flex; gap: 16px; align-items: flex-start;">
+            <!-- Left: Score display -->
+            <div style="text-align: center; padding: 10px;">
+              <div style="width: 90px; height: 90px; background: linear-gradient(135deg, #9945FF 0%, #14F195 100%); border: 3px solid; border-color: var(--win-white) var(--win-darker) var(--win-darker) var(--win-white); display: flex; align-items: center; justify-content: center; margin: 0 auto 8px;">
+                <div class="score-big" style="color: #fff; text-shadow: 2px 2px 0 rgba(0,0,0,0.4);">87</div>
+              </div>
+              <div class="tier-badge">POWER USER</div>
+            </div>
+            <!-- Right: Details -->
+            <div style="flex: 1;">
+              <div class="group-box" style="margin-top: 2px;">
+                <div class="group-label">Wallet Information</div>
+                <div class="stat-row">
+                  <div class="stat-label">Address:</div>
+                  <div class="stat-field">7xKX...gAsU</div>
+                </div>
+                <div class="stat-row">
+                  <div class="stat-label">Score:</div>
+                  <div class="stat-field" style="font-weight: 700; color: #000080;">87 / 100</div>
+                </div>
+                <div class="stat-row">
+                  <div class="stat-label">Tier:</div>
+                  <div class="stat-field" style="font-weight: 600;">Power User</div>
+                </div>
+              </div>
+              <div class="group-box">
+                <div class="group-label">Security &amp; Stats</div>
+                <div class="stat-row">
+                  <div class="stat-label">Norton Scan:</div>
+                  <div class="stat-field"><span class="norton-clean">CLEAN &#x2713;</span></div>
+                </div>
+                <div class="stat-row">
+                  <div class="stat-label">Sybil Check:</div>
+                  <div class="stat-field"><span style="color:#008000; font-weight:600;">PASS</span></div>
+                </div>
+                <div class="stat-row">
+                  <div class="stat-label">Network Fees:</div>
+                  <div class="stat-field">2.30 SOL</div>
+                </div>
+                <div class="stat-row">
+                  <div class="stat-label">Wallet Age:</div>
+                  <div class="stat-field">18 months</div>
+                </div>
+                <div class="stat-row">
+                  <div class="stat-label">Protocols Used:</div>
+                  <div class="stat-field">8</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 6px; margin-top: 8px;">
+            <button class="win-btn win-btn-default">OK</button>
+            <button class="win-btn">Cancel</button>
+            <button class="win-btn">Apply</button>
+          </div>
+        </div>
+
+        <!-- SCORE BREAKDOWN TAB -->
+        <div class="tab-panel" id="tab1">
+          <div class="group-box" style="margin-top: 8px;">
+            <div class="group-label">Score Components</div>
+            <div style="padding: 6px 0;">
+              <div class="progress-row">
+                <div class="progress-label">Volume:</div>
+                <div class="progress-wrapper">
+                  <div class="win-progress"><div class="fill" style="width: 92%;"></div></div>
+                </div>
+                <div class="progress-value">92</div>
+              </div>
+              <div class="progress-row">
+                <div class="progress-label">Protocol Diversity:</div>
+                <div class="progress-wrapper">
+                  <div class="win-progress"><div class="fill" style="width: 88%;"></div></div>
+                </div>
+                <div class="progress-value">88</div>
+              </div>
+              <div class="progress-row">
+                <div class="progress-label">Activity:</div>
+                <div class="progress-wrapper">
+                  <div class="win-progress"><div class="fill" style="width: 85%;"></div></div>
+                </div>
+                <div class="progress-value">85</div>
+              </div>
+              <div class="progress-row">
+                <div class="progress-label">Holdings:</div>
+                <div class="progress-wrapper">
+                  <div class="win-progress"><div class="fill" style="width: 78%;"></div></div>
+                </div>
+                <div class="progress-value">78</div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top: 12px; padding: 8px; background: #fff; border: 2px solid; border-color: var(--win-dark) var(--win-white) var(--win-white) var(--win-dark); font-size: 11px;">
+            <strong>&#9432; Composite Score:</strong> Your overall score of <strong>87</strong> is calculated from the weighted average of these four components. You are in the top 15% of all scanned wallets.
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 6px; margin-top: 12px;">
+            <button class="win-btn win-btn-default">OK</button>
+            <button class="win-btn">Cancel</button>
+            <button class="win-btn">Apply</button>
+          </div>
+        </div>
+
+        <!-- SECTOR ACTIVITY TAB -->
+        <div class="tab-panel" id="tab2">
+          <div class="group-box" style="margin-top: 8px;">
+            <div class="group-label">Sector Scores</div>
+            <div style="padding: 6px 0;">
+              <div class="progress-row">
+                <div class="progress-label">DEX / Spot:</div>
+                <div class="progress-wrapper">
+                  <div class="win-progress"><div class="fill" style="width: 72%; background: var(--progress-teal);"></div></div>
+                </div>
+                <div class="progress-value">72</div>
+              </div>
+              <div class="progress-row">
+                <div class="progress-label">Launchpad:</div>
+                <div class="progress-wrapper">
+                  <div class="win-progress"><div class="fill" style="width: 45%; background: var(--progress-teal);"></div></div>
+                </div>
+                <div class="progress-value">45</div>
+              </div>
+              <div class="progress-row">
+                <div class="progress-label">Aggregator:</div>
+                <div class="progress-wrapper">
+                  <div class="win-progress"><div class="fill" style="width: 88%; background: var(--progress-teal);"></div></div>
+                </div>
+                <div class="progress-value">88</div>
+              </div>
+              <div class="progress-row">
+                <div class="progress-label">Perpetuals:</div>
+                <div class="progress-wrapper">
+                  <div class="win-progress"><div class="fill" style="width: 30%; background: var(--progress-teal);"></div></div>
+                </div>
+                <div class="progress-value">30</div>
+              </div>
+              <div class="progress-row">
+                <div class="progress-label">Trading Tools:</div>
+                <div class="progress-wrapper">
+                  <div class="win-progress"><div class="fill" style="width: 55%; background: var(--progress-teal);"></div></div>
+                </div>
+                <div class="progress-value">55</div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top: 8px; padding: 8px; background: #fff; border: 2px solid; border-color: var(--win-dark) var(--win-white) var(--win-white) var(--win-dark); font-size: 11px;">
+            <strong>&#9432; Strongest Sector:</strong> Aggregator (88) &mdash; <strong>Weakest:</strong> Perpetuals (30). Consider exploring perp protocols to improve your overall score.
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 6px; margin-top: 12px;">
+            <button class="win-btn win-btn-default">OK</button>
+            <button class="win-btn">Cancel</button>
+            <button class="win-btn">Apply</button>
+          </div>
+        </div>
+
+        <!-- PROTOCOLS TAB -->
+        <div class="tab-panel" id="tab3">
+          <div style="font-size: 11px; margin-bottom: 6px;">Protocols detected for wallet <strong>7xKX...gAsU</strong>:</div>
+          <div class="list-view">
+            <div class="list-header">
+              <div class="col" style="width: 28px; text-align: center; font-size: 9px;">&#128196;</div>
+              <div class="col" style="width: 160px;">Name</div>
+              <div class="col" style="width: 140px;">Sector</div>
+              <div class="col" style="flex: 1;">Status</div>
+            </div>
+            <div class="list-row">
+              <div class="col" style="width: 28px; text-align: center;">&#128311;</div>
+              <div class="col" style="width: 160px;">Jupiter</div>
+              <div class="col" style="width: 140px;">Aggregator</div>
+              <div class="col" style="flex: 1;"><span class="status-active">Active</span></div>
+            </div>
+            <div class="list-row">
+              <div class="col" style="width: 28px; text-align: center;">&#128311;</div>
+              <div class="col" style="width: 160px;">Raydium</div>
+              <div class="col" style="width: 140px;">DEX / Spot</div>
+              <div class="col" style="flex: 1;"><span class="status-active">Active</span></div>
+            </div>
+            <div class="list-row">
+              <div class="col" style="width: 28px; text-align: center;">&#128311;</div>
+              <div class="col" style="width: 160px;">Marinade Finance</div>
+              <div class="col" style="width: 140px;">Staking</div>
+              <div class="col" style="flex: 1;"><span class="status-active">Active</span></div>
+            </div>
+            <div class="list-row">
+              <div class="col" style="width: 28px; text-align: center;">&#128311;</div>
+              <div class="col" style="width: 160px;">Drift Protocol</div>
+              <div class="col" style="width: 140px;">Perpetuals</div>
+              <div class="col" style="flex: 1;"><span class="status-active">Active</span></div>
+            </div>
+            <div class="list-row">
+              <div class="col" style="width: 28px; text-align: center;">&#128311;</div>
+              <div class="col" style="width: 160px;">Orca</div>
+              <div class="col" style="width: 140px;">DEX / Spot</div>
+              <div class="col" style="flex: 1;"><span class="status-active">Active</span></div>
+            </div>
+            <div class="list-row">
+              <div class="col" style="width: 28px; text-align: center;">&#128311;</div>
+              <div class="col" style="width: 160px;">Tensor</div>
+              <div class="col" style="width: 140px;">Trading Tools</div>
+              <div class="col" style="flex: 1;"><span class="status-active">Active</span></div>
+            </div>
+            <div class="list-row">
+              <div class="col" style="width: 28px; text-align: center;">&#128311;</div>
+              <div class="col" style="width: 160px;">Solend</div>
+              <div class="col" style="width: 140px;">Lending</div>
+              <div class="col" style="flex: 1;"><span class="status-active">Active</span></div>
+            </div>
+            <div class="list-row">
+              <div class="col" style="width: 28px; text-align: center;">&#128311;</div>
+              <div class="col" style="width: 160px;">Pump.fun</div>
+              <div class="col" style="width: 140px;">Launchpad</div>
+              <div class="col" style="flex: 1;"><span class="status-active">Active</span></div>
+            </div>
+          </div>
+          <div style="font-size: 11px; margin-top: 6px; color: #808080;">8 object(s) &nbsp;&nbsp; Total protocols detected</div>
+          <div style="display: flex; justify-content: flex-end; gap: 6px; margin-top: 8px;">
+            <button class="win-btn win-btn-default">OK</button>
+            <button class="win-btn">Cancel</button>
+            <button class="win-btn">Apply</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== NORTON SYBIL SCANNER WINDOW ===== -->
+  <div class="window" style="top: 220px; left: 700px; width: 340px; height: 300px;">
+    <div class="title-bar" style="background: linear-gradient(90deg, #808000, #c0c000);">
+      <div class="title-bar-text">
+        <div class="title-icon">&#x1f6e1;</div>
+        Norton Sybil Scanner 98
+      </div>
+      <div class="title-bar-controls">
+        <button>&#8211;</button>
+        <button>&#9633;</button>
+        <button>&#10005;</button>
+      </div>
+    </div>
+    <div class="window-body">
+      <div class="norton-header">
+        <div class="norton-logo">&#x2713;</div>
+        <div>
+          <div style="font-size: 13px; font-weight: 700;">Norton Sybil Scanner</div>
+          <div style="font-size: 10px; color: #808080;">Version 4.2.1 - Solana Edition</div>
+        </div>
+      </div>
+
+      <div class="group-box" style="margin: 4px 0;">
+        <div class="group-label">Scan Progress</div>
+        <div class="scan-line checking">Scanning wallet 7xKX...gAsU</div>
+        <div class="scan-bar"><div class="scan-bar-fill"></div></div>
+        <div class="scan-line checking">Checking transaction patterns... &#x2713;</div>
+        <div class="scan-line checking">Analyzing protocol diversity... &#x2713;</div>
+        <div class="scan-line checking">Verifying wallet age... &#x2713;</div>
+        <div class="scan-line checking">Cross-referencing clusters... &#x2713;</div>
+        <div class="scan-line done">Scan complete. No threats found.</div>
+      </div>
+
+      <div class="scan-result">
+        <div class="big-check">&#x2705;</div>
+        <div style="font-size: 12px; font-weight: 700; color: #008000; margin: 2px 0;">CLEAN - No Sybil Activity Detected</div>
+        <div style="font-size: 10px; color: #808080;">Classification: Legitimate User</div>
+      </div>
+
+      <div style="display: flex; justify-content: center; gap: 6px; margin-top: 8px;">
+        <button class="win-btn win-btn-default">Close</button>
+        <button class="win-btn">Rescan</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== TASKBAR ===== -->
+<div class="taskbar">
+  <button class="start-btn">
+    <div class="start-flag">
+      <div class="start-flag-grid">
+        <div></div><div></div><div></div><div></div>
+      </div>
+    </div>
+    Start
+  </button>
+  <div class="taskbar-divider"></div>
+  <button class="taskbar-window-btn active" style="border-color: var(--win-darker) var(--win-white) var(--win-white) var(--win-darker); box-shadow: inset 1px 1px 2px rgba(0,0,0,0.3); background: #b0b0b0;">
+    <span style="width:12px;height:12px;background:linear-gradient(135deg,#9945FF,#14F195);display:inline-block;border-radius:1px;flex-shrink:0;"></span>
+    My Score - Properties
+  </button>
+  <button class="taskbar-window-btn" style="border-color: var(--win-white) var(--win-darker) var(--win-darker) var(--win-white);">
+    <span style="font-size:10px;">&#x1f6e1;</span>
+    Norton Sybil Scanner
+  </button>
+  <div class="taskbar-tray">
+    <div class="tray-icon" title="Phantom Wallet" style="color: #9945FF; font-weight: 700;">&#9830;</div>
+    <div class="tray-icon" title="Solana Network" style="font-size: 8px; font-weight: 700; color: #14F195;">SOL</div>
+    <div class="tray-icon" title="Volume">&#128266;</div>
+    <span>3:42 PM</span>
+  </div>
+</div>
+
+<script>
+function showTab(index) {
+  // Update tab active state
+  const tabs = document.querySelectorAll('.tab');
+  tabs.forEach((t, i) => {
+    t.classList.toggle('active', i === index);
+  });
+  // Update panel active state
+  const panels = document.querySelectorAll('.tab-panel');
+  panels.forEach((p, i) => {
+    p.classList.toggle('active', i === index);
+  });
+}
+</script>
+
+</body>
+</html>

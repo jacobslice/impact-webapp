@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1200, height=800">
+<title>SolScape — RuneScape Themed Wallet Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --rs-dark: #1b1510;
+    --rs-brown1: #2b2218;
+    --rs-brown2: #3b3024;
+    --rs-brown3: #4a3c2d;
+    --rs-brown4: #5c4b38;
+    --rs-gold: #ff981f;
+    --rs-gold-light: #ffb347;
+    --rs-tan: #c8aa6e;
+    --rs-tan-dark: #9e8559;
+    --rs-green: #00ff00;
+    --rs-red: #ff3030;
+    --rs-white: #f5e6c8;
+    --rs-black: #0d0a07;
+    --rs-chat-bg: #3b3024;
+    --rs-border: #5c4b38;
+    --rs-border-dark: #2b2218;
+    --rs-panel: linear-gradient(180deg, #3b3024 0%, #2e251b 100%);
+    --rs-header: linear-gradient(180deg, #4a3c2d 0%, #3b3024 100%);
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    background: var(--rs-dark);
+    color: var(--rs-tan);
+    width: 1200px;
+    height: 800px;
+    margin: 0 auto;
+    overflow: hidden;
+    image-rendering: auto;
+    letter-spacing: 0.02em;
+    user-select: none;
+    position: relative;
+  }
+
+  /* Stone texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px),
+      repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.02) 2px, rgba(0,0,0,0.02) 4px);
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  /* RS Panel styling */
+  .rs-panel {
+    background: var(--rs-panel);
+    border: 2px solid var(--rs-border);
+    border-top-color: var(--rs-brown4);
+    border-left-color: var(--rs-brown4);
+    border-right-color: var(--rs-border-dark);
+    border-bottom-color: var(--rs-border-dark);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 2px 4px rgba(0,0,0,0.5);
+    position: relative;
+  }
+
+  .rs-panel::after {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    border: 1px solid rgba(255,255,255,0.03);
+    pointer-events: none;
+  }
+
+  /* Inner bevel effect */
+  .rs-inner {
+    background: linear-gradient(180deg, #2b2218 0%, #241d14 100%);
+    border: 2px solid var(--rs-border-dark);
+    border-top-color: #1b1510;
+    border-left-color: #1b1510;
+    border-right-color: var(--rs-brown3);
+    border-bottom-color: var(--rs-brown3);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
+  }
+
+  /* Gold header text */
+  .rs-title {
+    font-weight: 900;
+    font-size: 13px;
+    color: var(--rs-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    text-shadow: 1px 1px 0 #000, -1px -1px 0 rgba(0,0,0,0.3);
+    text-align: center;
+    padding: 5px 0;
+    background: var(--rs-header);
+    border-bottom: 2px solid var(--rs-border-dark);
+    margin: -1px -1px 0 -1px;
+  }
+
+  /* Top Banner */
+  .top-banner {
+    background: linear-gradient(180deg, #4a3c2d 0%, #3b3024 40%, #2b2218 100%);
+    border-bottom: 3px solid var(--rs-gold);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.6), inset 0 -1px 0 rgba(255,152,31,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 52px;
+    position: relative;
+  }
+
+  .top-banner::before, .top-banner::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--rs-gold), transparent);
+  }
+  .top-banner::before { left: 200px; }
+  .top-banner::after { right: 200px; }
+
+  .logo-text {
+    font-weight: 900;
+    font-size: 28px;
+    color: var(--rs-gold);
+    letter-spacing: 0.15em;
+    text-shadow:
+      2px 2px 0 #000,
+      -1px -1px 0 #000,
+      1px -1px 0 #000,
+      -1px 1px 0 #000,
+      0 0 10px rgba(255,152,31,0.4);
+    text-transform: uppercase;
+  }
+
+  .logo-sub {
+    font-size: 10px;
+    color: var(--rs-tan-dark);
+    letter-spacing: 0.3em;
+    text-shadow: 1px 1px 0 #000;
+    position: absolute;
+    bottom: 6px;
+    right: 240px;
+  }
+
+  .logo-sword-l, .logo-sword-r {
+    font-size: 22px;
+    color: var(--rs-gold);
+    text-shadow: 1px 1px 0 #000;
+    margin: 0 12px;
+  }
+
+  /* Main layout */
+  .main-area {
+    display: grid;
+    grid-template-columns: 260px 1fr 240px;
+    grid-template-rows: 1fr;
+    gap: 4px;
+    padding: 4px;
+    height: calc(800px - 52px - 140px);
+  }
+
+  /* === LEFT PANEL: Combat Stats === */
+  .left-panel { display: flex; flex-direction: column; gap: 4px; }
+
+  .combat-level-display {
+    text-align: center;
+    padding: 12px 8px;
+  }
+
+  .combat-hex {
+    width: 90px;
+    height: 90px;
+    margin: 0 auto 8px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .combat-hex-bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #3b3024, #2b2218);
+    clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+    border: none;
+  }
+
+  .combat-hex-border {
+    position: absolute;
+    inset: -3px;
+    background: linear-gradient(135deg, var(--rs-gold), #b36e0f);
+    clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+    z-index: 0;
+  }
+
+  .combat-hex-bg { z-index: 1; }
+
+  .combat-number {
+    position: relative;
+    z-index: 2;
+    font-size: 36px;
+    font-weight: 900;
+    color: var(--rs-gold);
+    text-shadow: 2px 2px 0 #000, 0 0 8px rgba(255,152,31,0.5);
+    line-height: 1;
+  }
+
+  .combat-label {
+    font-size: 11px;
+    color: var(--rs-tan-dark);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .stat-row {
+    display: flex;
+    align-items: center;
+    padding: 6px 10px;
+    gap: 8px;
+    border-bottom: 1px solid rgba(92,75,56,0.3);
+  }
+
+  .stat-row:last-child { border-bottom: none; }
+
+  .stat-icon {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    background: var(--rs-brown2);
+    border: 1px solid var(--rs-border);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .stat-info { flex: 1; min-width: 0; }
+
+  .stat-name {
+    font-size: 11px;
+    color: var(--rs-gold);
+    text-shadow: 1px 1px 0 #000;
+    letter-spacing: 0.05em;
+  }
+
+  .stat-bar-track {
+    height: 10px;
+    background: var(--rs-black);
+    border: 1px solid var(--rs-border-dark);
+    margin-top: 2px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-bar-fill {
+    height: 100%;
+    background: linear-gradient(180deg, #00cc00 0%, #009900 50%, #006600 100%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
+    transition: width 0.3s;
+  }
+
+  .stat-bar-fill.high { background: linear-gradient(180deg, #00cc00 0%, #009900 50%, #006600 100%); }
+  .stat-bar-fill.mid { background: linear-gradient(180deg, #cccc00 0%, #999900 50%, #666600 100%); }
+  .stat-bar-fill.low { background: linear-gradient(180deg, #cc3300 0%, #993300 50%, #662200 100%); }
+
+  .stat-level {
+    font-size: 12px;
+    font-weight: 900;
+    color: var(--rs-white);
+    text-shadow: 1px 1px 0 #000;
+    min-width: 24px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* Misc stats */
+  .misc-stats { padding: 6px 10px; }
+
+  .misc-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 0;
+    font-size: 10px;
+    border-bottom: 1px solid rgba(92,75,56,0.2);
+  }
+
+  .misc-label { color: var(--rs-tan-dark); text-shadow: 1px 1px 0 #000; }
+  .misc-value { color: var(--rs-white); text-shadow: 1px 1px 0 #000; }
+  .misc-value.pass { color: var(--rs-green); }
+
+  /* === CENTER PANEL === */
+  .center-panel { display: flex; flex-direction: column; gap: 4px; }
+
+  .character-display {
+    text-align: center;
+    padding: 15px 10px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  /* Pixel art character */
+  .pixel-avatar {
+    width: 80px;
+    height: 96px;
+    margin: 0 auto 10px;
+    position: relative;
+    image-rendering: pixelated;
+  }
+
+  .pixel-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 8px);
+    grid-template-rows: repeat(12, 8px);
+    gap: 0;
+  }
+
+  .px { width: 8px; height: 8px; }
+  .px-skin { background: #c8a86e; }
+  .px-hair { background: #8b4513; }
+  .px-armor { background: #7b5ccc; }
+  .px-armor2 { background: #9945ff; }
+  .px-boots { background: #5c4b38; }
+  .px-gold { background: var(--rs-gold); }
+  .px-dark { background: #2b2218; }
+  .px-cape { background: #14f195; }
+  .px-eye { background: #fff; }
+  .px-empty { background: transparent; }
+
+  .char-wallet {
+    font-size: 12px;
+    color: var(--rs-gold);
+    text-shadow: 1px 1px 0 #000;
+    margin-bottom: 4px;
+    letter-spacing: 0.05em;
+  }
+
+  .char-title {
+    font-size: 14px;
+    font-weight: 900;
+    color: var(--rs-gold-light);
+    text-shadow: 1px 1px 0 #000, 0 0 6px rgba(255,152,31,0.3);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .char-tier {
+    font-size: 10px;
+    color: #c8aa6e;
+    letter-spacing: 0.15em;
+    text-shadow: 1px 1px 0 #000;
+    margin-bottom: 8px;
+  }
+
+  .bot-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(0,255,0,0.08);
+    border: 1px solid rgba(0,255,0,0.25);
+    padding: 4px 12px;
+    font-size: 10px;
+    color: var(--rs-green);
+    text-shadow: 1px 1px 0 #000;
+    letter-spacing: 0.1em;
+  }
+
+  /* Inventory panel */
+  .inventory-section { padding: 6px; }
+
+  .inventory-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 3px;
+    padding: 6px;
+  }
+
+  .inv-slot {
+    aspect-ratio: 1;
+    background: linear-gradient(135deg, #241d14, #1b1510);
+    border: 2px solid var(--rs-border-dark);
+    border-top-color: #1b1510;
+    border-left-color: #1b1510;
+    border-right-color: var(--rs-brown3);
+    border-bottom-color: var(--rs-brown3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    position: relative;
+    cursor: pointer;
+    min-height: 48px;
+  }
+
+  .inv-slot:hover {
+    border-color: var(--rs-gold);
+    box-shadow: inset 0 0 6px rgba(255,152,31,0.2);
+  }
+
+  .inv-slot-label {
+    font-size: 7px;
+    color: var(--rs-tan-dark);
+    text-shadow: 1px 1px 0 #000;
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+    text-transform: uppercase;
+  }
+
+  .inv-slot-letter {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 900;
+    border-radius: 2px;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+  }
+
+  /* Protocol colors */
+  .proto-dex { background: #9945ff; color: #fff; }
+  .proto-lp { background: #ff981f; color: #fff; }
+  .proto-agg { background: #14f195; color: #000; }
+  .proto-perp { background: #ff3030; color: #fff; }
+  .proto-tool { background: #00d1ff; color: #000; }
+  .proto-nft { background: #ff6bcc; color: #fff; }
+  .proto-stake { background: #c8aa6e; color: #000; }
+  .proto-lend { background: #66cc33; color: #000; }
+
+  /* === RIGHT PANEL: Skills === */
+  .right-panel { display: flex; flex-direction: column; gap: 4px; }
+
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 3px;
+    padding: 6px;
+  }
+
+  .skill-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    background: rgba(0,0,0,0.15);
+    border: 1px solid rgba(92,75,56,0.2);
+  }
+
+  .skill-icon {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    background: var(--rs-brown2);
+    border: 1px solid var(--rs-border);
+    flex-shrink: 0;
+  }
+
+  .skill-info { flex: 1; }
+
+  .skill-name {
+    font-size: 10px;
+    color: var(--rs-gold);
+    text-shadow: 1px 1px 0 #000;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .skill-bar-track {
+    height: 8px;
+    background: var(--rs-black);
+    border: 1px solid var(--rs-border-dark);
+    margin-top: 2px;
+  }
+
+  .skill-bar-fill {
+    height: 100%;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);
+  }
+
+  .skill-level {
+    font-size: 14px;
+    font-weight: 900;
+    color: var(--rs-white);
+    text-shadow: 1px 1px 0 #000;
+    min-width: 24px;
+    text-align: right;
+  }
+
+  /* Highscores */
+  .highscores { padding: 0; }
+
+  .hs-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px;
+  }
+
+  .hs-table th {
+    background: var(--rs-header);
+    color: var(--rs-gold);
+    padding: 4px 6px;
+    text-align: left;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-shadow: 1px 1px 0 #000;
+    border-bottom: 1px solid var(--rs-border);
+  }
+
+  .hs-table td {
+    padding: 4px 6px;
+    border-bottom: 1px solid rgba(92,75,56,0.15);
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .hs-table tr:hover td { background: rgba(255,152,31,0.05); }
+
+  .hs-rank { color: var(--rs-tan-dark); font-weight: 900; width: 30px; }
+  .hs-rank.gold { color: #ffd700; }
+  .hs-rank.silver { color: #c0c0c0; }
+  .hs-rank.bronze { color: #cd7f32; }
+  .hs-name { color: var(--rs-white); }
+  .hs-score { color: var(--rs-green); text-align: right; font-weight: 900; }
+
+  /* === BOTTOM: Chat Box === */
+  .chat-area {
+    height: 140px;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, #2b2218, #1b1510);
+    border-top: 3px solid var(--rs-border);
+  }
+
+  .chat-tabs {
+    display: flex;
+    background: var(--rs-brown2);
+    border-bottom: 2px solid var(--rs-border-dark);
+  }
+
+  .chat-tab {
+    padding: 4px 14px;
+    font-size: 10px;
+    color: var(--rs-tan-dark);
+    letter-spacing: 0.1em;
+    text-shadow: 1px 1px 0 #000;
+    cursor: pointer;
+    border-right: 1px solid var(--rs-border-dark);
+    text-transform: uppercase;
+  }
+
+  .chat-tab.active {
+    color: var(--rs-gold);
+    background: var(--rs-brown3);
+    border-bottom: 2px solid var(--rs-gold);
+    margin-bottom: -2px;
+  }
+
+  .chat-messages {
+    flex: 1;
+    padding: 6px 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 2px;
+  }
+
+  .chat-msg {
+    font-size: 11px;
+    text-shadow: 1px 1px 0 #000;
+    line-height: 1.5;
+  }
+
+  .chat-msg .tag-system { color: #ff981f; }
+  .chat-msg .tag-bot { color: #00ff00; }
+  .chat-msg .tag-achieve { color: #ff3030; }
+  .chat-msg .tag-trade { color: #8080ff; }
+  .chat-msg .msg-text { color: var(--rs-white); }
+  .chat-msg .msg-green { color: var(--rs-green); }
+  .chat-msg .msg-gold { color: var(--rs-gold); }
+
+  .chat-input-row {
+    display: flex;
+    align-items: center;
+    border-top: 1px solid var(--rs-border-dark);
+    background: rgba(0,0,0,0.2);
+    padding: 3px 8px;
+  }
+
+  .chat-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--rs-white);
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    outline: none;
+    letter-spacing: 0.02em;
+  }
+
+  .chat-input::placeholder { color: var(--rs-tan-dark); }
+
+  /* Context menu */
+  .context-menu {
+    position: absolute;
+    top: 160px;
+    left: 540px;
+    background: var(--rs-brown2);
+    border: 2px solid var(--rs-border);
+    border-top-color: var(--rs-brown4);
+    border-left-color: var(--rs-brown4);
+    z-index: 50;
+    min-width: 160px;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.6);
+  }
+
+  .ctx-title {
+    background: var(--rs-brown3);
+    padding: 4px 10px;
+    font-size: 10px;
+    color: var(--rs-gold);
+    text-shadow: 1px 1px 0 #000;
+    letter-spacing: 0.08em;
+    border-bottom: 1px solid var(--rs-border-dark);
+  }
+
+  .ctx-item {
+    padding: 3px 10px;
+    font-size: 10px;
+    color: var(--rs-white);
+    text-shadow: 1px 1px 0 #000;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+  }
+
+  .ctx-item:hover { background: rgba(255,152,31,0.1); }
+  .ctx-item .ctx-action { color: var(--rs-gold); }
+
+  /* Gold ornamental divider */
+  .ornament {
+    height: 4px;
+    background: linear-gradient(90deg, transparent 0%, var(--rs-gold) 20%, var(--rs-gold-light) 50%, var(--rs-gold) 80%, transparent 100%);
+    opacity: 0.3;
+    margin: 0 20px;
+  }
+
+  /* Minimap (top-right decoration) */
+  .minimap {
+    position: absolute;
+    top: 56px;
+    right: 8px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #1a2a1a 0%, #0a150a 100%);
+    border: 3px solid var(--rs-gold);
+    box-shadow: 0 0 0 2px var(--rs-border-dark), 0 2px 6px rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    overflow: hidden;
+  }
+
+  .minimap-compass {
+    font-size: 10px;
+    font-weight: 900;
+    color: var(--rs-gold);
+    text-shadow: 0 0 3px rgba(255,152,31,0.5);
+    letter-spacing: 0;
+  }
+
+  .minimap-dot {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #fff;
+    border-radius: 50%;
+  }
+
+  /* XP drop animation */
+  @keyframes xpDrop {
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-30px); }
+  }
+
+  .xp-drop {
+    position: absolute;
+    top: 80px;
+    right: 70px;
+    font-size: 12px;
+    font-weight: 900;
+    color: var(--rs-green);
+    text-shadow: 1px 1px 0 #000;
+    animation: xpDrop 2s ease-out infinite;
+    z-index: 20;
+  }
+
+  /* Tier badge */
+  .tier-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 10px;
+    background: linear-gradient(180deg, rgba(153,69,255,0.2), rgba(153,69,255,0.05));
+    border: 1px solid rgba(153,69,255,0.4);
+    font-size: 10px;
+    color: #c8a0ff;
+    text-shadow: 1px 1px 0 #000;
+    letter-spacing: 0.08em;
+  }
+
+  /* Run energy orb */
+  .orb-container {
+    position: absolute;
+    top: 110px;
+    right: 14px;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .orb {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid var(--rs-gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: 900;
+    text-shadow: 1px 1px 0 #000;
+    box-shadow: 0 0 0 1px var(--rs-border-dark);
+  }
+
+  .orb-hp {
+    background: radial-gradient(circle, #440000, #220000);
+    color: var(--rs-green);
+  }
+
+  .orb-pray {
+    background: radial-gradient(circle, #003344, #001a22);
+    color: #00d1ff;
+  }
+
+  .orb-run {
+    background: radial-gradient(circle, #333300, #1a1a00);
+    color: var(--rs-gold);
+  }
+</style>
+</head>
+<body>
+
+<!-- XP Drop -->
+<div class="xp-drop">+87 xp</div>
+
+<!-- Minimap -->
+<div class="minimap">
+  <span class="minimap-compass">SOL</span>
+  <div class="minimap-dot" style="top: 12px; left: 18px;"></div>
+  <div class="minimap-dot" style="top: 28px; left: 30px; background: #ff0;"></div>
+</div>
+
+<!-- Orbs -->
+<div class="orb-container">
+  <div class="orb orb-hp">87</div>
+  <div class="orb orb-pray">8</div>
+  <div class="orb orb-run">100</div>
+</div>
+
+<!-- Context Menu -->
+<div class="context-menu">
+  <div class="ctx-title">7xKX...gAsU</div>
+  <div class="ctx-item"><span class="ctx-action">Examine</span> wallet</div>
+  <div class="ctx-item"><span class="ctx-action">Lookup</span> on Explorer</div>
+  <div class="ctx-item"><span class="ctx-action">Trade</span> with wallet</div>
+  <div class="ctx-item"><span class="ctx-action">Report</span> as bot</div>
+  <div class="ctx-item"><span class="ctx-action">Add</span> to friends list</div>
+</div>
+
+<!-- TOP BANNER -->
+<div class="top-banner">
+  <span class="logo-sword-l">&#9876;</span>
+  <span class="logo-text">SolScape</span>
+  <span class="logo-sword-r">&#9876;</span>
+  <span class="logo-sub">WALLET SCORES</span>
+</div>
+
+<!-- MAIN AREA -->
+<div class="main-area">
+
+  <!-- LEFT: Combat Stats -->
+  <div class="left-panel">
+    <div class="rs-panel" style="flex:0 0 auto;">
+      <div class="rs-title">&#9734; Combat Stats &#9734;</div>
+      <div class="combat-level-display">
+        <div class="combat-hex">
+          <div class="combat-hex-border"></div>
+          <div class="combat-hex-bg"></div>
+          <div class="combat-number">87</div>
+        </div>
+        <div class="combat-label">Wallet Score</div>
+      </div>
+      <div class="ornament"></div>
+      <div class="stat-row">
+        <div class="stat-icon">&#9876;</div>
+        <div class="stat-info">
+          <div class="stat-name">Attack (Volume)</div>
+          <div class="stat-bar-track"><div class="stat-bar-fill high" style="width: 92%;"></div></div>
+        </div>
+        <div class="stat-level">92</div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-icon">&#128170;</div>
+        <div class="stat-info">
+          <div class="stat-name">Strength (Diversity)</div>
+          <div class="stat-bar-track"><div class="stat-bar-fill high" style="width: 88%;"></div></div>
+        </div>
+        <div class="stat-level">88</div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-icon">&#128737;</div>
+        <div class="stat-info">
+          <div class="stat-name">Defence (Activity)</div>
+          <div class="stat-bar-track"><div class="stat-bar-fill high" style="width: 85%;"></div></div>
+        </div>
+        <div class="stat-level">85</div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-icon">&#10024;</div>
+        <div class="stat-info">
+          <div class="stat-name">Magic (Holdings)</div>
+          <div class="stat-bar-track"><div class="stat-bar-fill mid" style="width: 78%;"></div></div>
+        </div>
+        <div class="stat-level">78</div>
+      </div>
+    </div>
+
+    <div class="rs-panel" style="flex:1;">
+      <div class="rs-title">&#9881; Miscellaneous</div>
+      <div class="misc-stats">
+        <div class="misc-row">
+          <span class="misc-label">Bot Detection</span>
+          <span class="misc-value pass">HUMAN &#10003;</span>
+        </div>
+        <div class="misc-row">
+          <span class="misc-label">Network Fees</span>
+          <span class="misc-value">2.30 SOL</span>
+        </div>
+        <div class="misc-row">
+          <span class="misc-label">Wallet Age</span>
+          <span class="misc-value">18 months</span>
+        </div>
+        <div class="misc-row">
+          <span class="misc-label">Protocols</span>
+          <span class="misc-value">8 used</span>
+        </div>
+        <div class="misc-row">
+          <span class="misc-label">Sybil Check</span>
+          <span class="misc-value pass">PASS &#10003;</span>
+        </div>
+        <div class="misc-row">
+          <span class="misc-label">Quest Points</span>
+          <span class="misc-value" style="color: var(--rs-gold);">87 / 100</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CENTER: Character + Inventory + Highscores -->
+  <div class="center-panel">
+    <div class="rs-panel" style="flex: 1;">
+      <div class="rs-title">&#9733; Character &#9733;</div>
+      <div class="character-display">
+        <!-- Pixel Art Avatar -->
+        <div class="pixel-avatar">
+          <div class="pixel-grid">
+            <!-- Row 1: Hair top -->
+            <div class="px px-empty"></div><div class="px px-empty"></div><div class="px px-empty"></div><div class="px px-hair"></div><div class="px px-hair"></div><div class="px px-hair"></div><div class="px px-hair"></div><div class="px px-empty"></div><div class="px px-empty"></div><div class="px px-empty"></div>
+            <!-- Row 2: Hair -->
+            <div class="px px-empty"></div><div class="px px-empty"></div><div class="px px-hair"></div><div class="px px-hair"></div><div class="px px-hair"></div><div class="px px-hair"></div><div class="px px-hair"></div><div class="px px-hair"></div><div class="px px-empty"></div><div class="px px-empty"></div>
+            <!-- Row 3: Face -->
+            <div class="px px-empty"></div><div class="px px-empty"></div><div class="px px-skin"></div><div class="px px-skin"></div><div class="px px-eye"></div><div class="px px-skin"></div><div class="px px-eye"></div><div class="px px-skin"></div><div class="px px-empty"></div><div class="px px-empty"></div>
+            <!-- Row 4: Face -->
+            <div class="px px-empty"></div><div class="px px-empty"></div><div class="px px-skin"></div><div class="px px-skin"></div><div class="px px-skin"></div><div class="px px-skin"></div><div class="px px-skin"></div><div class="px px-skin"></div><div class="px px-empty"></div><div class="px px-empty"></div>
+            <!-- Row 5: Neck -->
+            <div class="px px-empty"></div><div class="px px-empty"></div><div class="px px-empty"></div><div class="px px-empty"></div><div class="px px-skin"></div><div class="px px-skin"></div><div class="px px-empty"></div><div class="px px-empty"></div><div class="px px-empty"></div><div class="px px-empty"></div>
+            <!-- Row 6: Shoulders -->
+            <div class="px px-empty"></div><div class="px px-cape"></div><div class="px px-armor2"></div><div class="px px-armor"></div><div class="px px-armor"></div><div class="px px-armor"></div><div class="px px-armor"></div><div class="px px-armor2"></div><div class="px px-cape"></div><div class="px px-empty"></div>
+            <!-- Row 7: Torso -->
+            <div class="px px-empty"></div><div class="px px-cape"></div><div class="px px-armor2"></div><div class="px px-armor"></div><div class="px px-gold"></div><div class="px px-gold"></div><div class="px px-armor"></div><div class="px px-armor2"></div><div class="px px-cape"></div><div class="px px-empty"></div>
+            <!-- Row 8: Torso -->
+            <div class="px px-empty"></div><div class="px px-empty"></div><div class="px px-armor2"></div><div class="px px-armor"></div><div class="px px-armor"></div><div class="px px-armor"></div><div class="px px-armor"></div><div class="px px-armor2"></div><div class="px px-empty"></div><div class="px px-empty"></div>
+            <!-- Row 9: Belt -->
+            <div class="px px-empty"></div><div class="px px-empty"></div><div class="px px-empty"></div><div class="px px-gold"></div><div class="px px-gold"></div><div class="px px-gold"></div><div class="px px-gold"></div><div class="px px-empty"></div><div class="px px-empty"></div><div class="px px-empty"></div>
+            <!-- Row 10: Legs -->
+            <div class="px px-empty"></div><div class="px px-empty"></div><div class="px px-empty"></div><div class="px px-armor"></div><div class="px px-armor"></div><div class="px px-armor"></div><div class="px px-armor"></div><div class="px px-empty"></div><div class="px px-empty"></div><div class="px px-empty"></div>
+            <!-- Row 11: Legs -->
+            <div class="px px-empty"></div><div class="px px-empty"></div><div class="px px-empty"></div><div class="px px-armor"></div><div class="px px-dark"></div><div class="px px-dark"></div><div class="px px-armor"></div><div class="px px-empty"></div><div class="px px-empty"></div><div class="px px-empty"></div>
+            <!-- Row 12: Boots -->
+            <div class="px px-empty"></div><div class="px px-empty"></div><div class="px px-boots"></div><div class="px px-boots"></div><div class="px px-empty"></div><div class="px px-empty"></div><div class="px px-boots"></div><div class="px px-boots"></div><div class="px px-empty"></div><div class="px px-empty"></div>
+          </div>
+        </div>
+
+        <div class="char-wallet">7xKX...gAsU</div>
+        <div class="char-title">Power User of Solana</div>
+        <div class="tier-badge">&#9733; POWER USER TIER &#9733;</div>
+        <div style="height: 8px;"></div>
+        <div class="bot-check">&#128737; Bot Detection: Human Verified &#10003;</div>
+      </div>
+    </div>
+
+    <!-- Inventory -->
+    <div class="rs-panel" style="flex: 0 0 auto;">
+      <div class="rs-title">&#128188; Inventory (Protocols)</div>
+      <div class="inventory-grid">
+        <div class="inv-slot">
+          <div class="inv-slot-letter proto-dex">R</div>
+          <div class="inv-slot-label">Raydium</div>
+        </div>
+        <div class="inv-slot">
+          <div class="inv-slot-letter proto-agg">J</div>
+          <div class="inv-slot-label">Jupiter</div>
+        </div>
+        <div class="inv-slot">
+          <div class="inv-slot-letter proto-stake">M</div>
+          <div class="inv-slot-label">Marinade</div>
+        </div>
+        <div class="inv-slot">
+          <div class="inv-slot-letter proto-perp">D</div>
+          <div class="inv-slot-label">Drift</div>
+        </div>
+        <div class="inv-slot">
+          <div class="inv-slot-letter proto-lend">S</div>
+          <div class="inv-slot-label">Solend</div>
+        </div>
+        <div class="inv-slot">
+          <div class="inv-slot-letter proto-nft">T</div>
+          <div class="inv-slot-label">Tensor</div>
+        </div>
+        <div class="inv-slot">
+          <div class="inv-slot-letter proto-lp">O</div>
+          <div class="inv-slot-label">Orca</div>
+        </div>
+        <div class="inv-slot">
+          <div class="inv-slot-letter proto-tool">P</div>
+          <div class="inv-slot-label">Pyth</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Skills + Highscores -->
+  <div class="right-panel">
+    <div class="rs-panel" style="flex: 1;">
+      <div class="rs-title">&#128218; Skills (Sectors)</div>
+      <div class="skills-grid">
+        <div class="skill-row">
+          <div class="skill-icon">&#9876;</div>
+          <div class="skill-info">
+            <div class="skill-name">DEX / Spot</div>
+            <div class="skill-bar-track"><div class="skill-bar-fill" style="width: 72%; background: linear-gradient(180deg, #9955ff, #7733cc);"></div></div>
+          </div>
+          <div class="skill-level">72</div>
+        </div>
+        <div class="skill-row">
+          <div class="skill-icon">&#128640;</div>
+          <div class="skill-info">
+            <div class="skill-name">Launchpad</div>
+            <div class="skill-bar-track"><div class="skill-bar-fill" style="width: 45%; background: linear-gradient(180deg, #ff981f, #cc7700);"></div></div>
+          </div>
+          <div class="skill-level">45</div>
+        </div>
+        <div class="skill-row">
+          <div class="skill-icon">&#128256;</div>
+          <div class="skill-info">
+            <div class="skill-name">Aggregator</div>
+            <div class="skill-bar-track"><div class="skill-bar-fill" style="width: 88%; background: linear-gradient(180deg, #14f195, #0fbb73);"></div></div>
+          </div>
+          <div class="skill-level">88</div>
+        </div>
+        <div class="skill-row">
+          <div class="skill-icon">&#9760;</div>
+          <div class="skill-info">
+            <div class="skill-name">Perpetuals</div>
+            <div class="skill-bar-track"><div class="skill-bar-fill" style="width: 30%; background: linear-gradient(180deg, #ff4040, #cc2020);"></div></div>
+          </div>
+          <div class="skill-level">30</div>
+        </div>
+        <div class="skill-row">
+          <div class="skill-icon">&#128295;</div>
+          <div class="skill-info">
+            <div class="skill-name">Trading Tools</div>
+            <div class="skill-bar-track"><div class="skill-bar-fill" style="width: 55%; background: linear-gradient(180deg, #00d1ff, #009fcc);"></div></div>
+          </div>
+          <div class="skill-level">55</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rs-panel" style="flex: 1;">
+      <div class="rs-title">&#127942; High Scores</div>
+      <div class="highscores">
+        <table class="hs-table">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Player</th>
+              <th style="text-align:right;">Level</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="hs-rank gold">1</td>
+              <td class="hs-name">&#128081; Bwk3...R9pT</td>
+              <td class="hs-score">99.02</td>
+            </tr>
+            <tr>
+              <td class="hs-rank silver">2</td>
+              <td class="hs-name">&#129351; FmDq...7xLe</td>
+              <td class="hs-score">99.01</td>
+            </tr>
+            <tr>
+              <td class="hs-rank bronze">3</td>
+              <td class="hs-name">&#129352; Ht9z...kWm4</td>
+              <td class="hs-score">99.01</td>
+            </tr>
+            <tr>
+              <td class="hs-rank">4</td>
+              <td class="hs-name">Qp5a...nY2j</td>
+              <td class="hs-score">99.00</td>
+            </tr>
+            <tr>
+              <td class="hs-rank">5</td>
+              <td class="hs-name">Vr8c...dS6w</td>
+              <td class="hs-score">99.00</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CHAT BOX -->
+<div class="chat-area">
+  <div class="chat-tabs">
+    <div class="chat-tab active">All</div>
+    <div class="chat-tab">Game</div>
+    <div class="chat-tab">Public</div>
+    <div class="chat-tab">Private</div>
+    <div class="chat-tab">Clan</div>
+    <div class="chat-tab">Trade</div>
+  </div>
+  <div class="chat-messages">
+    <div class="chat-msg"><span class="tag-system">[System]:</span> <span class="msg-text">Welcome to SolScape.</span></div>
+    <div class="chat-msg"><span class="tag-system">[System]:</span> <span class="msg-text">You are connected to <span class="msg-gold">Solana Mainnet</span>.</span></div>
+    <div class="chat-msg"><span class="tag-bot">[Bot Detection]:</span> <span class="msg-text">Wallet <span class="msg-gold">7xKX...gAsU</span> scanned. <span class="msg-green">No bot activity detected.</span></span></div>
+    <div class="chat-msg"><span class="tag-trade">[Trade]:</span> <span class="msg-text">8 protocols discovered in inventory.</span></div>
+    <div class="chat-msg"><span class="tag-achieve">[Achievement]:</span> <span class="msg-text">You have reached <span class="msg-gold">Power User</span> tier!</span></div>
+    <div class="chat-msg"><span class="tag-system">[System]:</span> <span class="msg-text">Your wallet score is <span class="msg-green">87 / 100</span>. Keep grinding!</span></div>
+  </div>
+  <div class="chat-input-row">
+    <input class="chat-input" type="text" placeholder="Press Enter to chat..." disabled>
+  </div>
+</div>
+
+</body>
+</html>

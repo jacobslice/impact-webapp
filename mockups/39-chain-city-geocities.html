@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>~*~7xKX...gAsU's Solana Score Page~*~</title>
+<link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  /* === TILED STAR BACKGROUND === */
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Comic Sans MS', 'Comic Neue', cursive, sans-serif;
+    background-color: #000033;
+    background-image:
+      radial-gradient(1px 1px at 10px 10px, #ffffff 50%, transparent 50%),
+      radial-gradient(1px 1px at 40px 30px, #ffff99 50%, transparent 50%),
+      radial-gradient(2px 2px at 70px 15px, #ffffff 50%, transparent 50%),
+      radial-gradient(1px 1px at 20px 55px, #aaaaff 50%, transparent 50%),
+      radial-gradient(1px 1px at 90px 45px, #ffffff 50%, transparent 50%),
+      radial-gradient(2px 2px at 55px 70px, #ffff99 50%, transparent 50%),
+      radial-gradient(1px 1px at 80px 80px, #ffffff 50%, transparent 50%),
+      radial-gradient(1px 1px at 35px 90px, #aaaaff 50%, transparent 50%);
+    background-size: 100px 100px;
+    color: #000000;
+    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><text y='14' font-size='14'>✨</text></svg>"), auto;
+  }
+
+  /* === MAIN CONTENT WRAPPER === */
+  .page-wrapper {
+    max-width: 780px;
+    margin: 0 auto;
+    background-color: #ffffee;
+    border-left: 4px solid #ff00ff;
+    border-right: 4px solid #00ffff;
+    padding: 10px 20px 30px 20px;
+    box-shadow: 0 0 30px rgba(255, 0, 255, 0.4), 0 0 60px rgba(0, 255, 255, 0.2);
+  }
+
+  /* === MARQUEE === */
+  .marquee-bar {
+    background: linear-gradient(90deg, #ff0000, #ff8800, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff);
+    padding: 6px 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .marquee-text {
+    display: inline-block;
+    animation: marquee 12s linear infinite;
+    font-size: 18px;
+    font-weight: bold;
+    color: #ffffff;
+    text-shadow: 2px 2px 0 #000000;
+  }
+  @keyframes marquee {
+    0% { transform: translateX(100vw); }
+    100% { transform: translateX(-100%); }
+  }
+
+  /* === BLINK === */
+  .blink {
+    animation: blinker 1s step-start infinite;
+  }
+  @keyframes blinker {
+    50% { opacity: 0; }
+  }
+
+  /* === RAINBOW TEXT === */
+  .rainbow-letter {
+    font-size: 42px;
+    font-weight: bold;
+    display: inline-block;
+    text-shadow: 3px 3px 0 #000000;
+  }
+
+  /* === RAINBOW HR === */
+  .rainbow-hr {
+    border: none;
+    height: 6px;
+    background: linear-gradient(90deg, #ff0000, #ff8800, #ffff00, #00ff00, #00ffff, #0000ff, #8b00ff, #ff00ff);
+    margin: 20px 0;
+    border-radius: 3px;
+  }
+
+  /* === SECTION HEADERS === */
+  .section-header {
+    font-size: 28px;
+    font-weight: bold;
+    text-decoration: underline;
+    margin: 15px 0 10px 0;
+  }
+
+  /* === TABLES === */
+  .stats-table {
+    border-collapse: collapse;
+    margin: 10px auto;
+    width: 90%;
+  }
+  .stats-table td, .stats-table th {
+    border: 3px solid #000000;
+    padding: 8px 12px;
+    font-size: 16px;
+    font-weight: bold;
+  }
+  .stats-table th {
+    background-color: #8b00ff;
+    color: #ffffff;
+    font-size: 18px;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  /* === PROTOCOL GRID === */
+  .proto-table {
+    border-collapse: collapse;
+    margin: 10px auto;
+    width: 90%;
+  }
+  .proto-table td {
+    border: 3px ridge #808080;
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 15px;
+    width: 25%;
+  }
+
+  /* === NEW BADGE === */
+  .new-badge {
+    display: inline-block;
+    background: #ff0000;
+    color: #ffff00;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border: 2px solid #ffff00;
+    animation: pulse-new 0.6s ease-in-out infinite alternate;
+    vertical-align: super;
+    margin-left: 6px;
+  }
+  @keyframes pulse-new {
+    from { transform: scale(1); }
+    to { transform: scale(1.2); }
+  }
+
+  /* === SPARKLE ANIMATION === */
+  .sparkle {
+    display: inline-block;
+    animation: sparkle-spin 1.5s linear infinite;
+  }
+  @keyframes sparkle-spin {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.3); }
+    100% { transform: rotate(360deg) scale(1); }
+  }
+
+  /* === VISITOR COUNTER === */
+  .visitor-counter {
+    display: inline-block;
+    background: #000000;
+    color: #00ff00;
+    font-family: 'Courier New', monospace;
+    font-size: 20px;
+    font-weight: bold;
+    padding: 6px 16px;
+    border: 3px inset #808080;
+    letter-spacing: 2px;
+  }
+
+  /* === LINKS === */
+  a {
+    color: #0000ff;
+    text-decoration: underline;
+    font-weight: bold;
+  }
+  a:hover {
+    color: #ff0000;
+  }
+  a:visited {
+    color: #800080;
+  }
+
+  /* === CONSTRUCTION BANNER === */
+  .construction-banner {
+    background: repeating-linear-gradient(
+      45deg,
+      #ffff00,
+      #ffff00 10px,
+      #000000 10px,
+      #000000 20px
+    );
+    padding: 12px;
+    text-align: center;
+    margin: 15px 0;
+  }
+  .construction-inner {
+    background: #ffff00;
+    display: inline-block;
+    padding: 6px 20px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #ff0000;
+  }
+
+  /* === WEB RING === */
+  .webring {
+    border: 3px double #0000ff;
+    padding: 12px;
+    margin: 15px auto;
+    width: 70%;
+    background: #e0e0ff;
+    text-align: center;
+  }
+  .webring img { vertical-align: middle; }
+
+  /* === MIDI NOTICE === */
+  .midi-notice {
+    background: #ffe0f0;
+    border: 2px dashed #ff00ff;
+    padding: 8px;
+    font-size: 13px;
+    color: #990099;
+    margin: 10px auto;
+    width: 80%;
+  }
+
+  /* === STAR RATING === */
+  .star-full { color: #ffcc00; }
+  .star-empty { color: #cccccc; }
+
+  /* === ASCII PROGRESS BAR === */
+  .ascii-bar {
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+
+  center { text-align: center; }
+</style>
+</head>
+<body>
+
+<!-- MARQUEE -->
+<div class="marquee-bar">
+  <span class="marquee-text">&#9733;&#9733;&#9733; Welcome to 7xKX...gAsU's Solana Score Page! &#9733;&#9733;&#9733; --- FREE Solana Score Lookup! --- You Won't BELIEVE This Score! --- &#9733;&#9733;&#9733;</span>
+</div>
+
+<div class="page-wrapper">
+<center>
+
+<!-- MIDI JOKE -->
+<div class="midi-notice">
+  &#127925; <i>If you had sound enabled, you would be hearing <b>finalcountdown.mid</b> right now</i> &#127925;<br>
+  <span style="font-size:11px;">(Turn on your speakers for the full experience!)</span>
+</div>
+
+<hr class="rainbow-hr">
+
+<!-- === HEADER === -->
+<div>
+  <span class="sparkle">&#10024;</span>
+  <span class="sparkle">&#10024;</span>
+  <span class="sparkle">&#10024;</span>
+  <br>
+  <span class="rainbow-letter" style="color:#ff0000;">M</span><span class="rainbow-letter" style="color:#ff8800;">y</span><span class="rainbow-letter" style="color:#ffff00;"> </span><span class="rainbow-letter" style="color:#00ff00;">S</span><span class="rainbow-letter" style="color:#00cccc;">o</span><span class="rainbow-letter" style="color:#0000ff;">l</span><span class="rainbow-letter" style="color:#8b00ff;">a</span><span class="rainbow-letter" style="color:#ff00ff;">n</span><span class="rainbow-letter" style="color:#ff0000;">a</span><span class="rainbow-letter" style="color:#ff8800;"> </span><span class="rainbow-letter" style="color:#ffff00;">S</span><span class="rainbow-letter" style="color:#00ff00;">c</span><span class="rainbow-letter" style="color:#00cccc;">o</span><span class="rainbow-letter" style="color:#0000ff;">r</span><span class="rainbow-letter" style="color:#8b00ff;">e</span><span class="rainbow-letter" style="color:#ff00ff;">!</span><span class="rainbow-letter" style="color:#ff0000;">!</span><span class="rainbow-letter" style="color:#ff8800;">!</span>
+  <br>
+  <span class="sparkle">&#10024;</span>
+  <span class="sparkle">&#10024;</span>
+  <span class="sparkle">&#10024;</span>
+</div>
+
+<hr class="rainbow-hr">
+
+<!-- === SECTION 1: ABOUT ME === -->
+<div class="section-header" style="color: #ff00ff;">&#128075; About Me &#128075;</div>
+
+<p style="font-size: 18px; color: #000080;">
+  Hi!! My name is <b style="color: #ff0000; font-size: 22px;">7xKX...gAsU</b> and I've been on <span style="color: #9945FF; font-size: 20px;">S</span><span style="color: #14F195; font-size: 20px;">o</span><span style="color: #00D1FF; font-size: 20px;">l</span><span style="color: #9945FF; font-size: 20px;">a</span><span style="color: #14F195; font-size: 20px;">n</span><span style="color: #00D1FF; font-size: 20px;">a</span> for <b style="color: #ff00ff;">18 months</b>!!!
+</p>
+
+<p style="font-size: 22px; color: #008800;">
+  My score is <span style="font-size: 48px; color: #ff0000; text-shadow: 2px 2px #ffff00;">87</span> out of 100!!!!
+  <span class="new-badge">NEW!</span>
+  <br>
+  I'm a <span style="font-size: 32px; color: #8b00ff; text-shadow: 2px 2px 0 #ffcc00;" class="blink">&#9733; POWER USER &#9733;</span> &#128293;&#128293;&#128293;
+</p>
+
+<p style="font-size: 20px; background: #ccffcc; border: 2px solid #00aa00; padding: 10px; display: inline-block;">
+  <b>Sybil Status:</b> <span style="color: #ff0000; font-size: 24px;">NOT A BOT!!!</span> &#9989;
+  <br><span style="font-size: 14px; color: #006600;">(Verified REAL human! Take THAT, sybil hunters!)</span>
+</p>
+
+<br><br>
+<span style="font-size: 12px; color: #808080;">Network Fees Paid: <b>2.30 SOL</b> &bull; Protocols Used: <b>8</b> &bull; Wallet Age: <b>18 months</b></span>
+
+<hr class="rainbow-hr">
+
+<!-- === SECTION 2: MY STATS === -->
+<div class="section-header" style="color: #0000ff;">&#128202; My Stats &#128202;</div>
+<p style="font-size: 14px; color: #666;">(These are my REAL scores, no cap fr fr)</p>
+
+<table class="stats-table">
+  <tr>
+    <th colspan="3">&#9733; SCORE BREAKDOWN &#9733;</th>
+  </tr>
+  <tr style="background: #ffff88;">
+    <td style="color: #880000; width: 30%;">&#128176; Volume</td>
+    <td style="width: 45%;">
+      <span class="ascii-bar" style="color: #008800;">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9617;&#9617;</span>
+    </td>
+    <td style="color: #ff0000; font-size: 24px; width: 25%;"><b>92%</b></td>
+  </tr>
+  <tr style="background: #88ff88;">
+    <td style="color: #000088;">&#127760; Protocol Diversity</td>
+    <td>
+      <span class="ascii-bar" style="color: #0000aa;">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9617;&#9617;&#9617;</span>
+    </td>
+    <td style="color: #0000ff; font-size: 24px;"><b>88%</b></td>
+  </tr>
+  <tr style="background: #88ffff;">
+    <td style="color: #880088;">&#9889; Activity</td>
+    <td>
+      <span class="ascii-bar" style="color: #880088;">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9617;&#9617;&#9617;</span>
+    </td>
+    <td style="color: #8b00ff; font-size: 24px;"><b>85%</b></td>
+  </tr>
+  <tr style="background: #ffbbdd;">
+    <td style="color: #006600;">&#128176; Holdings</td>
+    <td>
+      <span class="ascii-bar" style="color: #cc6600;">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9617;&#9617;&#9617;&#9617;</span>
+    </td>
+    <td style="color: #ff6600; font-size: 24px;"><b>78%</b></td>
+  </tr>
+</table>
+
+<hr class="rainbow-hr">
+
+<!-- === SECTION 3: MY SECTORS === -->
+<div class="section-header" style="color: #ff0000;">&#127775; My Sectors &#127775;</div>
+<p style="font-size: 13px; color: #999;">Click a sector to learn more! (jk links don't work lol)</p>
+
+<table style="margin: 0 auto; text-align: left; font-size: 17px; line-height: 2.2;">
+  <tr>
+    <td>
+      <span class="star-full">&#11088;&#11088;&#11088;&#11088;</span><span class="star-empty">&#11088;</span>
+      <a href="#" style="color: #ff6600; font-size: 20px;">DEX / Spot</a>
+      <span style="color: #888;"> - Score: <b style="color:#ff0000;">72</b></span>
+      <span style="font-size: 14px; color: #008800;"> - I love trading!!</span>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <span class="star-full">&#11088;&#11088;</span><span class="star-empty">&#11088;&#11088;&#11088;</span>
+      <a href="#" style="color: #cc00cc; font-size: 20px;">Launchpad</a>
+      <span style="color: #888;"> - Score: <b style="color:#ff0000;">45</b></span>
+      <span style="font-size: 14px; color: #0000cc;"> - Need to ape more launches</span>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <span class="star-full">&#11088;&#11088;&#11088;&#11088;</span><span class="star-empty">&#11088;</span>
+      <a href="#" style="color: #0088ff; font-size: 20px;">Aggregator</a>
+      <span style="color: #888;"> - Score: <b style="color:#ff0000;">88</b></span>
+      <span style="font-size: 14px; color: #ff00ff;"> - Jupiter gang!! &#128640;</span>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <span class="star-full">&#11088;</span><span class="star-empty">&#11088;&#11088;&#11088;&#11088;</span>
+      <a href="#" style="color: #ff0000; font-size: 20px;">Perpetuals</a>
+      <span style="color: #888;"> - Score: <b style="color:#ff0000;">30</b></span>
+      <span style="font-size: 14px; color: #888;"> - I'm too scared for perps tbh</span>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <span class="star-full">&#11088;&#11088;&#11088;</span><span class="star-empty">&#11088;&#11088;</span>
+      <a href="#" style="color: #00aa00; font-size: 20px;">Trading Tools</a>
+      <span style="color: #888;"> - Score: <b style="color:#ff0000;">55</b></span>
+      <span style="font-size: 14px; color: #cc6600;"> - Bots are friends not foes</span>
+    </td>
+  </tr>
+</table>
+
+<hr class="rainbow-hr">
+
+<!-- === SECTION 4: PROTOCOL COLLECTION === -->
+<div class="section-header" style="color: #008800;">&#127942; My Protocol Collection &#127942;</div>
+<p style="font-size: 14px; color: #666;">Gotta catch 'em all!! (8 / ??? collected)</p>
+
+<table class="proto-table">
+  <tr>
+    <td style="background: #ffcccc;">
+      <span style="font-size: 22px;">&#128640;</span><br>
+      <b style="color: #cc0000;">Jupiter Ultra</b><br>
+      <span style="color: #008800; font-size: 13px;">COLLECTED &#10003;</span>
+    </td>
+    <td style="background: #ccffcc;">
+      <span style="font-size: 22px;">&#128257;</span><br>
+      <b style="color: #006600;">Jupiter DCA</b><br>
+      <span style="color: #008800; font-size: 13px;">COLLECTED &#10003;</span>
+    </td>
+    <td style="background: #ccccff;">
+      <span style="font-size: 22px;">&#127754;</span><br>
+      <b style="color: #000088;">Raydium</b><br>
+      <span style="color: #008800; font-size: 13px;">COLLECTED &#10003;</span>
+    </td>
+    <td style="background: #ffffcc;">
+      <span style="font-size: 22px;">&#128011;</span><br>
+      <b style="color: #886600;">Orca</b><br>
+      <span style="color: #008800; font-size: 13px;">COLLECTED &#10003;</span>
+    </td>
+  </tr>
+  <tr>
+    <td style="background: #ffccff;">
+      <span style="font-size: 22px;">&#9732;</span><br>
+      <b style="color: #880088;">Meteora</b><br>
+      <span style="color: #008800; font-size: 13px;">COLLECTED &#10003;</span>
+    </td>
+    <td style="background: #ccffff;">
+      <span style="font-size: 22px;">&#9878;</span><br>
+      <b style="color: #008888;">Axiom</b><br>
+      <span style="color: #008800; font-size: 13px;">COLLECTED &#10003;</span>
+    </td>
+    <td style="background: #ffeecc;">
+      <span style="font-size: 22px;">&#128161;</span><br>
+      <b style="color: #cc6600;">Photon</b><br>
+      <span style="color: #008800; font-size: 13px;">COLLECTED &#10003;</span>
+    </td>
+    <td style="background: #eeccff;">
+      <span style="font-size: 22px;">&#128163;</span><br>
+      <b style="color: #8800cc;">Pump.fun</b><br>
+      <span style="color: #008800; font-size: 13px;">COLLECTED &#10003;</span>
+    </td>
+  </tr>
+</table>
+
+<hr class="rainbow-hr">
+
+<!-- === SECTION 5: COOL LINKS === -->
+<div class="section-header" style="color: #cc6600;">&#128279; Cool Links &#128279;</div>
+
+<table style="margin: 0 auto; text-align: left; font-size: 16px; line-height: 2.4;">
+  <tr><td>&#128073; <a href="https://explorer.solana.com">Solana Explorer</a> - <span style="color:#888; font-size:13px;">See the chain for yourself!</span></td></tr>
+  <tr><td>&#128073; <a href="https://jup.ag">Jupiter Aggregator</a> - <span style="color:#888; font-size:13px;">Best swaps on Solana</span></td></tr>
+  <tr><td>&#128073; <a href="#">Check out my friend's pages!</a> - <span style="color:#888; font-size:13px;">They have cool scores too</span></td></tr>
+  <tr><td>&#128073; <a href="#">Best Solana Memes</a> - <span style="color:#888; font-size:13px;">Top quality memes only</span></td></tr>
+  <tr><td>&#128073; <a href="#">FREE Solana Score Lookup</a> <span class="blink" style="color: #ff0000; font-size: 14px;">&lt;-- HOT!!</span></td></tr>
+  <tr><td>&#128073; <a href="#">Add Me On AIM: SolanaMaxi2008</a> - <span style="color:#888; font-size:13px;">I'm always online</span></td></tr>
+</table>
+
+<hr class="rainbow-hr">
+
+<!-- === CONSTRUCTION BANNER === -->
+<div class="construction-banner">
+  <div class="construction-inner">
+    <span class="blink">&#128679; UNDER CONSTRUCTION - More sectors coming soon! &#128679;</span>
+  </div>
+</div>
+
+<hr class="rainbow-hr">
+
+<!-- === FOOTER === -->
+
+<!-- Visitor Counter -->
+<p style="font-size: 16px; color: #000080;">You are visitor number...</p>
+<div class="visitor-counter">035,643,297</div>
+<br><br>
+
+<!-- Guestbook -->
+<p>
+  <a href="#" style="font-size: 20px; color: #ff00ff;">&#128221; Sign my Guestbook! &#128221;</a>
+  <br><span style="font-size: 12px; color: #999;">(No spam please, I WILL ban you)</span>
+</p>
+
+<hr class="rainbow-hr">
+
+<!-- Last Updated -->
+<p style="font-size: 13px; color: #666;">
+  This page was last updated: <b>March 30, 2026</b><br>
+  All scores accurate as of last Dune query refresh
+</p>
+
+<!-- Best Viewed -->
+<p style="font-size: 12px; color: #000088; background: #e0e0ff; display: inline-block; padding: 4px 14px; border: 1px solid #0000aa;">
+  &#127760; Best viewed in <b>Netscape Navigator 4.0</b> at <b>800x600</b> resolution &#127760;
+</p>
+
+<br><br>
+
+<!-- Web Ring -->
+<div class="webring">
+  <b style="color: #0000aa; font-size: 16px;">&#127760; Solana Score Web Ring &#127760;</b><br>
+  <span style="font-size: 14px;">
+    <a href="#">&laquo; Prev</a>
+    &nbsp; | &nbsp;
+    <a href="#">Random</a>
+    &nbsp; | &nbsp;
+    <a href="#">List</a>
+    &nbsp; | &nbsp;
+    <a href="#">Next &raquo;</a>
+  </span>
+  <br>
+  <span style="font-size: 11px; color: #666;">This site is part of the <b>Solana Score Web Ring</b> &bull; 247 sites strong!</span>
+</div>
+
+<br>
+
+<!-- Made With -->
+<p style="font-size: 14px;">
+  Made with <span style="color: #ff0000;">&#10084;&#65039;</span> and <b>HTML</b>
+  <br>
+  <span style="font-size: 11px; color: #aaa;">(and maybe a little bit of CSS... don't tell the webmaster police)</span>
+</p>
+
+<!-- Email Webmaster -->
+<p style="font-size: 12px; color: #444;">
+  &#9993; Questions? Email the webmaster: <a href="mailto:7xKX@geocities.com">7xKX@geocities.com</a>
+</p>
+
+<br>
+<span style="font-size: 10px; color: #ccc;">&copy; 1998-2026 7xKX...gAsU. All rights reserved. Solana and the Solana logo are trademarks of Solana Foundation. This is not financial advice. DYOR. NFA. WAGMI.</span>
+
+</center>
+</div>
+
+<!-- BOTTOM MARQUEE -->
+<div class="marquee-bar">
+  <span class="marquee-text">&#9733; Thanks for visiting!! &#9733; Don't forget to bookmark this page!! &#9733; Tell your friends!! &#9733; SOLANA TO THE MOON &#128640; &#9733;</span>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1200, height=800">
+<title>Solana Score Buddy List — AIM Theme</title>
+<link href="https://fonts.googleapis.com/css2?family=Trebuchet+MS&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Trebuchet MS', Tahoma, Arial, sans-serif;
+    font-size: 12px;
+    background: #008080;
+    width: 1200px;
+    height: 800px;
+    overflow: hidden;
+    position: relative;
+    cursor: default;
+    user-select: none;
+  }
+
+  /* === AIM WINDOW BASE === */
+  .aim-window {
+    position: absolute;
+    border: 2px solid #0054a6;
+    border-radius: 6px 6px 4px 4px;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.2);
+    background: #ece9d8;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .aim-titlebar {
+    background: linear-gradient(180deg, #3280fc 0%, #0054e3 40%, #0046c8 60%, #3280fc 100%);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 4px 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 4px 4px 0 0;
+    min-height: 24px;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.4);
+  }
+
+  .titlebar-left {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .titlebar-icon {
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+
+  .titlebar-buttons {
+    display: flex;
+    gap: 2px;
+  }
+
+  .titlebar-btn {
+    width: 18px;
+    height: 16px;
+    background: linear-gradient(180deg, #d4d0c8 0%, #bbb7ad 100%);
+    border: 1px solid #888;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    color: #333;
+    cursor: pointer;
+    font-weight: bold;
+    line-height: 1;
+  }
+
+  .titlebar-btn:hover {
+    background: linear-gradient(180deg, #e8e4dc 0%, #ccc8c0 100%);
+  }
+
+  .titlebar-btn.close {
+    background: linear-gradient(180deg, #e06050 0%, #c03020 100%);
+    color: white;
+  }
+
+  /* === AIM MENU BAR === */
+  .aim-menubar {
+    background: #ece9d8;
+    border-bottom: 1px solid #aca899;
+    padding: 2px 4px;
+    font-size: 11px;
+    display: flex;
+    gap: 12px;
+  }
+
+  .aim-menubar span {
+    color: #333;
+    cursor: pointer;
+  }
+
+  .aim-menubar span:hover {
+    color: #0054e3;
+    text-decoration: underline;
+  }
+
+  /* === BUDDY LIST WINDOW === */
+  .buddy-list {
+    top: 20px;
+    left: 30px;
+    width: 280px;
+    height: 720px;
+  }
+
+  .buddy-header {
+    background: linear-gradient(180deg, #fff8dc 0%, #f5e6c8 100%);
+    border-bottom: 1px solid #d4c8a0;
+    padding: 8px 10px;
+    text-align: center;
+  }
+
+  .buddy-header .running-man {
+    font-size: 28px;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .buddy-header .screenname {
+    font-size: 13px;
+    font-weight: bold;
+    color: #333;
+  }
+
+  .buddy-header .idle-info {
+    font-size: 10px;
+    color: #666;
+    margin-top: 2px;
+  }
+
+  .buddy-header .away-msg {
+    font-size: 10px;
+    color: #0054e3;
+    font-style: italic;
+    margin-top: 2px;
+  }
+
+  .buddy-content {
+    flex: 1;
+    background: white;
+    overflow-y: auto;
+    border: 1px inset #ccc;
+    margin: 2px;
+  }
+
+  /* Tree view */
+  .buddy-group {
+    margin: 0;
+  }
+
+  .group-header {
+    padding: 3px 6px;
+    font-weight: bold;
+    font-size: 11px;
+    color: #333;
+    background: linear-gradient(180deg, #f8f4e8 0%, #efe8d4 100%);
+    border-bottom: 1px solid #e0d8c0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+  }
+
+  .group-header:hover {
+    background: linear-gradient(180deg, #fffae0 0%, #f5ecd0 100%);
+  }
+
+  .triangle {
+    font-size: 8px;
+    color: #555;
+    display: inline-block;
+    width: 10px;
+    text-align: center;
+  }
+
+  .group-score {
+    margin-left: auto;
+    font-size: 10px;
+    font-weight: normal;
+    color: #888;
+  }
+
+  .buddy-item {
+    padding: 2px 8px 2px 24px;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+  }
+
+  .buddy-item:hover {
+    background: #0054e3;
+    color: white;
+  }
+
+  .buddy-item.online {
+    color: #333;
+  }
+
+  .buddy-item.offline {
+    color: #aaa;
+    font-style: italic;
+  }
+
+  .buddy-item .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+
+  .buddy-item.online .status-dot {
+    background: #2ea82e;
+    box-shadow: 0 0 2px #2ea82e;
+  }
+
+  .buddy-item.offline .status-dot {
+    background: #ccc;
+  }
+
+  .buddy-item .aim-icon {
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  .buddy-footer {
+    background: #ece9d8;
+    border-top: 1px solid #aca899;
+    padding: 6px 8px;
+    text-align: center;
+    font-size: 10px;
+    color: #666;
+  }
+
+  .buddy-footer .online-count {
+    font-weight: bold;
+    color: #333;
+  }
+
+  .buddy-footer .warning-level {
+    font-size: 9px;
+    color: #888;
+    margin-top: 2px;
+  }
+
+  .buddy-bottom-bar {
+    background: #ece9d8;
+    padding: 4px 6px;
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    border-top: 1px solid #d4d0c8;
+  }
+
+  .aim-bottom-btn {
+    background: linear-gradient(180deg, #f0ece0 0%, #d8d0c0 100%);
+    border: 1px solid #a0988c;
+    border-radius: 3px;
+    padding: 2px 8px;
+    font-size: 10px;
+    cursor: pointer;
+    color: #333;
+  }
+
+  .aim-bottom-btn:hover {
+    background: linear-gradient(180deg, #f8f4e8 0%, #e0d8c8 100%);
+  }
+
+  /* === CHAT WINDOW (Score Breakdown) === */
+  .chat-window {
+    top: 40px;
+    left: 340px;
+    width: 440px;
+    height: 540px;
+  }
+
+  .chat-toolbar {
+    background: #ece9d8;
+    border-bottom: 1px solid #aca899;
+    padding: 3px 6px;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .toolbar-btn {
+    background: linear-gradient(180deg, #f0ece0 0%, #d8d0c0 100%);
+    border: 1px solid #a0988c;
+    border-radius: 3px;
+    padding: 1px 6px;
+    font-size: 10px;
+    cursor: pointer;
+    color: #333;
+  }
+
+  .chat-area {
+    flex: 1;
+    background: white;
+    overflow-y: auto;
+    padding: 6px 8px;
+    border: 1px inset #ccc;
+    margin: 2px;
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  .chat-msg {
+    margin-bottom: 6px;
+  }
+
+  .chat-msg .timestamp {
+    color: #aaa;
+    font-size: 9px;
+  }
+
+  .chat-msg .sender {
+    font-weight: bold;
+  }
+
+  .chat-msg .sender.bot {
+    color: #0054e3;
+  }
+
+  .chat-msg .sender.sybil {
+    color: #cc0000;
+  }
+
+  .chat-msg .sender.user {
+    color: #cc0066;
+  }
+
+  .chat-msg .text {
+    color: #333;
+  }
+
+  .chat-msg .score-high { color: #2ea82e; font-weight: bold; }
+  .chat-msg .score-mid { color: #cc8800; font-weight: bold; }
+  .chat-msg .score-low { color: #cc3300; font-weight: bold; }
+
+  .chat-msg .verified {
+    color: #2ea82e;
+    font-weight: bold;
+    font-size: 12px;
+  }
+
+  .chat-divider {
+    text-align: center;
+    color: #ccc;
+    font-size: 10px;
+    margin: 6px 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 4px;
+  }
+
+  .chat-input-area {
+    background: #ece9d8;
+    padding: 4px;
+    display: flex;
+    gap: 4px;
+    border-top: 1px solid #aca899;
+  }
+
+  .chat-input {
+    flex: 1;
+    border: 1px solid #7f9db9;
+    padding: 3px 6px;
+    font-family: 'Trebuchet MS', Tahoma, Arial, sans-serif;
+    font-size: 11px;
+    border-radius: 2px;
+    background: white;
+    color: #333;
+  }
+
+  .send-btn {
+    background: linear-gradient(180deg, #f0ece0 0%, #d8d0c0 100%);
+    border: 1px solid #a0988c;
+    border-radius: 3px;
+    padding: 3px 12px;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #333;
+  }
+
+  .send-btn:hover {
+    background: linear-gradient(180deg, #f8f4e8 0%, #e0d8c8 100%);
+  }
+
+  .chat-formatting {
+    background: #ece9d8;
+    padding: 2px 6px;
+    display: flex;
+    gap: 8px;
+    font-size: 11px;
+    border-bottom: 1px solid #d4d0c8;
+  }
+
+  .fmt-btn {
+    cursor: pointer;
+    color: #555;
+    padding: 0 2px;
+  }
+
+  .fmt-btn:hover { color: #0054e3; }
+
+  /* === AWAY MESSAGE WINDOW === */
+  .away-window {
+    top: 480px;
+    left: 520px;
+    width: 360px;
+    height: 200px;
+  }
+
+  .away-content {
+    flex: 1;
+    background: #fff8dc;
+    padding: 12px 14px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px inset #ccc;
+    margin: 2px;
+  }
+
+  .away-content .away-icon {
+    font-size: 30px;
+  }
+
+  .away-content .away-user {
+    font-size: 12px;
+    font-weight: bold;
+    color: #333;
+  }
+
+  .away-content .away-text {
+    font-size: 11px;
+    color: #555;
+    line-height: 1.6;
+    padding: 6px 10px;
+    background: white;
+    border: 1px solid #d4c8a0;
+    border-radius: 3px;
+    max-width: 300px;
+  }
+
+  .away-content .away-idle {
+    font-size: 10px;
+    color: #999;
+    font-style: italic;
+  }
+
+  .away-buttons {
+    background: #ece9d8;
+    padding: 4px 8px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    border-top: 1px solid #aca899;
+  }
+
+  .away-btn {
+    background: linear-gradient(180deg, #f0ece0 0%, #d8d0c0 100%);
+    border: 1px solid #a0988c;
+    border-radius: 3px;
+    padding: 3px 16px;
+    font-size: 11px;
+    cursor: pointer;
+    color: #333;
+  }
+
+  /* === SOUND NOTIFICATION === */
+  .sound-notif {
+    position: absolute;
+    background: #fffbe6;
+    border: 1px solid #d4c8a0;
+    border-radius: 3px;
+    padding: 3px 8px;
+    font-size: 10px;
+    color: #888;
+    font-style: italic;
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.15);
+  }
+
+  /* === TASKBAR === */
+  .taskbar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 32px;
+    background: linear-gradient(180deg, #3280fc 0%, #0054e3 30%, #245edb 60%, #3280fc 100%);
+    display: flex;
+    align-items: center;
+    padding: 0 4px;
+    gap: 4px;
+    border-top: 2px solid #5a9afc;
+  }
+
+  .start-btn {
+    background: linear-gradient(180deg, #3daa40 0%, #2d8e30 50%, #3daa40 100%);
+    border: 1px solid #206820;
+    border-radius: 4px;
+    color: white;
+    font-weight: bold;
+    font-size: 12px;
+    padding: 2px 10px 2px 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.3);
+  }
+
+  .taskbar-item {
+    background: linear-gradient(180deg, #3a7bda 0%, #2460c0 100%);
+    border: 1px solid #1a4a9e;
+    border-radius: 3px;
+    color: white;
+    font-size: 10px;
+    padding: 2px 8px;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .taskbar-item.active {
+    background: linear-gradient(180deg, #1a4a9e 0%, #0a3080 100%);
+    border: 1px solid #ccc;
+  }
+
+  .taskbar-tray {
+    margin-left: auto;
+    background: linear-gradient(180deg, #1a5acc 0%, #0e3ea0 100%);
+    border-left: 1px solid #5a9afc;
+    padding: 0 8px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    color: white;
+  }
+
+  .tray-icon {
+    font-size: 12px;
+  }
+
+  /* Score bar in buddy list */
+  .score-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 24px;
+    margin-bottom: 2px;
+  }
+
+  .score-bar-bg {
+    flex: 1;
+    height: 6px;
+    background: #eee;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+  }
+
+  .score-bar-label {
+    font-size: 9px;
+    color: #999;
+    min-width: 22px;
+    text-align: right;
+  }
+
+  /* AIM ad banner */
+  .aim-ad {
+    background: linear-gradient(90deg, #fff8dc, #ffeebb, #fff8dc);
+    border: 1px solid #d4c8a0;
+    margin: 2px;
+    padding: 4px 8px;
+    text-align: center;
+    font-size: 9px;
+    color: #888;
+  }
+
+  .aim-ad a {
+    color: #0054e3;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  /* Profile link */
+  .profile-link {
+    color: #0054e3;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 10px;
+  }
+
+  .group-hidden { display: none; }
+
+  /* Scrollbar styling */
+  .buddy-content::-webkit-scrollbar,
+  .chat-area::-webkit-scrollbar {
+    width: 16px;
+  }
+
+  .buddy-content::-webkit-scrollbar-track,
+  .chat-area::-webkit-scrollbar-track {
+    background: #f0f0f0;
+    border: 1px solid #ccc;
+  }
+
+  .buddy-content::-webkit-scrollbar-thumb,
+  .chat-area::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #d4d0c8 0%, #bbb7ad 100%);
+    border: 1px solid #999;
+    border-radius: 0;
+  }
+
+  /* Buddy list overall score display */
+  .overall-score-bar {
+    margin: 4px 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .overall-score-bar .bar-bg {
+    flex: 1;
+    height: 10px;
+    background: #e0dcd0;
+    border: 1px inset #ccc;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .overall-score-bar .bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ffd700, #2ea82e);
+    border-radius: 2px;
+  }
+
+  .overall-score-bar .bar-label {
+    font-size: 11px;
+    font-weight: bold;
+    color: #333;
+  }
+</style>
+</head>
+<body>
+
+<!-- === MAIN BUDDY LIST WINDOW === -->
+<div class="aim-window buddy-list">
+  <div class="aim-titlebar">
+    <div class="titlebar-left">
+      <div class="titlebar-icon">🏃</div>
+      <span>Solana Score Buddy List</span>
+    </div>
+    <div class="titlebar-buttons">
+      <div class="titlebar-btn">_</div>
+      <div class="titlebar-btn">□</div>
+      <div class="titlebar-btn close">×</div>
+    </div>
+  </div>
+
+  <div class="aim-menubar">
+    <span><u>M</u>y Score</span>
+    <span><u>P</u>eople</span>
+    <span><u>H</u>elp</span>
+  </div>
+
+  <!-- User Profile Header -->
+  <div class="buddy-header">
+    <span class="running-man">🏃‍♂️</span>
+    <div class="screenname">7xKX...gAsU</div>
+    <div class="idle-info">Score: 87/100 &nbsp;|&nbsp; Idle: 18 months</div>
+    <div class="away-msg">"Power User 🔥"</div>
+    <div class="overall-score-bar">
+      <span class="bar-label">87</span>
+      <div class="bar-bg"><div class="bar-fill" style="width:87%"></div></div>
+      <span class="bar-label">/100</span>
+    </div>
+  </div>
+
+  <!-- Buddy Tree -->
+  <div class="buddy-content" id="buddyContent">
+
+    <!-- DEX / Spot -->
+    <div class="buddy-group">
+      <div class="group-header" onclick="toggleGroup('dex')">
+        <span class="triangle" id="tri-dex">▼</span>
+        <span>DEX / Spot (3/7)</span>
+        <span class="group-score">72</span>
+      </div>
+      <div id="group-dex">
+        <div class="buddy-item online"><span class="status-dot"></span><span class="aim-icon">🟡</span> Raydium</div>
+        <div class="buddy-item online"><span class="status-dot"></span><span class="aim-icon">🟡</span> Orca</div>
+        <div class="buddy-item online"><span class="status-dot"></span><span class="aim-icon">🟡</span> Meteora</div>
+        <div class="buddy-item offline"><span class="status-dot"></span><span class="aim-icon">⚪</span> Lifinity</div>
+        <div class="buddy-item offline"><span class="status-dot"></span><span class="aim-icon">⚪</span> Phoenix</div>
+        <div class="buddy-item offline"><span class="status-dot"></span><span class="aim-icon">⚪</span> OpenBook</div>
+        <div class="buddy-item offline"><span class="status-dot"></span><span class="aim-icon">⚪</span> Serum</div>
+        <div class="score-bar-container">
+          <div class="score-bar-bg"><div class="score-bar-fill" style="width:72%;background:#2ea82e;"></div></div>
+          <span class="score-bar-label">72</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Aggregator -->
+    <div class="buddy-group">
+      <div class="group-header" onclick="toggleGroup('agg')">
+        <span class="triangle" id="tri-agg">▼</span>
+        <span>Aggregator (3/3)</span>
+        <span class="group-score">88</span>
+      </div>
+      <div id="group-agg">
+        <div class="buddy-item online"><span class="status-dot"></span><span class="aim-icon">🟡</span> Jupiter Ultra</div>
+        <div class="buddy-item online"><span class="status-dot"></span><span class="aim-icon">🟡</span> Jupiter DCA</div>
+        <div class="buddy-item online"><span class="status-dot"></span><span class="aim-icon">🟡</span> Jupiter Limit</div>
+        <div class="score-bar-container">
+          <div class="score-bar-bg"><div class="score-bar-fill" style="width:88%;background:#2ea82e;"></div></div>
+          <span class="score-bar-label">88</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trading Tools -->
+    <div class="buddy-group">
+      <div class="group-header" onclick="toggleGroup('tools')">
+        <span class="triangle" id="tri-tools">▼</span>
+        <span>Trading Tools (2/3)</span>
+        <span class="group-score">55</span>
+      </div>
+      <div id="group-tools">
+        <div class="buddy-item online"><span class="status-dot"></span><span class="aim-icon">🟡</span> Axiom</div>
+        <div class="buddy-item online"><span class="status-dot"></span><span class="aim-icon">🟡</span> Photon</div>
+        <div class="buddy-item offline"><span class="status-dot"></span><span class="aim-icon">⚪</span> BirdEye</div>
+        <div class="score-bar-container">
+          <div class="score-bar-bg"><div class="score-bar-fill" style="width:55%;background:#cc8800;"></div></div>
+          <span class="score-bar-label">55</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Launchpad -->
+    <div class="buddy-group">
+      <div class="group-header" onclick="toggleGroup('launch')">
+        <span class="triangle" id="tri-launch">▼</span>
+        <span>Launchpad (1/6)</span>
+        <span class="group-score">45</span>
+      </div>
+      <div id="group-launch">
+        <div class="buddy-item online"><span class="status-dot"></span><span class="aim-icon">🟡</span> Pump.fun</div>
+        <div class="buddy-item offline"><span class="status-dot"></span><span class="aim-icon">⚪</span> Moonshot</div>
+        <div class="buddy-item offline"><span class="status-dot"></span><span class="aim-icon">⚪</span> StarLaunch</div>
+        <div class="buddy-item offline"><span class="status-dot"></span><span class="aim-icon">⚪</span> Solanium</div>
+        <div class="buddy-item offline"><span class="status-dot"></span><span class="aim-icon">⚪</span> AcceleRaytor</div>
+        <div class="buddy-item offline"><span class="status-dot"></span><span class="aim-icon">⚪</span> Ape.pro</div>
+        <div class="score-bar-container">
+          <div class="score-bar-bg"><div class="score-bar-fill" style="width:45%;background:#cc8800;"></div></div>
+          <span class="score-bar-label">45</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Perpetuals -->
+    <div class="buddy-group">
+      <div class="group-header" onclick="toggleGroup('perps')">
+        <span class="triangle" id="tri-perps">▼</span>
+        <span>Perpetuals (0/2)</span>
+        <span class="group-score">30</span>
+      </div>
+      <div id="group-perps">
+        <div class="buddy-item offline"><span class="status-dot"></span><span class="aim-icon">⚪</span> Drift</div>
+        <div class="buddy-item offline"><span class="status-dot"></span><span class="aim-icon">⚪</span> Zeta Markets</div>
+        <div class="score-bar-container">
+          <div class="score-bar-bg"><div class="score-bar-fill" style="width:30%;background:#cc3300;"></div></div>
+          <span class="score-bar-label">30</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="buddy-footer">
+    <div class="online-count">8 of 24 protocols online</div>
+    <div class="warning-level">Warning Level: 0% &nbsp;|&nbsp; Network Fees: 2.30 SOL</div>
+  </div>
+
+  <!-- Ad Banner -->
+  <div class="aim-ad">
+    ⭐ Get <a>Solana Score Pro</a> — Unlimited lookups + API access! ⭐
+  </div>
+
+  <!-- Bottom Buttons -->
+  <div class="buddy-bottom-bar">
+    <button class="aim-bottom-btn">📧 IM</button>
+    <button class="aim-bottom-btn">💬 Chat</button>
+    <button class="aim-bottom-btn">📊 Score</button>
+    <button class="aim-bottom-btn">🔍 Lookup</button>
+  </div>
+</div>
+
+
+<!-- === CHAT WINDOW (Score Breakdown) === -->
+<div class="aim-window chat-window">
+  <div class="aim-titlebar">
+    <div class="titlebar-left">
+      <div class="titlebar-icon">💬</div>
+      <span>SolanaScoreBot - Instant Message</span>
+    </div>
+    <div class="titlebar-buttons">
+      <div class="titlebar-btn">_</div>
+      <div class="titlebar-btn">□</div>
+      <div class="titlebar-btn close">×</div>
+    </div>
+  </div>
+
+  <div class="aim-menubar">
+    <span><u>F</u>ile</span>
+    <span><u>E</u>dit</span>
+    <span><u>I</u>nsert</span>
+    <span><u>P</u>eople</span>
+  </div>
+
+  <div class="chat-toolbar">
+    <button class="toolbar-btn">Warn</button>
+    <button class="toolbar-btn">Block</button>
+    <button class="toolbar-btn">Add Buddy</button>
+    <button class="toolbar-btn" style="margin-left:auto">Get Info</button>
+  </div>
+
+  <div class="chat-formatting">
+    <span class="fmt-btn"><b>B</b></span>
+    <span class="fmt-btn"><i>I</i></span>
+    <span class="fmt-btn"><u>U</u></span>
+    <span class="fmt-btn">A</span>
+    <span class="fmt-btn" style="color:#0054e3">🔗</span>
+    <span class="fmt-btn">😊</span>
+    <span style="margin-left:auto;font-size:9px;color:#aaa">Last msg received at 3:42:07 PM</span>
+  </div>
+
+  <div class="chat-area">
+    <div class="chat-divider">*door open sound* — SolanaScoreBot signed on at 3:41 PM</div>
+
+    <div class="chat-msg">
+      <span class="timestamp">(3:41:12 PM)</span>
+      <span class="sender bot">SolanaScoreBot:</span>
+      <span class="text">Hey! 👋 Running your wallet score now...</span>
+    </div>
+
+    <div class="chat-msg">
+      <span class="timestamp">(3:41:14 PM)</span>
+      <span class="sender bot">SolanaScoreBot:</span>
+      <span class="text">Here's your breakdown!</span>
+    </div>
+
+    <div class="chat-msg">
+      <span class="timestamp">(3:41:15 PM)</span>
+      <span class="sender bot">SolanaScoreBot:</span>
+      <span class="text">📊 Volume: <span class="score-high">92/100</span></span>
+    </div>
+
+    <div class="chat-msg">
+      <span class="timestamp">(3:41:16 PM)</span>
+      <span class="sender bot">SolanaScoreBot:</span>
+      <span class="text">📊 Protocol Diversity: <span class="score-high">88/100</span></span>
+    </div>
+
+    <div class="chat-msg">
+      <span class="timestamp">(3:41:17 PM)</span>
+      <span class="sender bot">SolanaScoreBot:</span>
+      <span class="text">📊 Activity: <span class="score-high">85/100</span></span>
+    </div>
+
+    <div class="chat-msg">
+      <span class="timestamp">(3:41:18 PM)</span>
+      <span class="sender bot">SolanaScoreBot:</span>
+      <span class="text">📊 Holdings: <span class="score-mid">78/100</span></span>
+    </div>
+
+    <div class="chat-msg">
+      <span class="timestamp">(3:41:20 PM)</span>
+      <span class="sender bot">SolanaScoreBot:</span>
+      <span class="text">━━━━━━━━━━━━━━━━━━━━━━</span>
+    </div>
+
+    <div class="chat-msg">
+      <span class="timestamp">(3:41:21 PM)</span>
+      <span class="sender bot">SolanaScoreBot:</span>
+      <span class="text">🏆 <b>Overall Score: <span class="score-high">87</span> — Power User tier!</b></span>
+    </div>
+
+    <div class="chat-divider">*door open sound* — SybilBot signed on at 3:42 PM</div>
+
+    <div class="chat-msg">
+      <span class="timestamp">(3:42:05 PM)</span>
+      <span class="sender sybil">SybilBot:</span>
+      <span class="text">🛡️ Initiating sybil scan on 7xKX...gAsU...</span>
+    </div>
+
+    <div class="chat-msg">
+      <span class="timestamp">(3:42:07 PM)</span>
+      <span class="sender sybil">SybilBot:</span>
+      <span class="text">🛡️ Scan complete. You're <span class="verified">VERIFIED ✓</span>. No bot activity detected.</span>
+    </div>
+
+    <div class="chat-msg">
+      <span class="timestamp">(3:42:08 PM)</span>
+      <span class="sender sybil">SybilBot:</span>
+      <span class="text">Wallet Age: 18 months | Fees Paid: 2.30 SOL | Protocols: 8</span>
+    </div>
+
+    <div class="chat-msg">
+      <span class="timestamp">(3:42:10 PM)</span>
+      <span class="sender user">7xKX...gAsU:</span>
+      <span class="text">ty 😎</span>
+    </div>
+  </div>
+
+  <div class="chat-input-area">
+    <input class="chat-input" type="text" value="brb checking my score on solana" readonly>
+    <button class="send-btn">Send</button>
+  </div>
+</div>
+
+
+<!-- === AWAY MESSAGE WINDOW === -->
+<div class="aim-window away-window">
+  <div class="aim-titlebar">
+    <div class="titlebar-left">
+      <div class="titlebar-icon">💤</div>
+      <span>Away Message - 7xKX...gAsU</span>
+    </div>
+    <div class="titlebar-buttons">
+      <div class="titlebar-btn">_</div>
+      <div class="titlebar-btn close">×</div>
+    </div>
+  </div>
+
+  <div class="away-content">
+    <div class="away-icon">💤</div>
+    <div class="away-user">7xKX...gAsU is away</div>
+    <div class="away-text">
+      Score: 87/100 | Power User 🔥<br>
+      18 months active | 8 protocols<br>
+      Verified Human ✓ | Warning: 0%<br>
+      <br>
+      <a class="profile-link">View full score &gt;&gt;</a>
+    </div>
+    <div class="away-idle">This user has been idle for 18 months.</div>
+  </div>
+
+  <div class="away-buttons">
+    <button class="away-btn">OK</button>
+  </div>
+</div>
+
+
+<!-- Sound notifications -->
+<div class="sound-notif" style="top: 600px; left: 340px;">
+  *door open sound* 🔊
+</div>
+
+<div class="sound-notif" style="top: 12px; left: 580px;">
+  *buddy signed on* 🔔
+</div>
+
+
+<!-- === WINDOWS XP-STYLE TASKBAR === -->
+<div class="taskbar">
+  <button class="start-btn">
+    <span style="font-size:14px;">🪟</span> start
+  </button>
+  <div class="taskbar-item active">🏃 Solana Score Buddy List</div>
+  <div class="taskbar-item">💬 SolanaScoreBot - IM</div>
+  <div class="taskbar-item">💤 Away Message</div>
+  <div class="taskbar-tray">
+    <span class="tray-icon">🏃</span>
+    <span class="tray-icon">🔊</span>
+    <span class="tray-icon">🔌</span>
+    <span>3:42 PM</span>
+  </div>
+</div>
+
+
+<script>
+function toggleGroup(id) {
+  var group = document.getElementById('group-' + id);
+  var tri = document.getElementById('tri-' + id);
+  if (group.classList.contains('group-hidden')) {
+    group.classList.remove('group-hidden');
+    tri.textContent = '▼';
+  } else {
+    group.classList.add('group-hidden');
+    tri.textContent = '▶';
+  }
+}
+</script>
+
+</body>
+</html>
