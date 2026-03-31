@@ -699,6 +699,21 @@ export default function TrailPage() {
 
   const skip = () => dispatch({ type: "SKIP_TO_SCORE" });
 
+  // Auto-assign KOLs when entering party phase
+  useEffect(() => {
+    if (state.phase === "party" && state.party.length === 0) {
+      const kols = getRandomKOLs(3);
+      const members: PartyMember[] = kols.map(k => ({
+        handle: k.handle,
+        hp: 50 + Math.floor(Math.random() * 50),
+        alive: true,
+        isKOL: true,
+        uniqueDeaths: k.uniqueDeaths,
+      }));
+      dispatch({ type: "SET_PARTY", party: members });
+    }
+  }, [state.phase, state.party.length]);
+
   // SBF dialogue advance guard — prevents double-fire from re-renders
   const sbfAdvancedRef = useRef<number>(-1);
   const handleSbfLineDone = useCallback((lineIndex: number) => {
@@ -890,22 +905,6 @@ export default function TrailPage() {
       </CRTWrapper>
     );
   }
-
-  // ================ PARTY SETUP ================
-  // Auto-assign KOLs when entering party phase (outside render)
-  useEffect(() => {
-    if (state.phase === "party" && state.party.length === 0) {
-      const kols = getRandomKOLs(3);
-      const members: PartyMember[] = kols.map(k => ({
-        handle: k.handle,
-        hp: 50 + Math.floor(Math.random() * 50),
-        alive: true,
-        isKOL: true,
-        uniqueDeaths: k.uniqueDeaths,
-      }));
-      dispatch({ type: "SET_PARTY", party: members });
-    }
-  }, [state.phase, state.party.length]);
 
   if (state.phase === "party") {
     return (
