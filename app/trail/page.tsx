@@ -699,6 +699,24 @@ export default function TrailPage() {
 
   const skip = () => dispatch({ type: "SKIP_TO_SCORE" });
 
+  // SBF dialogue advance guard — prevents double-fire from re-renders
+  const sbfAdvancedRef = useRef<number>(-1);
+  const handleSbfLineDone = useCallback((lineIndex: number) => {
+    if (lineIndex >= SBF_DIALOGUE.length - 1) return;
+    if (sbfAdvancedRef.current >= lineIndex) return;
+    sbfAdvancedRef.current = lineIndex;
+    setTimeout(() => dispatch({ type: "SBF_NEXT_LINE" }), 800);
+  }, []);
+
+  // Play miss sound when entering hunt_miss phase
+  const missQuoteRef = useRef("");
+  useEffect(() => {
+    if (state.phase === "hunt_miss") {
+      sfxMiss();
+      missQuoteRef.current = TRUMP_MISS_QUOTES[Math.floor(Math.random() * TRUMP_MISS_QUOTES.length)];
+    }
+  }, [state.phase]);
+
   // ================ BOOT ================
   if (state.phase === "boot") {
     return (
@@ -954,15 +972,6 @@ export default function TrailPage() {
     );
   }
 
-  // SBF dialogue advance guard — prevents double-fire from re-renders
-  const sbfAdvancedRef = useRef<number>(-1);
-  const handleSbfLineDone = useCallback((lineIndex: number) => {
-    if (lineIndex >= SBF_DIALOGUE.length - 1) return; // last line, don't auto-advance
-    if (sbfAdvancedRef.current >= lineIndex) return; // already advanced this line
-    sbfAdvancedRef.current = lineIndex;
-    setTimeout(() => dispatch({ type: "SBF_NEXT_LINE" }), 800);
-  }, []);
-
   // ================ SBF JAIL ================
   if (state.phase === "sbf") {
     const isLastLine = state.sbfLine >= SBF_DIALOGUE.length - 1;
@@ -1190,15 +1199,6 @@ export default function TrailPage() {
       </CRTWrapper>
     );
   }
-
-  // Play miss sound when entering hunt_miss phase
-  const missQuoteRef = useRef("");
-  useEffect(() => {
-    if (state.phase === "hunt_miss") {
-      sfxMiss();
-      missQuoteRef.current = TRUMP_MISS_QUOTES[Math.floor(Math.random() * TRUMP_MISS_QUOTES.length)];
-    }
-  }, [state.phase]);
 
   // ================ HUNT MISS — TRUMP ================
   if (state.phase === "hunt_miss") {
