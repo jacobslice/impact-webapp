@@ -5,10 +5,15 @@
 
 let audioCtx: AudioContext | null = null;
 
-function getCtx(): AudioContext {
-  if (!audioCtx) audioCtx = new AudioContext();
-  if (audioCtx.state === "suspended") audioCtx.resume();
-  return audioCtx;
+function getCtx(): AudioContext | null {
+  try {
+    if (typeof window === "undefined") return null;
+    if (!audioCtx) audioCtx = new AudioContext();
+    if (audioCtx.state === "suspended") audioCtx.resume();
+    return audioCtx;
+  } catch {
+    return null;
+  }
 }
 
 // ============================================================
@@ -23,6 +28,7 @@ function playTone(
 ) {
   try {
     const ctx = getCtx();
+    if (!ctx) return;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.type = type;
@@ -38,6 +44,7 @@ function playTone(
 function playNoise(duration: number, volume = 0.2, delay = 0) {
   try {
     const ctx = getCtx();
+    if (!ctx) return;
     const bufferSize = Math.floor(ctx.sampleRate * duration);
     const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
     const data = buffer.getChannelData(0);
@@ -113,8 +120,9 @@ export function sfxWagon() {
 
 /** CRT boot — rising electronic whine */
 export function sfxBoot() {
-  const ctx = getCtx();
   try {
+    const ctx = getCtx();
+    if (!ctx) return;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.type = "sawtooth";
