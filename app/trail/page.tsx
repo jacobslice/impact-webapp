@@ -290,7 +290,7 @@ function reducer(state: GameState, action: Action): GameState {
       let newSol = state.sol;
       let text = evt.text;
 
-      // --- CATASTROPHIC: one member dies with a reason ---
+      // --- CATASTROPHIC: one member dies, party takes heavy damage ---
       if (evt.effect === "catastrophic") {
         if (text.includes("PARTY_MEMBER") && newParty.length > 0) {
           const alive = newParty.filter(m => m.alive);
@@ -301,85 +301,71 @@ function reducer(state: GameState, action: Action): GameState {
             } else {
               text = text.replace("PARTY_MEMBER", `@${victim.handle}`);
             }
-            const oldHp = victim.hp;
             victim.hp = 0; victim.alive = false;
-            changes.push({ label: `@${victim.handle}`, before: `${oldHp} HP`, after: "DEAD ☠️", delta: "KILLED", type: "bad" });
+            changes.push({ label: `@${victim.handle}`, before: "alive", after: "DEAD ☠️", delta: "KILLED", type: "bad" });
           }
         }
-        // Everyone takes shock damage
-        const oldH = newHealth;
+        // Party-wide impact
         newHealth = Math.max(0, newHealth - 20);
-        for (const m of newParty) { if (m.alive) { m.hp = Math.max(1, m.hp - 15); } }
-        changes.push({ label: "Party HP", before: oldH, after: newHealth, delta: "-20 (shock)", type: "bad" });
-        const oldS = newSol;
+        for (const m of newParty) { if (m.alive) m.hp = Math.max(1, m.hp - 15); }
         newSol = Math.max(0, newSol - 3);
-        if (oldS !== newSol) changes.push({ label: "SOL", before: oldS.toFixed(1), after: newSol.toFixed(1), delta: `-${(oldS - newSol).toFixed(1)}`, type: "bad" });
-        // Food spoiled from the chaos
-        const oldFood = newSupplies.Food || 0;
-        newSupplies.Food = Math.max(0, oldFood - 2);
-        if (oldFood !== newSupplies.Food) changes.push({ label: "Food", before: oldFood, after: newSupplies.Food, delta: `-${oldFood - newSupplies.Food} (spoiled)`, type: "bad" });
+        newSupplies.Food = Math.max(0, (newSupplies.Food || 0) - 2);
+        changes.push({ label: "Party HP", before: "", after: "", delta: "-20", type: "bad" });
+        changes.push({ label: "SOL", before: "", after: state.sol > newSol ? newSol.toFixed(1) : "", delta: "-3", type: "bad" });
+        changes.push({ label: "Food", before: "", after: "", delta: "-2 (spoiled)", type: "bad" });
       }
 
-      // --- BAD: primary victim + party-wide minor damage ---
+      // --- BAD: targeted + party-wide minor damage ---
       if (evt.effect === "bad") {
         if (text.includes("PARTY_MEMBER") && newParty.length > 0) {
           const alive = newParty.filter(m => m.alive);
           if (alive.length > 0) {
             const victim = alive[Math.floor(Math.random() * alive.length)];
             text = text.replace("PARTY_MEMBER", `@${victim.handle}`);
-            const oldHp = victim.hp;
             victim.hp -= 30;
             if (victim.hp <= 0) {
               victim.alive = false; victim.hp = 0;
-              changes.push({ label: `@${victim.handle}`, before: `${oldHp} HP`, after: "DEAD ☠️", delta: `-${oldHp}`, type: "bad" });
+              changes.push({ label: `@${victim.handle}`, before: "alive", after: "DEAD ☠️", delta: "KILLED", type: "bad" });
             } else {
-              changes.push({ label: `@${victim.handle} HP`, before: oldHp, after: victim.hp, delta: "-30", type: "bad" });
+              changes.push({ label: `@${victim.handle}`, before: "", after: "", delta: "-30 HP", type: "bad" });
             }
           }
         }
-        // Everyone takes minor damage from the setback
-        const oldH = newHealth;
         newHealth = Math.max(0, newHealth - 10);
-        for (const m of newParty) { if (m.alive) { m.hp = Math.max(1, m.hp - 5); } }
-        changes.push({ label: "Party HP", before: oldH, after: newHealth, delta: "-10 (setback)", type: "bad" });
-        const oldS = newSol;
+        for (const m of newParty) { if (m.alive) m.hp = Math.max(1, m.hp - 5); }
         newSol = Math.max(0, newSol - 1);
-        if (oldS !== newSol) changes.push({ label: "SOL", before: oldS.toFixed(1), after: newSol.toFixed(1), delta: "-1.0", type: "bad" });
+        changes.push({ label: "Party HP", before: "", after: "", delta: "-10", type: "bad" });
+        if (state.sol > newSol) changes.push({ label: "SOL", before: "", after: "", delta: "-1", type: "bad" });
       }
 
-      // --- GOOD: heal + medicine auto-used if available ---
+      // --- GOOD: heal party + auto-use medicine ---
       if (evt.effect === "good") {
-        const oldH = newHealth;
         let healAmount = 10;
-        // Auto-use medicine for bonus healing
         if ((newSupplies.Medicine || 0) > 0) {
           newSupplies.Medicine = (newSupplies.Medicine || 0) - 1;
           healAmount = 25;
           text += " Used 1 medicine for extra healing.";
-          changes.push({ label: "Medicine", before: (newSupplies.Medicine + 1), after: newSupplies.Medicine, delta: "-1 (used)", type: "neutral" });
+          changes.push({ label: "Medicine", before: "", after: "", delta: "-1 (used)", type: "neutral" });
         }
         newHealth = Math.min(100, newHealth + healAmount);
-        for (const m of newParty) { if (m.alive) { m.hp = Math.min(100, m.hp + 15); } }
-        changes.push({ label: "Party HP", before: oldH, after: newHealth, delta: `+${healAmount}`, type: "good" });
-        const oldS = newSol;
+        for (const m of newParty) { if (m.alive) m.hp = Math.min(100, m.hp + 15); }
         newSol += 5;
-        changes.push({ label: "SOL", before: oldS.toFixed(1), after: newSol.toFixed(1), delta: "+5.0", type: "good" });
+        changes.push({ label: "Party HP", before: "", after: "", delta: `+${healAmount}`, type: "good" });
+        changes.push({ label: "SOL", before: "", after: "", delta: "+5", type: "good" });
       }
 
-      // --- NEUTRAL: time passes, everyone fatigued, food consumed ---
+      // --- NEUTRAL: time passes, party fatigued ---
       if (evt.effect === "neutral") {
-        const oldFood = newSupplies.Food || 0;
-        newSupplies.Food = Math.max(0, oldFood - 1);
-        if (oldFood > 0) changes.push({ label: "Food", before: oldFood, after: newSupplies.Food, delta: "-1 (time passed)", type: "bad" });
-        const oldH = newHealth;
+        newSupplies.Food = Math.max(0, (newSupplies.Food || 0) - 1);
         newHealth = Math.max(0, newHealth - 5);
-        for (const m of newParty) { if (m.alive) { m.hp = Math.max(1, m.hp - 5); } }
-        changes.push({ label: "Party HP", before: oldH, after: newHealth, delta: "-5 (fatigue)", type: "bad" });
+        for (const m of newParty) { if (m.alive) m.hp = Math.max(1, m.hp - 5); }
+        changes.push({ label: "Party HP", before: "", after: "", delta: "-5 (fatigue)", type: "bad" });
+        changes.push({ label: "Food", before: "", after: "", delta: "-1 (time passed)", type: "bad" });
       }
 
       // Player death from this event
       if (newHealth <= 0) {
-        changes.push({ label: "YOU", before: "alive", after: "DEAD", delta: "☠️", type: "bad" });
+        changes.push({ label: "YOU", before: "", after: "DEAD", delta: "☠️", type: "bad" });
         text += " You didn't make it.";
       }
 
@@ -397,16 +383,28 @@ function reducer(state: GameState, action: Action): GameState {
       const changes: StatChange[] = [];
       let newHealth = state.health;
       let newSol = state.sol;
+      const newPartyLm = [...state.party];
       let newScore = state.gameScore + 100;
-      if (choice.effect === "good") { newHealth = Math.min(100, newHealth + 10); newSol += 5; newScore += 50; }
-      if (choice.effect === "bad") { newHealth = Math.max(0, newHealth - 15); newSol = Math.max(0, newSol - 5); }
-
-      if (newHealth !== state.health) changes.push({ label: "Health", before: state.health, after: newHealth, delta: `${newHealth > state.health ? "+" : ""}${newHealth - state.health}`, type: newHealth > state.health ? "good" : "bad" });
-      if (newSol !== state.sol) changes.push({ label: "SOL", before: state.sol.toFixed(1), after: newSol.toFixed(1), delta: `${newSol > state.sol ? "+" : ""}${(newSol - state.sol).toFixed(1)}`, type: newSol > state.sol ? "good" : "bad" });
-      changes.push({ label: "Score", before: state.gameScore, after: newScore, delta: `+${newScore - state.gameScore}`, type: "good" });
+      if (choice.effect === "good") {
+        newHealth = Math.min(100, newHealth + 10);
+        for (const m of newPartyLm) { if (m.alive) m.hp = Math.min(100, m.hp + 10); }
+        newSol += 5;
+        newScore += 50;
+        changes.push({ label: "Party HP", before: "", after: "", delta: "+10", type: "good" });
+        changes.push({ label: "SOL", before: "", after: "", delta: "+5", type: "good" });
+      }
+      if (choice.effect === "bad") {
+        newHealth = Math.max(0, newHealth - 15);
+        for (const m of newPartyLm) { if (m.alive) m.hp = Math.max(1, m.hp - 10); }
+        newSol = Math.max(0, newSol - 5);
+        changes.push({ label: "Party HP", before: "", after: "", delta: "-15", type: "bad" });
+        changes.push({ label: "SOL", before: "", after: "", delta: "-5", type: "bad" });
+      }
+      changes.push({ label: "Score", before: "", after: "", delta: `+${newScore - state.gameScore}`, type: "good" });
 
       return {
         ...state, health: newHealth, sol: newSol, gameScore: newScore,
+        party: newPartyLm,
         events: [...state.events, `${state.currentLandmarkData!.name}: ${choice.outcome}`],
         lastOutcome: choice.outcome, lastChanges: changes, phase: "event",
       };
@@ -1026,7 +1024,7 @@ export default function TrailPage() {
         <div className="space-y-4 py-4">
           <TypedText text={state.lastOutcome} speed={20} className="text-sm border border-[#33ff33]/30 p-4" />
 
-          {/* Stat changes */}
+          {/* Stat changes — clean summary */}
           {state.lastChanges.length > 0 && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -1034,15 +1032,10 @@ export default function TrailPage() {
               transition={{ delay: 0.5 }}
               className="border border-[#33ff33]/20 p-3 space-y-1"
             >
-              <div className="text-[10px] text-[#33ff33]/40 mb-2">═══ WHAT CHANGED ═══</div>
               {state.lastChanges.map((c, i) => (
                 <div key={i} className="flex justify-between text-xs">
                   <span className="text-[#33ff33]/60">{c.label}</span>
-                  <span>
-                    <span className="text-[#33ff33]/30">{c.before}</span>
-                    <span className={`ml-2 font-bold ${changeColors[c.type]}`}>{c.delta}</span>
-                    <span className="ml-2">→ <span className={changeColors[c.type]}>{c.after}</span></span>
-                  </span>
+                  <span className={`font-bold ${changeColors[c.type]}`}>{c.delta}</span>
                 </div>
               ))}
             </motion.div>
