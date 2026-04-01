@@ -786,9 +786,9 @@ export default function TrailPage() {
             ▸ PRESS START ◂
           </motion.button>
 
-          <div className="flex items-center justify-center gap-2 mt-6 opacity-30">
+          <div className="flex items-center justify-center gap-2 mt-6 opacity-60">
             <span className="text-[10px]">Powered by</span>
-            <img src="/images/slice-analytics-full.png" alt="Slice Analytics" className="h-4 pixelated" style={{ imageRendering: "pixelated", filter: "brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(90deg)" }} />
+            <img src="/images/slice-analytics-full.png" alt="Slice Analytics" className="h-5 pixelated" style={{ imageRendering: "pixelated", filter: "brightness(0) invert(1)" }} />
           </div>
 
           <p className="text-[#33ff33]/20 text-[10px] mt-2">ESC to skip | ENTER to continue | 1-3 to choose</p>
@@ -922,21 +922,29 @@ export default function TrailPage() {
                 <span className="text-[#33ff33]/30 text-xs">✓ X connected</span>
               </div>
             ) : (
-              <div className="flex gap-2 items-center">
-                <input
-                  value={playerInput}
-                  onChange={e => setPlayerInput(e.target.value.replace("@", ""))}
-                  placeholder="enter your name or @handle"
-                  className="bg-transparent border-b border-[#33ff33]/30 text-[#33ff33] outline-none px-2 flex-1 font-mono"
-                  onKeyDown={e => {
-                    if (e.key === "Enter" && playerInput.trim()) {
-                      dispatch({ type: "SET_PLAYER", handle: playerInput.trim() });
-                    }
-                  }}
-                />
-                {playerInput.trim() && (
-                  <GreenButton onClick={() => dispatch({ type: "SET_PLAYER", handle: playerInput.trim() })}>SET</GreenButton>
-                )}
+              <div className="space-y-3">
+                <div className="flex gap-2 items-center">
+                  <input
+                    value={playerInput}
+                    onChange={e => setPlayerInput(e.target.value.replace("@", ""))}
+                    placeholder="enter your name or @handle"
+                    className="bg-transparent border-b border-[#33ff33]/30 text-[#33ff33] outline-none px-2 flex-1 font-mono"
+                    onKeyDown={e => {
+                      if (e.key === "Enter" && playerInput.trim()) {
+                        dispatch({ type: "SET_PLAYER", handle: playerInput.trim() });
+                      }
+                    }}
+                  />
+                  {playerInput.trim() && (
+                    <GreenButton onClick={() => dispatch({ type: "SET_PLAYER", handle: playerInput.trim() })}>SET</GreenButton>
+                  )}
+                </div>
+                <button
+                  onClick={() => { window.location.href = "/api/auth/twitter"; }}
+                  className="flex items-center gap-2 px-4 py-1.5 border border-[#1DA1F2]/40 text-[#1DA1F2]/80 hover:bg-[#1DA1F2]/10 hover:border-[#1DA1F2]/60 text-xs font-mono transition-all"
+                >
+                  𝕏 CONNECT YOUR X ACCOUNT
+                </button>
               </div>
             )}
             {state.player && !profile && <p className="text-sm">Leader: @{state.player}</p>}
@@ -1210,7 +1218,7 @@ export default function TrailPage() {
             animate={{ y: 0, opacity: 1 }}
             transition={{ type: "spring", bounce: 0.4 }}
           >
-            <img src="/images/trail/trump.gif" alt="Trump laughing" className="w-24 h-24 mx-auto pixelated" style={{ imageRendering: "pixelated" }} />
+            <img src="/images/trail/trump_cropped.png" alt="Trump laughing" className="w-28 h-32 mx-auto pixelated border-2 border-[#ff8c00]/30" style={{ imageRendering: "pixelated" }} />
             <p className="text-[#ff8c00] text-sm mt-3 max-w-md mx-auto italic">&quot;{quote}&quot;</p>
             <p className="text-[#ff8c00]/40 text-[10px] mt-1">— Donald J. Trump</p>
           </motion.div>
@@ -1443,8 +1451,8 @@ export default function TrailPage() {
             </button>
           </motion.div>
 
-          <div className="text-center pt-4 opacity-30">
-            <img src="/images/slice-analytics-full.png" alt="Slice Analytics" className="h-4 mx-auto pixelated" style={{ imageRendering: "pixelated", filter: "brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(90deg)" }} />
+          <div className="text-center pt-4 opacity-60">
+            <img src="/images/slice-analytics-full.png" alt="Slice Analytics" className="h-5 mx-auto pixelated" style={{ imageRendering: "pixelated", filter: "brightness(0) invert(1)" }} />
           </div>
         </div>
       </CRTWrapper>
