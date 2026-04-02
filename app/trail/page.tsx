@@ -256,7 +256,7 @@ function reducer(state: GameState, action: Action): GameState {
       const nextStepIdx = state.trailStep + 1;
       const newSupplies = { ...state.supplies };
       const changes: StatChange[] = [];
-      const newParty = [...state.party];
+      const newParty = state.party.map(m => ({ ...m })); // deep copy to prevent mutation bleed
       let newHealth = state.health;
 
       // Player death check
@@ -383,7 +383,7 @@ function reducer(state: GameState, action: Action): GameState {
       const changes: StatChange[] = [];
       let newHealth = state.health;
       let newSol = state.sol;
-      const newPartyLm = [...state.party];
+      const newPartyLm = state.party.map(m => ({ ...m }));
       let newScore = state.gameScore + 100;
       if (choice.effect === "good") {
         newHealth = Math.min(100, newHealth + 10);
@@ -495,6 +495,11 @@ function CRTWrapper({ children, onSkip, showSkip = true }: { children: React.Rea
       <div className="w-full max-w-3xl font-mono crt-curve p-6" style={{ color: "#33ff33", textShadow: "0 0 8px #33ff3366, 0 0 2px #33ff33" }}>
         {children}
       </div>
+      {/* Fixed bottom bar */}
+      <div className="fixed bottom-3 left-0 right-0 z-[55] flex items-center justify-center gap-2 pointer-events-none">
+        <span className="text-[#33ff33]/40 text-[10px] font-mono">Built by</span>
+        <img src="/images/trail/slice-logo-pixel.png" alt="Slice Analytics" className="pixelated opacity-50" style={{ imageRendering: "pixelated", height: 16 }} />
+      </div>
     </div>
   );
 }
@@ -552,9 +557,9 @@ function StatusBar({ state }: { state: GameState }) {
 // ============================================================
 export default function TrailPage() {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { publicKey, connected } = useWallet();
+  const { publicKey, connected, disconnect } = useWallet();
   const { setVisible } = useWalletModal();
-  const { profile } = useTwitterProfile();
+  const { profile, unlink: unlinkTwitter } = useTwitterProfile();
   const [addressInput, setAddressInput] = useState("");
   const [playerInput, setPlayerInput] = useState("");
   const [huntTimer, setHuntTimer] = useState(10);
@@ -699,6 +704,35 @@ export default function TrailPage() {
 
   const skip = () => dispatch({ type: "SKIP_TO_SCORE" });
 
+  // Save game result to DB when reaching score_reveal
+  const gameSavedRef = useRef(false);
+  useEffect(() => {
+    if (state.phase !== "score_reveal" || gameSavedRef.current) return;
+    gameSavedRef.current = true;
+    const addr = publicKey?.toBase58() || null;
+    fetch("/api/trail/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        wallet: addr,
+        twitter_handle: profile?.handle || null,
+        player_name: state.player || "Anon",
+        profession: state.profession?.name || "Unknown",
+        multiplier: state.profession?.multiplier || 1,
+        game_score: state.gameScore,
+        final_score: Math.round(state.gameScore * (state.profession?.multiplier || 1)),
+        solana_score: state.scoreData?.score ?? null,
+        hunt_score: state.huntScore,
+        survivors: state.party.filter(m => m.alive).length,
+        party_size: state.party.length,
+        events_log: state.events,
+        party_data: state.party.map(m => ({
+          handle: m.handle, alive: m.alive, isKOL: m.isKOL,
+        })),
+      }),
+    }).catch(() => {}); // Silent fail — game still works without DB
+  }, [state.phase]);
+
   // Auto-assign KOLs when entering party phase
   useEffect(() => {
     if (state.phase === "party" && state.party.length === 0) {
@@ -763,10 +797,13 @@ export default function TrailPage() {
 /___/ \\___//_/\\_,_//_/ /_/\\_,_/  /_/  /_/  \\_,_//_/_/
           `}</pre>
 
-          {/* Animated wagon rolling across */}
+          {/* Animated wagon then logo scrolling across */}
           <div className="relative h-16 overflow-hidden">
-            <div className="absolute" style={{ animation: "wagonRoll 6s linear infinite" }}>
+            <div className="absolute top-1" style={{ animation: "wagonRoll 8s linear infinite" }}>
               <img src="/images/trail/wagon.png" alt="wagon" className="w-20 h-12 pixelated" style={{ imageRendering: "pixelated" }} />
+            </div>
+            <div className="absolute top-3" style={{ animation: "wagonRoll 8s linear infinite", animationDelay: "2s" }}>
+              <img src="/images/trail/slice-logo-pixel.png" alt="Slice Analytics" className="h-8 pixelated opacity-40" style={{ imageRendering: "pixelated" }} />
             </div>
           </div>
 
@@ -786,12 +823,6 @@ export default function TrailPage() {
             ▸ PRESS START ◂
           </motion.button>
 
-          <div className="flex items-center justify-center gap-2 mt-6 opacity-60">
-            <span className="text-[10px]">Powered by</span>
-            <img src="/images/slice-analytics-full.png" alt="Slice Analytics" className="h-5 pixelated" style={{ imageRendering: "pixelated", filter: "brightness(0) invert(1)" }} />
-          </div>
-
-          <p className="text-[#33ff33]/20 text-[10px] mt-2">ESC to skip | ENTER to continue | 1-3 to choose</p>
         </motion.div>
       </CRTWrapper>
     );
@@ -799,15 +830,41 @@ export default function TrailPage() {
 
   // ================ CONNECT ================
   if (state.phase === "connect") {
+    const addr = connected && publicKey ? publicKey.toBase58() : null;
     return (
       <CRTWrapper onSkip={skip}>
         <div className="space-y-6 py-8">
           <h2 className="text-xl tracking-wider">═══ CONNECT YOUR WAGON ═══</h2>
           <TypedText text="Connect your Solana wallet to begin the trail. Your score is hidden until you reach Oregon." speed={20} className="text-sm text-[#33ff33]/70" />
 
+          {/* Show connected wallet info */}
+          {addr && (
+            <div className="border border-[#33ff33]/20 p-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-[#33ff33]/40 text-xs">WALLET:</span>
+                <span className="text-[#33ff33] text-xs font-mono">{addr.slice(0, 6)}...{addr.slice(-6)}</span>
+                <span className="text-[#33ff33]/30 text-xs">✓</span>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setVisible(true)}
+                  className="text-[#33ff33]/40 hover:text-[#33ff33] text-[10px] font-mono border border-[#33ff33]/15 hover:border-[#33ff33]/40 px-2 py-0.5 transition-all"
+                >
+                  CHANGE
+                </button>
+                <button
+                  onClick={() => disconnect()}
+                  className="text-[#33ff33]/30 hover:text-[#ff4444] text-[10px] font-mono border border-[#33ff33]/15 hover:border-[#ff4444]/40 px-2 py-0.5 transition-all"
+                >
+                  DISCONNECT
+                </button>
+              </div>
+            </div>
+          )}
+
           {connected && state.scoreData ? (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
-              <p className="text-[#33ff33]">✓ Wallet connected. {state.landmarks.length} landmark{state.landmarks.length !== 1 ? "s" : ""} loaded.</p>
+              <p className="text-[#33ff33]">✓ Blockchain scanned. Landmarks loaded from your onchain history.</p>
               <GreenButton onClick={() => {
                 sfxClick();
                 const prof = getProfessionForWallet(state.scoreData);
@@ -825,10 +882,6 @@ export default function TrailPage() {
                   sfxClick();
                   dispatch({ type: "SET_PROFESSION", profession: PROFESSIONS[6] }); // Crypto Poor
                 }}>TRY ANYWAY</GreenButton>
-                <GreenButton onClick={() => {
-                  dispatch({ type: "SET_PHASE", phase: "connect" });
-                  window.location.reload();
-                }} className="border-[#33ff33]/30 text-[#33ff33]/50">CHECK ANOTHER WALLET</GreenButton>
               </div>
             </motion.div>
           ) : connected ? (
@@ -857,49 +910,100 @@ export default function TrailPage() {
     return (
       <CRTWrapper onSkip={skip}>
         <div className="space-y-6 py-8">
-          <h2 className="text-xl tracking-wider">═══ PROFESSION ASSIGNED ═══</h2>
-          <TypedText
-            text={`Based on your on-chain activity, you are a...`}
-            speed={30}
-            className="text-sm text-[#33ff33]/70"
-          />
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 1.5, type: "spring" }}
-            className="text-center py-4"
-          >
-            <div className={`text-3xl font-bold tracking-widest ${isCryptoPoor ? "text-[#ff4444]" : "text-[#33ff33]"}`}>
-              {prof.name.toUpperCase()}
-            </div>
-            <p className="text-sm text-[#33ff33]/50 mt-2 italic">{prof.description}</p>
-          </motion.div>
-
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 2.5 }}
-            className="border border-[#33ff33]/20 p-4 space-y-2 text-sm"
+            transition={{ delay: 0.3 }}
+            className="text-center text-xs text-[#33ff33]/30 tracking-wider"
           >
-            <div className="text-[#33ff33]/40 text-xs">═══ STARTING SUPPLIES ═══</div>
-            <div className="grid grid-cols-2 gap-2">
-              <span>💰 Solana: {prof.startSol}</span>
-              <span>{isCryptoPoor ? "🛒" : "🐂"} {isCryptoPoor ? "Shopping Cart" : "Bulls"}: {prof.supplies.Bulls}</span>
-              <span>🍔 Big Macs: {prof.supplies.Food}</span>
-              <span>💊 Medicine: {prof.supplies.Medicine || "thoughts & prayers"}</span>
+            BASED ON YOUR ON-CHAIN ACTIVITY, YOU ARE...
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 1, type: "spring", bounce: 0.4 }}
+            className="text-center py-4"
+          >
+            <div
+              className={`text-4xl font-bold tracking-widest ${isCryptoPoor ? "text-[#ff4444]" : "text-[#33ff33]"}`}
+              style={{ textShadow: isCryptoPoor ? "0 0 20px #ff4444, 0 0 40px #ff444466" : "0 0 20px #33ff33, 0 0 40px #33ff3366" }}
+            >
+              {prof.name.toUpperCase()}
+            </div>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.5 }}
+              className="text-sm text-[#33ff33]/50 mt-2 italic max-w-md mx-auto"
+            >
+              &ldquo;{prof.description}&rdquo;
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.8 }}
+              className="text-xs text-[#33ff33]/30 mt-1"
+            >
+              Score Multiplier: <span className="text-[#33ff33]/70">{prof.multiplier}x</span>
+            </motion.div>
+          </motion.div>
+
+          {/* Supply loadout */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 2 }}
+            className="border border-[#33ff33]/20 p-4"
+          >
+            <div className="text-[#33ff33]/40 text-xs mb-3 tracking-wider">═══ SUPPLY LOADOUT ═══</div>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { icon: "💰", label: "SOL", value: `${prof.startSol} SOL`, delay: 2.2 },
+                { icon: isCryptoPoor ? "🛒" : "🐂", label: isCryptoPoor ? "Shopping Cart" : "Bulls", value: `${prof.supplies.Bulls}`, delay: 2.4 },
+                { icon: "🍔", label: "Big Macs", value: `${prof.supplies.Food}`, delay: 2.6 },
+                { icon: "💊", label: "Medicine", value: `${prof.supplies.Medicine || 0}`, delay: 2.8 },
+              ].map((item, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: item.delay }}
+                  className="flex items-center gap-2 text-sm border border-[#33ff33]/10 p-2"
+                >
+                  <span>{item.icon}</span>
+                  <span className="text-[#33ff33]/40 text-xs">{item.label}:</span>
+                  <span className="text-[#33ff33] font-bold">{item.value}</span>
+                </motion.div>
+              ))}
             </div>
             {isCryptoPoor && (
-              <p className="text-[#ff4444]/60 text-xs mt-2 italic">
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 3 }}
+                className="text-[#ff4444]/60 text-xs mt-3 italic text-center"
+              >
                 You don&apos;t even have a wagon. You&apos;re pushing a shopping cart down the blockchain.
-              </p>
+              </motion.p>
+            )}
+            {!isCryptoPoor && prof.supplies.Medicine === 0 && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 3 }}
+                className="text-[#33ff33]/30 text-xs mt-3 italic text-center"
+              >
+                No medicine. Thoughts and prayers will have to do.
+              </motion.p>
             )}
           </motion.div>
 
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 3 }}>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 3.2 }}>
             <GreenButton onClick={() => {
               sfxClick();
               dispatch({ type: "SET_PHASE", phase: "party" });
-            }}>CONTINUE →</GreenButton>
+            }}>ASSEMBLE YOUR PARTY →</GreenButton>
           </motion.div>
         </div>
       </CRTWrapper>
@@ -914,12 +1018,29 @@ export default function TrailPage() {
 
           {/* Player identity */}
           <div className="border border-[#33ff33]/20 p-4 space-y-3">
-            <div className="text-xs text-[#33ff33]/40">WAGON LEADER</div>
+            <div className="flex items-center justify-between">
+              <div className="text-xs text-[#33ff33]/40">WAGON LEADER</div>
+              {state.profession && (
+                <div className="text-xs text-[#33ff33]/50 border border-[#33ff33]/15 px-2 py-0.5">
+                  {state.profession.name} ({state.profession.multiplier}x)
+                </div>
+              )}
+            </div>
             {profile ? (
-              <div className="flex items-center gap-3">
-                <PixelPFP handle={profile.handle} size={48} />
-                <span className="text-lg">@{profile.handle}</span>
-                <span className="text-[#33ff33]/30 text-xs">✓ X connected</span>
+              <div className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <PixelPFP handle={profile.handle} size={48} />
+                  <div>
+                    <span className="text-lg">@{profile.handle}</span>
+                    <span className="text-[#33ff33]/30 text-xs ml-2">✓ X connected</span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => unlinkTwitter()}
+                  className="text-[#33ff33]/20 hover:text-[#ff4444]/70 text-[10px] font-mono border border-[#33ff33]/10 hover:border-[#ff4444]/30 px-2 py-0.5 transition-all"
+                >
+                  DISCONNECT X
+                </button>
               </div>
             ) : (
               <div className="space-y-3">
@@ -940,7 +1061,7 @@ export default function TrailPage() {
                   )}
                 </div>
                 <button
-                  onClick={() => { window.location.href = "/api/auth/twitter"; }}
+                  onClick={() => { window.location.href = "/api/auth/twitter?returnTo=/trail"; }}
                   className="flex items-center gap-2 px-4 py-1.5 border border-[#1DA1F2]/40 text-[#1DA1F2]/80 hover:bg-[#1DA1F2]/10 hover:border-[#1DA1F2]/60 text-xs font-mono transition-all"
                 >
                   𝕏 CONNECT YOUR X ACCOUNT
@@ -1360,7 +1481,7 @@ export default function TrailPage() {
                 <div className="text-6xl font-bold" style={{
                   textShadow: "0 0 30px #33ff33, 0 0 60px #33ff33, 0 0 90px #33ff3366",
                 }}>
-                  {score}
+                  {typeof score === "number" ? score.toFixed(2) : score}
                 </div>
                 {tier && (
                   <p className="text-sm mt-2" style={{ color: tier.color }}>{tier.name}</p>
@@ -1435,14 +1556,18 @@ export default function TrailPage() {
             >
               SHARE ON 𝕏
             </a>
-            {score !== null && (
-              <a
-                href={`/dashboard`}
-                className="px-6 py-2 border border-[#33ff33] text-[#33ff33] hover:bg-[#33ff33]/10 font-mono transition-all"
-              >
-                VIEW FULL SCORE
-              </a>
-            )}
+            <a
+              href="/trail/leaderboard"
+              className="px-6 py-2 border border-[#33ff33] text-[#33ff33] hover:bg-[#33ff33]/10 font-mono transition-all"
+            >
+              LEADERBOARD
+            </a>
+            <a
+              href="/trail/dashboard"
+              className="px-6 py-2 border border-[#33ff33]/30 text-[#33ff33]/60 hover:bg-[#33ff33]/10 font-mono transition-all"
+            >
+              MY DASHBOARD
+            </a>
             <button
               onClick={() => window.location.reload()}
               className="px-6 py-2 border border-[#33ff33]/30 text-[#33ff33]/50 hover:bg-[#33ff33]/5 font-mono transition-all"
@@ -1451,9 +1576,6 @@ export default function TrailPage() {
             </button>
           </motion.div>
 
-          <div className="text-center pt-4 opacity-60">
-            <img src="/images/slice-analytics-full.png" alt="Slice Analytics" className="h-5 mx-auto pixelated" style={{ imageRendering: "pixelated", filter: "brightness(0) invert(1)" }} />
-          </div>
         </div>
       </CRTWrapper>
     );

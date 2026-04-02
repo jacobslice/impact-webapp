@@ -21,7 +21,15 @@ export interface TwitterUser {
   verified: boolean;
 }
 
-function getCallbackUrl(): string {
+function getCallbackUrl(requestUrl?: string): string {
+  // Try NEXTAUTH_URL first, then infer from request
+  if (process.env.NEXTAUTH_URL && process.env.NEXTAUTH_URL !== "http://localhost:3000") {
+    return `${process.env.NEXTAUTH_URL}/api/auth/twitter/callback`;
+  }
+  if (requestUrl) {
+    const url = new URL(requestUrl);
+    return `${url.origin}/api/auth/twitter/callback`;
+  }
   const base = process.env.NEXTAUTH_URL || "http://localhost:3000";
   return `${base}/api/auth/twitter/callback`;
 }
@@ -45,7 +53,7 @@ async function generateCodeChallenge(verifier: string): Promise<string> {
 }
 
 /** Build the Twitter OAuth 2.0 authorization URL */
-export async function buildAuthUrl(): Promise<{ url: string; codeVerifier: string }> {
+export async function buildAuthUrl(requestUrl?: string): Promise<{ url: string; codeVerifier: string }> {
   const codeVerifier = generateCodeVerifier();
   const codeChallenge = await generateCodeChallenge(codeVerifier);
   const state = crypto.randomUUID();
@@ -53,7 +61,7 @@ export async function buildAuthUrl(): Promise<{ url: string; codeVerifier: strin
   const params = new URLSearchParams({
     response_type: "code",
     client_id: TWITTER_CLIENT_ID,
-    redirect_uri: getCallbackUrl(),
+    redirect_uri: getCallbackUrl(requestUrl),
     scope: "tweet.read users.read offline.access",
     state,
     code_challenge: codeChallenge,
@@ -67,7 +75,7 @@ export async function buildAuthUrl(): Promise<{ url: string; codeVerifier: strin
 }
 
 /** Exchange authorization code for access token */
-export async function exchangeCodeForToken(code: string, codeVerifier: string): Promise<string> {
+export async function exchangeCodeForToken(code: string, codeVerifier: string, requestUrl?: string): Promise<string> {
   const credentials = btoa(`${TWITTER_CLIENT_ID}:${TWITTER_CLIENT_SECRET}`);
 
   const response = await fetch(TWITTER_TOKEN_URL, {
@@ -79,7 +87,7 @@ export async function exchangeCodeForToken(code: string, codeVerifier: string): 
     body: new URLSearchParams({
       code,
       grant_type: "authorization_code",
-      redirect_uri: getCallbackUrl(),
+      redirect_uri: getCallbackUrl(requestUrl),
       code_verifier: codeVerifier,
     }),
   });
